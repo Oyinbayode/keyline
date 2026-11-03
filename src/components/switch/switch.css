@@ -1,12 +1,31 @@
+/*
+ * Colours go through --kl-switch-* properties so the forced-colours block can
+ * swap all of them for system colours in one place.
+ *
+ * State is carried by the track: an empty track with a 3:1 border when off, a
+ * solid accent fill (5.9:1 / 6.5:1 on the page) when on. The thumb's colour and
+ * position repeat it but are not relied on, which is why the light thumb can be
+ * white on a pale track.
+ */
 .kl-switch {
   --kl-switch-width: 2.75rem;
   --kl-switch-height: 1.5rem;
-  --kl-switch-border: 2px;
-  --kl-switch-thumb-size: calc(var(--kl-switch-height) - 4 * var(--kl-switch-border));
+  --kl-switch-border: 1px;
+  --kl-switch-inset: 3px;
+  --kl-switch-thumb-size: calc(
+    var(--kl-switch-height) - 2 * (var(--kl-switch-border) + var(--kl-switch-inset))
+  );
   --kl-switch-travel: calc(
-    var(--kl-switch-width) - var(--kl-switch-thumb-size) - 4 * var(--kl-switch-border)
+    var(--kl-switch-width) - var(--kl-switch-thumb-size) - 2 *
+      (var(--kl-switch-border) + var(--kl-switch-inset))
   );
   --kl-switch-direction: 1;
+
+  --kl-switch-track: var(--kl-slate-4);
+  --kl-switch-track-border: var(--kl-slate-8);
+  --kl-switch-track-shadow: 0 0 transparent;
+  --kl-switch-thumb: light-dark(#ffffff, var(--kl-slate-11));
+  --kl-switch-thumb-shadow: 0 1px 2px light-dark(rgba(10, 15, 24, 0.25), transparent);
 
   all: unset;
   box-sizing: border-box;
@@ -15,34 +34,62 @@
   align-items: center;
   inline-size: var(--kl-switch-width);
   block-size: var(--kl-switch-height);
-  padding-inline: var(--kl-switch-border);
-  border: var(--kl-switch-border) solid var(--kl-color-slate);
+  padding-inline: var(--kl-switch-inset);
+  border: var(--kl-switch-border) solid var(--kl-switch-track-border);
   border-radius: var(--kl-radius-full);
-  background-color: transparent;
+  background-color: var(--kl-switch-track);
+  box-shadow: var(--kl-switch-track-shadow);
   cursor: pointer;
   vertical-align: middle;
   transition:
-    background-color var(--kl-duration-base) var(--kl-easing),
-    border-color var(--kl-duration-base) var(--kl-easing);
+    background-color var(--kl-duration-base) var(--kl-ease),
+    border-color var(--kl-duration-base) var(--kl-ease);
 }
 
 .kl-switch:dir(rtl) {
   --kl-switch-direction: -1;
 }
 
-.kl-switch:focus-visible {
-  outline: var(--kl-focus-ring-width) solid var(--kl-color-focus);
-  outline-offset: var(--kl-focus-ring-offset);
+.kl-switch:hover {
+  --kl-switch-track: var(--kl-slate-5);
+  --kl-switch-track-border: light-dark(var(--kl-slate-9), var(--kl-slate-8));
+  --kl-switch-thumb: light-dark(#ffffff, var(--kl-slate-12));
 }
 
 .kl-switch[data-state='checked'] {
-  border-color: var(--kl-color-accent);
-  background-color: var(--kl-color-accent);
+  --kl-switch-track: var(--kl-blue-9);
+  --kl-switch-track-border: var(--kl-blue-9);
+  --kl-switch-track-shadow: inset 0 1px 0 light-dark(transparent, rgba(219, 230, 255, 0.35));
+  --kl-switch-thumb: light-dark(#ffffff, var(--kl-blue-12));
 }
 
+.kl-switch[data-state='checked']:hover {
+  --kl-switch-track: var(--kl-blue-10);
+  --kl-switch-track-border: var(--kl-blue-10);
+}
+
+/* Disabled is told apart by colour, not opacity, so it never shows the page through. */
 .kl-switch:disabled {
+  --kl-switch-track: var(--kl-slate-3);
+  --kl-switch-track-border: light-dark(var(--kl-slate-5), var(--kl-slate-6));
+  --kl-switch-thumb: light-dark(var(--kl-slate-6), var(--kl-slate-8));
+  --kl-switch-thumb-shadow: 0 0 transparent;
+
   cursor: not-allowed;
-  opacity: 0.5;
+}
+
+.kl-switch:disabled[data-state='checked'] {
+  --kl-switch-track: light-dark(var(--kl-blue-4), var(--kl-blue-5));
+  --kl-switch-track-border: light-dark(var(--kl-blue-5), var(--kl-blue-6));
+  --kl-switch-track-shadow: 0 0 transparent;
+  --kl-switch-thumb: light-dark(#ffffff, var(--kl-blue-8));
+}
+
+/* The outline stays, transparent, because forced-colours mode drops box-shadow but paints outlines. */
+.kl-switch:focus-visible {
+  outline: var(--kl-focus-ring-width) solid transparent;
+  outline-offset: var(--kl-focus-ring-offset);
+  box-shadow: var(--kl-switch-track-shadow), var(--kl-focus-ring);
 }
 
 .kl-switch-thumb {
@@ -50,27 +97,41 @@
   inline-size: var(--kl-switch-thumb-size);
   block-size: var(--kl-switch-thumb-size);
   border-radius: var(--kl-radius-full);
-  background-color: var(--kl-color-slate);
+  background-color: var(--kl-switch-thumb);
+  box-shadow: var(--kl-switch-thumb-shadow);
   pointer-events: none;
   transition:
-    transform var(--kl-duration-base) var(--kl-easing),
-    background-color var(--kl-duration-base) var(--kl-easing);
+    transform var(--kl-duration-base) var(--kl-ease-spring),
+    background-color var(--kl-duration-base) var(--kl-ease);
 }
 
 .kl-switch[data-state='checked'] .kl-switch-thumb {
-  background-color: var(--kl-color-on-accent);
   transform: translateX(calc(var(--kl-switch-travel) * var(--kl-switch-direction)));
 }
 
 /*
  * The track fill is the only colour cue that differs between states, so the
  * switch opts out of forced colours and repaints itself with the system
- * palette the tokens already point at. Thumb position still carries the state
- * for users who cannot tell the colours apart.
+ * palette. Thumb position still carries the state for users who cannot tell
+ * the colours apart.
  */
 @media (forced-colors: active) {
-  .kl-switch {
+  .kl-switch,
+  .kl-switch:is(:hover, :disabled) {
+    --kl-switch-track: Canvas;
+    --kl-switch-track-border: ButtonText;
+    --kl-switch-track-shadow: 0 0 transparent;
+    --kl-switch-thumb: ButtonText;
+    --kl-switch-thumb-shadow: 0 0 transparent;
+
     forced-color-adjust: none;
+  }
+
+  .kl-switch[data-state='checked'],
+  .kl-switch[data-state='checked']:hover {
+    --kl-switch-track: Highlight;
+    --kl-switch-track-border: Highlight;
+    --kl-switch-thumb: HighlightText;
   }
 
   .kl-switch:disabled {
