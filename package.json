@@ -73,7 +73,9 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "size": "size-limit",
-    "check:package": "publint && attw --pack . --profile node16 --exclude-entrypoints styles.css tokens.css"
+    "check:package": "publint && attw --pack . --profile node16 --exclude-entrypoints styles.css tokens.css",
+    "storybook": "storybook dev -p 6006",
+    "build:storybook": "storybook build --quiet"
   },
   "peerDependencies": {
     "react": "^19.0.0",
@@ -87,6 +89,9 @@
     "@microsoft/api-extractor": "^7.60.1",
     "@playwright/test": "^1.64.1",
     "@size-limit/preset-small-lib": "^14.3.0",
+    "@storybook/addon-a11y": "^10.6.5",
+    "@storybook/addon-docs": "^10.6.5",
+    "@storybook/react-vite": "^10.6.5",
     "@testing-library/dom": "^10.4.2",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.3",
@@ -106,7 +111,9 @@
     "publint": "^0.3.25",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
+    "remark-gfm": "^4.0.1",
     "size-limit": "^14.3.0",
+    "storybook": "^10.6.5",
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.72.1",
     "vite": "^8.3.5",

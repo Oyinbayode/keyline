@@ -1,0 +1,146 @@
+import { ArgTypes, Canvas, Meta } from '@storybook/addon-docs/blocks';
+import { Status } from '../../../docs/blocks';
+import * as SwitchStories from './switch.stories';
+
+<Meta of={SwitchStories} />
+
+# Switch
+
+<p className="kl-lede">
+  An on/off control for settings that take effect immediately. Follows the{' '}
+  <a href="https://www.w3.org/WAI/ARIA/apg/patterns/switch/">WAI-ARIA APG Switch pattern</a>.
+</p>
+
+```tsx
+import { Switch } from 'keyline';
+import 'keyline/styles.css';
+
+<label>
+  <Switch defaultChecked onCheckedChange={(isOn) => save({ wifi: isOn })} />
+  Wi-Fi
+</label>;
+```
+
+## Problem
+
+Most switches in the wild are a styled `<div>` and a sliding circle. They look right and fail in ways sighted mouse users never see:
+
+- **Not reachable by keyboard.** A `<div onClick>` is not in the tab order and ignores <kbd>Space</kbd> and <kbd>Enter</kbd>. Keyboard and switch-device users cannot change the setting at all.
+- **Announced as nothing, or as the wrong thing.** Without `role="switch"` and `aria-checked`, a screen reader says "clickable" or reads the label text alone, with no state. A toggle button with `aria-pressed` says "pressed / not pressed", which is a different question from "on / off".
+- **No name.** A label placed next to the control but not associated with it leaves the screen reader saying just "switch". Clicking the label text does nothing either, so the target stays small.
+- **State shown only by colour.** In Windows High Contrast and other forced-colour modes the browser throws away the track colour, so on and off look identical. The same happens for users who cannot tell blue from grey.
+- **Focus ring removed.** `outline: none` with no replacement means keyboard users cannot see where they are.
+- **Motion and direction ignored.** The thumb animates even when the OS asks for reduced motion, and in right-to-left layouts it slides the wrong way.
+- **Disabled only in appearance.** `pointer-events: none` stops the mouse but leaves the control focusable and toggleable from the keyboard.
+
+## Solution
+
+Keyline's `Switch` renders a native `<button type="button" role="switch" aria-checked>`, so the browser supplies focus, <kbd>Space</kbd>, <kbd>Enter</kbd>, and the disabled behaviour. No key handler to get wrong.
+
+- **Name from a real label.** Wrap it in a `<label>`, point a `<label htmlFor>` at its `id`, or pass `aria-label` / `aria-labelledby`. Buttons are labelable elements, so clicking the label text toggles the switch. In development it warns in the console if no name is found.
+- **State in the accessibility tree.** `aria-checked` is always `"true"` or `"false"`; the thumb is `aria-hidden`.
+- **State shown three ways.** Track fill, thumb colour, and thumb position all change. In forced-colours mode the switch repaints itself with system colours (`Highlight`, `ButtonText`, `GrayText`) rather than letting the browser flatten it.
+- **Visible focus.** A `:focus-visible` outline from `--kl-color-focus` with a 2px offset, so it never merges with the track.
+- **Reduced motion and RTL.** Transitions read `--kl-duration-base`, which drops to `0ms` under `prefers-reduced-motion: reduce`. The thumb's travel flips under `:dir(rtl)`, and spacing uses logical properties.
+- **Truly disabled.** `disabled` sets the native attribute: out of the tab order, not clickable, announced as "disabled".
+- **Forms.** Give it a `name` and it submits `name=value` while on, nothing while off or disabled, like a checkbox.
+- **Controlled or uncontrolled.** Pass `checked` + `onCheckedChange` to own the state, or `defaultChecked` to let the switch own it.
+
+## Examples
+
+### Labelled by a wrapping label
+
+<Canvas of={SwitchStories.WrappingLabel} />
+
+### States
+
+<Canvas of={SwitchStories.States} />
+
+### Labelled by `htmlFor` and `aria-labelledby`
+
+<Canvas of={SwitchStories.LabelledByElsewhere} />
+
+### Controlled
+
+<Canvas of={SwitchStories.Controlled} />
+
+### In a form
+
+<Canvas of={SwitchStories.InAForm} />
+
+### Right to left
+
+<Canvas of={SwitchStories.RightToLeft} />
+
+## Props
+
+All other `<button>` props (`id`, `className`, `style`, `aria-*`, `data-*`, event handlers, `ref`) are passed to the button. `type`, `role`, and `aria-checked` are owned by the component. An `onClick` that calls `event.preventDefault()` cancels the toggle.
+
+<ArgTypes of={SwitchStories} />
+
+## Keyboard
+
+| Key                               | Action                                                        |
+| --------------------------------- | ------------------------------------------------------------- |
+| <kbd>Tab</kbd>                    | Moves focus to the switch. Disabled switches are skipped.     |
+| <kbd>Shift</kbd> + <kbd>Tab</kbd> | Moves focus to the previous focusable element.                |
+| <kbd>Space</kbd>                  | Toggles on and off. (APG: required.)                          |
+| <kbd>Enter</kbd>                  | Toggles on and off. (APG: optional; native button behaviour.) |
+
+## Screen reader output
+
+What the [Guidepup virtual screen reader](https://www.guidepup.dev/docs/virtual) announces, asserted in `switch.screen-reader.test.tsx`:
+
+| Markup                                             | Announcement                                   |
+| -------------------------------------------------- | ---------------------------------------------- |
+| `<label>Wi-Fi <Switch /></label>`                  | "switch, Wi-Fi, not checked"                   |
+| `<Switch aria-label="Bluetooth" defaultChecked />` | "switch, Bluetooth, checked"                   |
+| `<Switch aria-label="Airplane mode" disabled />`   | "switch, Airplane mode, not checked, disabled" |
+| After <kbd>Enter</kbd> or <kbd>Space</kbd>         | "switch, Wi-Fi, checked"                       |
+
+Real screen readers word this differently: Orca and NVDA usually say "on" / "off", VoiceOver says "on" / "off" with "switch button", TalkBack says "on" / "off" and "switch". The role and state are what matter; the wording belongs to the screen reader.
+
+## What's tested
+
+| Check                                                                    | Environment                            | Status                     |
+| ------------------------------------------------------------------------ | -------------------------------------- | -------------------------- |
+| Behaviour: toggling, controlled and uncontrolled, labels, forms, refs    | Vitest + Testing Library, jsdom        | <Status value="pass" />    |
+| axe-core, 0 violations: unchecked, checked, disabled, disabled + checked | vitest-axe (axe-core 4.14), jsdom      | <Status value="pass" />    |
+| Keyboard: Tab reaches it, Space and Enter toggle, disabled is skipped    | Playwright, Chromium and Firefox       | <Status value="pass" />    |
+| Visible focus ring, forced colours, reduced motion, RTL thumb travel     | Playwright, Chromium (media emulation) | <Status value="pass" />    |
+| Announced role, name, and state, before and after toggling               | Guidepup virtual screen reader         | <Status value="pass" />    |
+| axe on every story                                                       | Storybook a11y addon                   | <Status value="pass" />    |
+| Manual: Orca + Firefox                                                   | Linux desktop                          | <Status value="pending" /> |
+| Manual: TalkBack + Chrome                                                | Android                                | <Status value="pending" /> |
+
+Not tested yet: NVDA, JAWS, Narrator, VoiceOver (macOS and iOS), and real Windows High Contrast (forced colours are emulated in Chromium). A virtual screen reader checks the accessibility tree; it is not a substitute for a person using a real one.
+
+### Manual checklist (Orca + Firefox, TalkBack + Chrome)
+
+Run against the [Keyboard test fixture](?path=/story/components-switch--keyboard-fixture) story and record results in `docs/manual-testing.md`.
+
+1. Tab to "Wi-Fi". Expect the role (switch / toggle), the name "Wi-Fi", and the state "off" / "not checked".
+2. Press <kbd>Space</kbd>. Expect the new state "on" / "checked" to be announced without moving focus.
+3. Press <kbd>Enter</kbd>. Expect "off" / "not checked".
+4. Tab again. Expect focus to skip "Airplane mode" and land on "After".
+5. Browse mode (Orca: arrow keys; TalkBack: swipe right). Expect "Airplane mode" to be read as a disabled switch.
+6. TalkBack: double-tap "Wi-Fi". Expect it to toggle and announce the new state.
+7. Visual: focus ring visible on the switch in both light and dark themes.
+
+## Bundle size
+
+Measured by `size-limit` (minified + brotli, React excluded) for v0.0.1:
+
+| Import                                         | Size  |
+| ---------------------------------------------- | ----- |
+| `import { Switch } from 'keyline/switch'`      | 624 B |
+| `import { Switch } from 'keyline'`             | 624 B |
+| `keyline/styles.css` (tokens + all components) | 979 B |
+
+## Known limitations
+
+- **Disabled switches are not focusable,** so screen-reader users tabbing through a form will not hear them. That matches native controls and the APG; if the reason it is disabled matters, say so in visible text near it.
+- **No built-in label prop.** Labelling is left to HTML (`<label>`, `aria-labelledby`) so it composes with any form layout. The development warning catches a missing name.
+- **No "on/off" text inside the track.** The state is shown by fill, thumb colour, and position, and announced by assistive technology. Add visible text next to it if your users need it.
+- **No `required` or validation states yet.** A required on/off setting is unusual; use a checkbox if the user must agree to something.
+- **Real Windows High Contrast has not been checked by hand,** only emulated.

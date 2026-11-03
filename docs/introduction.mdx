@@ -1,0 +1,53 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Introduction" />
+
+# Keyline
+
+<p className="kl-lede">
+  Accessible React components with a keyboard and screen-reader contract you can read, and tests
+  that prove it.
+</p>
+
+## Problem
+
+Most component libraries say they are "accessible". Few say what that means, and fewer show how they checked.
+
+- **Accessibility claims are unfalsifiable.** "WAI-ARIA compliant" in a README does not tell you which keys work, what a screen reader says, or which screen readers anyone tried.
+- **The failures are invisible to the people building it.** A switch that cannot be reached with <kbd>Tab</kbd>, a dialog that lets focus escape behind it, a state shown only in colour: all of these look fine with a mouse and a typical monitor.
+- **Styling and behaviour come welded together.** Teams either accept a library's look or rebuild the component, and the rebuild drops the accessibility work.
+
+## Solution
+
+Keyline is a small React 19 + TypeScript library where every component documents its contract and tests it.
+
+- **Every page starts with the problem.** What naive implementations get wrong for keyboard and screen-reader users, concretely, then what Keyline does about it.
+- **Every page has a keyboard table and a "What's tested" table.** The test table says which checks are automated, which ran in real browsers, which screen readers were used by a person, and which have not been tried yet. "Pending" is a valid answer.
+- **Native elements first.** If the browser already provides focus, key handling, and form behaviour, Keyline uses it instead of re-implementing it.
+- **Styling through design tokens.** The default stylesheet is driven entirely by CSS custom properties. Light and dark themes, reduced motion, forced colours, and right-to-left layouts are handled in the tokens and component CSS. Override the tokens, or skip the stylesheet and style the `data-state` attributes yourself.
+- **Composable APIs.** Components accept `className`, `style`, and `ref`, spread other props onto the root element, and support controlled and uncontrolled use.
+
+## What it is
+
+- A growing set of interactive components that are hard to get right: Switch today; Tabs, Dialog, Toast, Menu, Combobox, and Date picker next.
+- The primitives they are built on, exported for your own components: `useControllableState`, `useId`, `Portal`, `FocusScope`.
+- Tested with Vitest, axe-core, Playwright (Chromium and Firefox), the Guidepup virtual screen reader, and by hand with Orca and TalkBack.
+
+## What it isn't
+
+- **Not a design system.** No layout primitives, typography scale, or icon set.
+- **Not a guarantee.** Accessible components can still be used inaccessibly: an unlabelled switch, a dialog with no title. Keyline warns in development where it can.
+- **Not finished.** It is at 0.x. APIs may change between minor versions until 1.0.
+
+## Install
+
+```sh
+pnpm add keyline
+```
+
+```tsx
+import { Switch } from 'keyline';
+import 'keyline/styles.css';
+```
+
+Source and issues: [github.com/Oyinbayode/keyline](https://github.com/Oyinbayode/keyline).

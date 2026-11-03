@@ -17,7 +17,7 @@
     "isolatedModules": true,
     "skipLibCheck": true,
     "noEmit": true,
-    "types": ["node"]
+    "types": ["node", "vite/client"]
   },
-  "include": ["src", "tests", ".storybook", "*.ts"]
+  "include": ["src", "tests", "docs", "scripts", ".storybook/**/*", "*.ts"]
 }

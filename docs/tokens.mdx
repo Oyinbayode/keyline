@@ -1,0 +1,66 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+import { TokenThemes } from './blocks';
+
+<Meta title="Tokens" />
+
+# Tokens
+
+<p className="kl-lede">
+  Every colour, radius, duration, and focus style in Keyline is a CSS custom property. Change the
+  tokens and every component follows.
+</p>
+
+## Problem
+
+Theming a component library usually means fighting it: overriding deeply nested selectors, copying hex values into your own CSS, and losing dark mode or high-contrast support along the way. A theme built that way often drops the contrast ratios the original was designed for.
+
+## Solution
+
+- **One declaration per colour.** Each token is written once with `light-dark()`, so the theme follows `color-scheme`: the OS preference by default, or `data-theme="light"` / `data-theme="dark"` on any ancestor.
+- **Contrast is part of the token.** Text colours are at least 4.5:1 against the background in both themes; control outlines and states (`--kl-color-slate`, `--kl-color-accent`) are at least 3:1 (WCAG 1.4.3 and 1.4.11).
+- **Motion is a token.** `--kl-duration-*` drops to `0ms` under `prefers-reduced-motion: reduce`, so no component needs its own media query.
+- **Forced colours are a token too.** Under `forced-colors: active` the colour tokens point at system colours (`Canvas`, `CanvasText`, `Highlight`, `ButtonText`), so components that must keep a colour cue repaint in the user's palette.
+- **Logical properties.** Spacing and sizing use `inline` / `block`, so right-to-left layouts need no overrides.
+
+## Both themes
+
+Values below are read back from the browser, not copied from the stylesheet.
+
+<TokenThemes />
+
+## Using them
+
+```css
+/* Follow the OS */
+@import 'keyline/styles.css';
+
+/* Force a theme for a subtree */
+<div data-theme="light">…</div>
+
+/* Rebrand */
+:root {
+  --kl-color-accent: light-dark(#0f7b5f, #3ccf9f);
+  --kl-radius-full: 0.375rem;
+}
+```
+
+`keyline/tokens.css` ships the tokens alone if you are styling components yourself.
+
+| Token                                                  | Purpose                                       |
+| ------------------------------------------------------ | --------------------------------------------- |
+| `--kl-color-bg`                                        | Page background                               |
+| `--kl-color-surface`                                   | Raised surfaces (menus, dialogs)              |
+| `--kl-color-line`                                      | Decorative borders and dividers               |
+| `--kl-color-text`                                      | Body text                                     |
+| `--kl-color-muted`                                     | Secondary text                                |
+| `--kl-color-accent`                                    | Selected / on state, links, focus             |
+| `--kl-color-on-accent`                                 | Text and icons placed on the accent           |
+| `--kl-color-slate`                                     | Control outlines and off state                |
+| `--kl-color-focus`                                     | Focus ring colour (defaults to accent)        |
+| `--kl-focus-ring-width`                                | Focus ring thickness                          |
+| `--kl-focus-ring-offset`                               | Gap between control and focus ring            |
+| `--kl-duration-fast`, `--kl-duration-base`             | Transition durations (0 under reduced motion) |
+| `--kl-easing`                                          | Transition easing                             |
+| `--kl-radius-sm`, `--kl-radius-md`, `--kl-radius-full` | Corner radii                                  |
+| `--kl-space-1` … `--kl-space-4`                        | Spacing scale (0.25rem steps)                 |
+| `--kl-font-family`, `--kl-font-family-mono`            | System font stacks; no web fonts required     |
