@@ -1,13 +1,24 @@
 import { Meta } from '@storybook/addon-docs/blocks';
+import { Datasheet } from './blocks';
 
 <Meta title="Introduction" />
 
-# Keyline
+<h1 className="kl-type-display">Keyline</h1>
 
-<p className="kl-lede">
+<div className="kl-lede">
   Accessible React components with a keyboard and screen-reader contract you can read, and tests
   that prove it.
-</p>
+</div>
+
+<Datasheet
+  entries={[
+    { label: 'Version', value: '0.x' },
+    { label: 'Runtime', value: 'React 19' },
+    { label: 'Components', value: 'Switch' },
+    { label: 'Target', value: 'WCAG 2.2 AA' },
+    { label: 'Licence', value: 'MIT' },
+  ]}
+/>
 
 ## Problem
 
