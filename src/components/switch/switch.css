@@ -56,9 +56,10 @@
   --kl-switch-thumb: light-dark(#ffffff, var(--kl-slate-12));
 }
 
+/* The alias, not blue-9, so a 0.0.x rebrand through --kl-color-accent still reaches the switch. */
 .kl-switch[data-state='checked'] {
-  --kl-switch-track: var(--kl-blue-9);
-  --kl-switch-track-border: var(--kl-blue-9);
+  --kl-switch-track: var(--kl-color-accent);
+  --kl-switch-track-border: var(--kl-color-accent);
   --kl-switch-track-shadow: inset 0 1px 0 light-dark(transparent, rgba(219, 230, 255, 0.35));
   --kl-switch-thumb: light-dark(#ffffff, var(--kl-blue-12));
 }
