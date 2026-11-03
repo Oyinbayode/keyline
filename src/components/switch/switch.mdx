@@ -102,16 +102,16 @@ Real screen readers word this differently: Orca and NVDA usually say "on" / "off
 
 ## What's tested
 
-| Check                                                                    | Environment                            | Status                     |
-| ------------------------------------------------------------------------ | -------------------------------------- | -------------------------- |
-| Behaviour: toggling, controlled and uncontrolled, labels, forms, refs    | Vitest + Testing Library, jsdom        | <Status value="pass" />    |
-| axe-core, 0 violations: unchecked, checked, disabled, disabled + checked | vitest-axe (axe-core 4.14), jsdom      | <Status value="pass" />    |
-| Keyboard: Tab reaches it, Space and Enter toggle, disabled is skipped    | Playwright, Chromium and Firefox       | <Status value="pass" />    |
-| Visible focus ring, forced colours, reduced motion, RTL thumb travel     | Playwright, Chromium (media emulation) | <Status value="pass" />    |
-| Announced role, name, and state, before and after toggling               | Guidepup virtual screen reader         | <Status value="pass" />    |
-| axe on every story                                                       | Storybook a11y addon                   | <Status value="pass" />    |
-| Manual: Orca + Firefox                                                   | Linux desktop                          | <Status value="pending" /> |
-| Manual: TalkBack + Chrome                                                | Android                                | <Status value="pending" /> |
+| Check                                                                    | Environment                                             | Status                     |
+| ------------------------------------------------------------------------ | ------------------------------------------------------- | -------------------------- |
+| Behaviour: toggling, controlled and uncontrolled, labels, forms, refs    | Vitest + Testing Library, jsdom                         | <Status value="pass" />    |
+| axe-core, 0 violations: unchecked, checked, disabled, disabled + checked | vitest-axe (axe-core 4.14), jsdom                       | <Status value="pass" />    |
+| Keyboard: Tab reaches it, Space and Enter toggle, disabled is skipped    | Playwright, Chromium and Firefox                        | <Status value="pass" />    |
+| Visible focus ring, forced colours, reduced motion, RTL thumb travel     | Playwright, Chromium (media emulation)                  | <Status value="pass" />    |
+| Announced role, name, and state, before and after toggling               | Guidepup virtual screen reader                          | <Status value="pass" />    |
+| axe-core on every story, light and dark themes                           | Playwright + @axe-core/playwright, Chromium and Firefox | <Status value="pass" />    |
+| Manual: Orca + Firefox                                                   | Linux desktop                                           | <Status value="pending" /> |
+| Manual: TalkBack + Chrome                                                | Android                                                 | <Status value="pending" /> |
 
 Not tested yet: NVDA, JAWS, Narrator, VoiceOver (macOS and iOS), and real Windows High Contrast (forced colours are emulated in Chromium). A virtual screen reader checks the accessibility tree; it is not a substitute for a person using a real one.
 
