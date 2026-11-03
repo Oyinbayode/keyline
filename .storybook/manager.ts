@@ -1,4 +1,5 @@
 import { addons } from 'storybook/manager-api';
-import { keylineTheme } from './theme';
+import { keylineDark } from './theme';
 
-addons.setConfig({ theme: keylineTheme });
+// The manager stays dark; the Theme toolbar switches the docs and canvas only.
+addons.setConfig({ theme: keylineDark });

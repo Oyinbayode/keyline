@@ -18,6 +18,8 @@ const config: StorybookConfig = {
     },
     '@storybook/addon-a11y',
   ],
+  // Docs-only web fonts, served from the site itself: no request to Google Fonts.
+  staticDirs: ['./public'],
   core: { disableTelemetry: true },
   viteFinal: (viteConfig) => ({
     ...viteConfig,

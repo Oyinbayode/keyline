@@ -1,29 +1,609 @@
 /*
- * Styles for the documentation site only; nothing here ships in the package.
- * Built from the same tokens so the docs double as a token smoke test.
+ * Styles for the documentation site only; nothing here ships in the package,
+ * which never loads or sets a font.
+ *
+ * The motif is the printer's keyline: hairlines, crop marks, numbered
+ * sections, spec-sheet tables. Rules separate content instead of boxes; there
+ * are no pills, gradients or pulsing animations. Colours come from the
+ * package tokens, so the docs double as a token smoke test in both themes.
  */
+
+/* Paths are relative to this file so Vite fingerprints them; nothing is fetched from Google Fonts. */
+@font-face {
+  font-family: 'Instrument Sans';
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url('./public/fonts/instrument-sans-latin.woff2') format('woff2');
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Instrument Sans';
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url('./public/fonts/instrument-sans-latin-ext.woff2') format('woff2');
+  unicode-range:
+    U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329,
+    U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F,
+    U+A720-A7FF;
+}
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 400 500;
+  font-display: swap;
+  src: url('./public/fonts/jetbrains-mono-latin.woff2') format('woff2');
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 400 500;
+  font-display: swap;
+  src: url('./public/fonts/jetbrains-mono-latin-ext.woff2') format('woff2');
+  unicode-range:
+    U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329,
+    U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F,
+    U+A720-A7FF;
+}
+
+:root {
+  --kl-docs-sans: 'Instrument Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --kl-docs-mono: 'JetBrains Mono', var(--kl-font-mono);
+  --kl-docs-prose: min(640px, 68ch);
+
+  /* Only 400, 500 and 600 are loaded; a synthesised bold would smear. */
+  font-synthesis: none;
+}
+
+html,
+body,
+.sb-show-main.sb-main-fullscreen,
+.docs-story {
+  background-color: var(--kl-color-bg);
+}
+
+/*
+ * Type scale. The classes are also used by the specimens on the Tokens page;
+ * scoped under .sbdocs to outrank Storybook's injected element styles.
+ */
+
+.sbdocs .kl-type-display,
+.sbdocs .kl-type-title,
+.sbdocs .kl-type-heading,
+.sbdocs .kl-type-subhead {
+  font-family: var(--kl-docs-sans);
+  font-weight: 600;
+}
+
+.sbdocs .kl-type-display {
+  font-size: 44px;
+  line-height: 48px;
+  letter-spacing: -0.03em;
+}
+
+.sbdocs .kl-type-title {
+  font-size: 32px;
+  line-height: 40px;
+  letter-spacing: -0.025em;
+}
+
+.sbdocs .kl-type-heading {
+  font-size: 24px;
+  line-height: 32px;
+  letter-spacing: -0.02em;
+}
+
+.sbdocs .kl-type-subhead {
+  font-size: 18px;
+  line-height: 28px;
+  letter-spacing: -0.01em;
+}
+
+.sbdocs .kl-type-body,
+.sbdocs .kl-type-small,
+.sbdocs .kl-type-caption {
+  font-family: var(--kl-docs-sans);
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+.sbdocs .kl-type-body {
+  font-size: 16px;
+  line-height: 26px;
+}
+
+.sbdocs .kl-type-small {
+  font-size: 14px;
+  line-height: 22px;
+}
+
+.sbdocs .kl-type-caption {
+  font-size: 12px;
+  line-height: 18px;
+}
+
+/* The only tracked style, and only because it is uppercase. */
+.sbdocs .kl-type-label {
+  font-family: var(--kl-docs-mono);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 16px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.sbdocs .kl-type-code {
+  font-family: var(--kl-docs-mono);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 22px;
+  letter-spacing: 0;
+}
+
+/* Page frame */
+
+.sbdocs.sbdocs-wrapper {
+  padding-block: var(--kl-space-7) var(--kl-space-8);
+  background-color: var(--kl-color-bg);
+  color: var(--kl-color-text);
+  font-family: var(--kl-docs-sans);
+}
+
+.sbdocs.sbdocs-content {
+  max-inline-size: 960px;
+  counter-reset: kl-section;
+}
+
+.sbdocs-content > h1 {
+  margin: 0 0 var(--kl-space-4);
+  color: var(--kl-color-text);
+  font-family: var(--kl-docs-sans);
+  font-size: 32px;
+  font-weight: 600;
+  line-height: 40px;
+  letter-spacing: -0.025em;
+}
+
+.sbdocs-content > h1.kl-type-display {
+  font-size: 44px;
+  line-height: 48px;
+  letter-spacing: -0.03em;
+}
+
+/*
+ * Every h2 is a numbered section: a hairline across the column, then a mono
+ * "01" in the accent. The number is generated, so pages cannot fall out of
+ * order, and its alt text is empty so screen readers read only the heading.
+ */
+.sbdocs-content > h2 {
+  counter-increment: kl-section;
+  display: flex;
+  align-items: baseline;
+  gap: var(--kl-space-4);
+  margin: var(--kl-space-7) 0 var(--kl-space-4);
+  padding: var(--kl-space-4) 0 0;
+  border: 0;
+  border-block-start: 1px solid var(--kl-color-line);
+  color: var(--kl-color-text);
+  font-family: var(--kl-docs-sans);
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 32px;
+  letter-spacing: -0.02em;
+}
+
+.sbdocs-content > h2::before {
+  content: counter(kl-section, decimal-leading-zero);
+  content: counter(kl-section, decimal-leading-zero) / '';
+  flex-shrink: 0;
+  min-inline-size: 2ch;
+  color: var(--kl-color-accent);
+  font-family: var(--kl-docs-mono);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 22px;
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.sbdocs-content > h3 {
+  margin: var(--kl-space-6) 0 var(--kl-space-3);
+  color: var(--kl-color-text);
+  font-family: var(--kl-docs-sans);
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 28px;
+  letter-spacing: -0.01em;
+}
+
+.sbdocs-content > p,
+.sbdocs-content > ul,
+.sbdocs-content > ol {
+  max-inline-size: var(--kl-docs-prose);
+  margin: 0 0 var(--kl-space-4);
+  color: var(--kl-color-text);
+  font-size: 16px;
+  line-height: 26px;
+}
+
+.sbdocs-content li {
+  font-size: 16px;
+  line-height: 26px;
+}
+
+.sbdocs-content > :is(ul, ol) > li + li {
+  margin-block-start: var(--kl-space-2);
+}
+
+.sbdocs-content strong,
+.sbdocs-content b,
+.sbdocs-content th {
+  font-weight: 600;
+}
+
+.sbdocs-content a:not(.sb-unstyled a, [aria-label]) {
+  color: var(--kl-blue-11);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.sbdocs-content a:not(.sb-unstyled a, [aria-label]):hover {
+  text-decoration-thickness: 2px;
+}
+
+.sbdocs .kl-lede {
+  max-inline-size: var(--kl-docs-prose);
+  margin: 0 0 var(--kl-space-6);
+  color: var(--kl-color-muted);
+  font-size: 18px;
+  line-height: 28px;
+}
+
+.sbdocs .kl-lede p {
+  margin: 0;
+  color: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+/* Inline code and code blocks */
+
+.sbdocs-content :not(pre) > code {
+  padding: 1px 4px;
+  border: 1px solid var(--kl-color-line);
+  border-radius: var(--kl-radius-sm);
+  background: var(--kl-slate-3);
+  color: var(--kl-color-text);
+  font-family: var(--kl-docs-mono);
+  font-size: 0.8125em;
+  letter-spacing: 0;
+}
+
+.sbdocs-content > pre,
+.sbdocs-content .docblock-source {
+  margin-block: var(--kl-space-4) var(--kl-space-6);
+  border: 1px solid var(--kl-color-line);
+  border-radius: 0;
+  background: var(--kl-slate-1);
+  box-shadow: none;
+}
+
+.sbdocs-content .docblock-source pre,
+.sbdocs-content .docblock-source code,
+.sbdocs-content .docblock-source span {
+  font-family: var(--kl-docs-mono);
+  font-size: 13px;
+  line-height: 22px;
+  letter-spacing: 0;
+}
+
+/* Keycaps: the keyboard contract is the point of every page, so keys look like keys. */
+.sbdocs kbd,
+.kl-kbd {
+  display: inline-block;
+  min-inline-size: 2.25em;
+  padding: 1px 6px;
+  border: 1px solid var(--kl-slate-8);
+  border-block-end-width: 2px;
+  border-radius: var(--kl-radius-sm);
+  background: var(--kl-slate-3);
+  color: var(--kl-color-text);
+  font-family: var(--kl-docs-mono);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 16px;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: 0.1em;
+}
+
+/*
+ * Tables read as spec sheets: a strong rule on top, hairlines between rows,
+ * no zebra stripes or cell walls, mono labels for the header.
+ */
+.sbdocs-content > table {
+  display: table;
+  inline-size: 100%;
+  margin: var(--kl-space-4) 0 var(--kl-space-6);
+  border-collapse: collapse;
+  border-block: 1px solid var(--kl-slate-8);
+  font-size: 14px;
+  line-height: 22px;
+  font-variant-numeric: tabular-nums;
+}
+
+.sbdocs-content > table tr,
+.sbdocs-content > table tr:nth-of-type(2n) {
+  border: 0;
+  background-color: transparent;
+}
+
+.sbdocs-content > table th,
+.sbdocs-content > table td {
+  padding: var(--kl-space-3) var(--kl-space-4) var(--kl-space-3) 0;
+  border: 0;
+  border-block-end: 1px solid var(--kl-color-line);
+  background: transparent;
+  color: var(--kl-color-text);
+  text-align: start;
+  vertical-align: top;
+}
+
+.sbdocs-content > table tr:last-child td {
+  border-block-end: 0;
+}
+
+.sbdocs-content > table th {
+  color: var(--kl-color-muted);
+  font-family: var(--kl-docs-mono);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 16px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Storybook's own blocks: square them off and swap their shadows for hairlines. */
+.sbdocs-content .docblock-argstable {
+  border-block: 1px solid var(--kl-slate-8);
+  font-variant-numeric: tabular-nums;
+}
+
+.sbdocs-content .docblock-argstable tbody {
+  box-shadow: none;
+  filter: none;
+}
+
+.sbdocs-content .docblock-argstable th {
+  font-family: var(--kl-docs-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.sbdocs-content .sbdocs-preview {
+  border: 1px solid var(--kl-color-line);
+  border-radius: 0;
+  box-shadow: none;
+  background: var(--kl-color-bg);
+}
+
+/* Datasheet: the spec row at the top of a component page. */
+
+.kl-datasheet {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+  margin: 0 0 var(--kl-space-6);
+  border-block: 1px solid var(--kl-slate-8);
+  font-variant-numeric: tabular-nums;
+}
+
+.kl-datasheet-cell {
+  padding: var(--kl-space-3) var(--kl-space-4) var(--kl-space-3) 0;
+}
+
+.kl-datasheet-cell + .kl-datasheet-cell {
+  padding-inline-start: var(--kl-space-4);
+  border-inline-start: 1px solid var(--kl-color-line);
+}
+
+.sbdocs .kl-datasheet dt {
+  margin: 0 0 var(--kl-space-1);
+  color: var(--kl-color-muted);
+  font-family: var(--kl-docs-mono);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 16px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.sbdocs .kl-datasheet dd {
+  margin: 0;
+  padding: 0;
+  color: var(--kl-color-text);
+  font-size: 14px;
+  line-height: 22px;
+}
+
+/*
+ * Proof sheet: an example framed like a print proof, a hairline trim with
+ * crop marks just outside each corner and a figure caption beneath.
+ */
+
+.kl-proof {
+  --kl-crop-gap: 4px;
+  --kl-crop-length: 12px;
+
+  position: relative;
+  margin: var(--kl-space-6) calc(var(--kl-crop-gap) + var(--kl-crop-length)) var(--kl-space-6);
+}
+
+.kl-proof-frame {
+  position: relative;
+  border: 1px solid var(--kl-color-line);
+}
+
+.sbdocs .kl-proof .sbdocs-preview {
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: var(--kl-color-bg);
+}
+
+.kl-crop {
+  position: absolute;
+  inline-size: 0;
+  block-size: 0;
+}
+
+.kl-crop::before,
+.kl-crop::after {
+  content: '';
+  position: absolute;
+  background: var(--kl-slate-8);
+}
+
+/* Horizontal mark, in line with the top or bottom trim edge. */
+.kl-crop::before {
+  inline-size: var(--kl-crop-length);
+  block-size: 1px;
+}
+
+/* Vertical mark, in line with the start or end trim edge. */
+.kl-crop::after {
+  inline-size: 1px;
+  block-size: var(--kl-crop-length);
+}
+
+.kl-crop[data-corner^='top'] {
+  inset-block-start: -1px;
+}
+
+.kl-crop[data-corner^='bottom'] {
+  inset-block-end: -1px;
+}
+
+.kl-crop[data-corner$='start'] {
+  inset-inline-start: -1px;
+}
+
+.kl-crop[data-corner$='end'] {
+  inset-inline-end: -1px;
+}
+
+.kl-crop[data-corner$='start']::before {
+  inset-inline-end: var(--kl-crop-gap);
+}
+
+.kl-crop[data-corner$='end']::before {
+  inset-inline-start: var(--kl-crop-gap);
+}
+
+.kl-crop[data-corner^='top']::after {
+  inset-block-end: var(--kl-crop-gap);
+}
+
+.kl-crop[data-corner^='bottom']::after {
+  inset-block-start: var(--kl-crop-gap);
+}
+
+.kl-crop[data-corner$='start']::after {
+  inset-inline-start: 0;
+}
+
+.kl-crop[data-corner$='end']::after {
+  inset-inline-end: 0;
+}
+
+.kl-crop[data-corner^='top']::before {
+  inset-block-start: 0;
+}
+
+.kl-crop[data-corner^='bottom']::before {
+  inset-block-end: 0;
+}
+
+.sbdocs .kl-proof figcaption {
+  margin-block-start: var(--kl-space-3);
+  color: var(--kl-color-muted);
+  font-family: var(--kl-docs-mono);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 16px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Storybook overlays the code toggles on the story with a negative margin; give them their own row. */
+.sbdocs .kl-proof .sbdocs-preview-actions {
+  box-sizing: border-box;
+  margin: 0;
+  padding-inline: var(--kl-space-3);
+  border-block-start: 1px solid var(--kl-color-line);
+}
+
+/* Test status: a word and a square swatch, never a pill. */
+.kl-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--kl-color-text);
+  font-family: var(--kl-docs-mono);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 16px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.kl-status::before {
+  content: '';
+  inline-size: 6px;
+  block-size: 6px;
+  background: var(--kl-swatch);
+}
+
+.kl-status[data-status='pass'] {
+  --kl-swatch: var(--kl-success);
+}
+
+.kl-status[data-status='pending'] {
+  --kl-swatch: var(--kl-warning);
+}
+
+/* Story canvas and example layouts */
 
 .kl-story-canvas {
   box-sizing: border-box;
   min-block-size: 100%;
-  padding: var(--kl-space-4) calc(var(--kl-space-4) * 1.5);
+  padding: var(--kl-space-5);
   background-color: var(--kl-color-bg);
   color: var(--kl-color-text);
-  font-family: var(--kl-font-family);
-  font-size: var(--kl-font-size);
-  line-height: var(--kl-line-height);
-}
-
-.sb-show-main.sb-main-fullscreen,
-.docs-story {
-  background-color: var(--kl-color-bg);
+  font-family: var(--kl-docs-sans);
+  font-size: 16px;
+  line-height: 26px;
 }
 
 .kl-example-row {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--kl-space-3) calc(var(--kl-space-4) * 2);
+  gap: var(--kl-space-3) var(--kl-space-6);
 }
 
 .kl-example-label {
@@ -33,7 +613,8 @@
   cursor: pointer;
 }
 
-.kl-example-stack {
+.kl-example-stack,
+.kl-example-form {
   display: grid;
   gap: var(--kl-space-3);
   justify-items: start;
@@ -42,158 +623,244 @@
 .kl-example-note {
   margin: 0;
   color: var(--kl-color-muted);
-  font-size: 0.875rem;
+  font-size: 14px;
+  line-height: 22px;
 }
 
-.kl-example-form {
-  display: grid;
-  gap: var(--kl-space-3);
-  justify-items: start;
-}
-
-.kl-example-form button[type='submit'] {
+.kl-story-canvas button:not(.kl-switch) {
   padding: var(--kl-space-1) var(--kl-space-3);
-  border: 1px solid var(--kl-color-slate);
+  border: 1px solid var(--kl-slate-8);
   border-radius: var(--kl-radius-sm);
-  background: transparent;
+  background: var(--kl-slate-3);
   color: inherit;
   font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 22px;
+  cursor: pointer;
 }
 
-.kl-example-form button[type='submit']:focus-visible {
-  outline: var(--kl-focus-ring-width) solid var(--kl-color-focus);
-  outline-offset: var(--kl-focus-ring-offset);
+.kl-story-canvas button:not(.kl-switch):hover {
+  background: var(--kl-slate-4);
+}
+
+.kl-story-canvas button:not(.kl-switch):focus-visible {
+  outline: 2px solid transparent;
+  box-shadow: var(--kl-focus-ring);
 }
 
 .kl-example-output {
-  font-family: var(--kl-font-family-mono);
-  font-size: 0.8125rem;
   color: var(--kl-color-muted);
+  font-family: var(--kl-docs-mono);
+  font-size: 13px;
+  line-height: 22px;
 }
 
-/* Keycaps: the keyboard contract is the point of every page, so keys look like keys. */
-.sbdocs kbd {
-  display: inline-block;
-  min-inline-size: 1.75em;
-  padding: 0.125em 0.5em;
-  border: 1px solid #232d3d;
-  border-block-end-width: 3px;
-  border-radius: 5px;
-  background: #0a0f17;
-  color: #e6ecf5;
-  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
-  font-size: 0.8125em;
-  line-height: 1.4;
-  text-align: center;
-  white-space: nowrap;
-}
-
-.sbdocs .kl-status {
-  display: inline-block;
-  padding: 0 0.5em;
-  border: 1px solid currentColor;
-  border-radius: 4px;
-  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
-  font-size: 0.75em;
-  line-height: 1.6;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  white-space: nowrap;
-}
-
-.sbdocs .kl-status[data-status='pass'] {
-  color: #5b8dff;
-}
-
-.sbdocs .kl-status[data-status='pending'] {
-  color: #8796ad;
-  border-style: dashed;
-}
-
-.sbdocs .kl-lede {
-  font-size: 1.125rem;
-  color: #8796ad;
-  max-inline-size: 44rem;
-}
+/* Tokens page */
 
 .kl-token-themes {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
-  gap: var(--kl-space-4);
+  gap: var(--kl-space-6);
 }
 
 .kl-token-panel {
-  padding: var(--kl-space-4);
-  border: 1px solid var(--kl-color-line);
-  border-radius: var(--kl-radius-md);
+  padding: var(--kl-space-5) var(--kl-space-5) var(--kl-space-6);
+  border-block: 1px solid var(--kl-slate-8);
   background: var(--kl-color-bg);
   color: var(--kl-color-text);
-  font-family: var(--kl-font-family);
 }
 
-.kl-token-panel h3 {
-  margin: 0 0 var(--kl-space-3);
-  font-size: 0.875rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
+.sbdocs .kl-token-panel h3 {
+  margin: 0 0 var(--kl-space-4);
+  color: var(--kl-color-muted);
+  font-family: var(--kl-docs-mono);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 16px;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+
+.kl-scale {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(4.5rem, 1fr));
+  gap: var(--kl-space-3) var(--kl-space-1);
+  margin: 0 0 var(--kl-space-5);
+  padding: 0;
+  list-style: none;
+}
+
+.sbdocs .kl-scale-step {
+  display: grid;
+  gap: var(--kl-space-1);
+  margin: 0;
+  color: var(--kl-color-text);
+  font-family: var(--kl-docs-mono);
+  font-size: 11px;
+  line-height: 16px;
+  font-variant-numeric: tabular-nums;
+}
+
+.kl-scale-chip {
+  block-size: 2.5rem;
+  border: 1px solid var(--kl-color-line);
+}
+
+.kl-scale-hex {
   color: var(--kl-color-muted);
 }
 
 .kl-token-list {
   display: grid;
-  gap: var(--kl-space-2);
   margin: 0;
   padding: 0;
   list-style: none;
+  border-block-start: 1px solid var(--kl-color-line);
 }
 
 .sbdocs .kl-token-row {
-  margin: 0;
-  color: var(--kl-color-text);
   display: grid;
-  grid-template-columns: 2rem 1fr auto;
+  grid-template-columns: 1.5rem minmax(0, 1fr) auto;
   align-items: center;
   gap: var(--kl-space-3);
-  font-size: 0.8125rem;
+  margin: 0;
+  padding-block: var(--kl-space-2);
+  border-block-end: 1px solid var(--kl-color-line);
+  color: var(--kl-color-text);
+  font-size: 14px;
+  line-height: 22px;
+  font-variant-numeric: tabular-nums;
 }
 
 .kl-token-chip {
-  inline-size: 2rem;
-  block-size: 2rem;
+  inline-size: 1.5rem;
+  block-size: 1.5rem;
   border: 1px solid var(--kl-color-line);
-  border-radius: var(--kl-radius-sm);
 }
 
 .kl-token-name,
 .kl-token-value {
-  font-family: var(--kl-font-family-mono);
+  font-family: var(--kl-docs-mono);
+  font-size: 13px;
 }
 
-.sbdocs .kl-token-value {
+.sbdocs .kl-token-value,
+.sbdocs .kl-token-role {
   color: var(--kl-color-muted);
 }
 
 .kl-token-sample {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: var(--kl-space-3);
-  margin-block-start: var(--kl-space-4);
-  padding-block-start: var(--kl-space-4);
+  gap: var(--kl-space-5);
+  margin-block-start: var(--kl-space-5);
+}
+
+.kl-specimens {
+  margin: var(--kl-space-4) 0 var(--kl-space-6);
+  border-block: 1px solid var(--kl-slate-8);
+}
+
+.kl-specimen {
+  display: grid;
+  grid-template-columns: 11rem minmax(0, 1fr);
+  align-items: baseline;
+  gap: var(--kl-space-4);
+  padding-block: var(--kl-space-4);
+  color: var(--kl-color-text);
+}
+
+.kl-specimen + .kl-specimen {
   border-block-start: 1px solid var(--kl-color-line);
 }
 
-/* Storybook stripes tables with a light grey that is loud on a near-black page. */
-.sbdocs table tr,
-.sbdocs table tr:nth-of-type(2n) {
-  background-color: transparent;
+.kl-specimen-meta {
+  display: grid;
+  gap: var(--kl-space-1);
+  color: var(--kl-color-muted);
+  font-variant-numeric: tabular-nums;
 }
 
-.sbdocs table tr:nth-of-type(2n) {
-  background-color: #0a0f17;
+.kl-specimen-meta span:last-child {
+  font-family: var(--kl-docs-mono);
+  font-size: 11px;
+  line-height: 16px;
 }
 
-.sbdocs table th,
-.sbdocs table td {
-  border-color: #232d3d;
+@media (width < 720px) {
+  .kl-specimen {
+    grid-template-columns: 1fr;
+  }
+}
+
+.kl-measures {
+  display: grid;
+  gap: var(--kl-space-2);
+  margin: var(--kl-space-4) 0 var(--kl-space-6);
+  padding: 0;
+  list-style: none;
+}
+
+.sbdocs .kl-measure {
+  display: grid;
+  grid-template-columns: 10rem 4rem minmax(0, 1fr);
+  align-items: center;
+  gap: var(--kl-space-4);
+  margin: 0;
+  font-family: var(--kl-docs-mono);
+  font-size: 13px;
+  line-height: 22px;
+  font-variant-numeric: tabular-nums;
+}
+
+.kl-measure-value {
+  color: var(--kl-color-muted);
+}
+
+.kl-measure-bar {
+  block-size: 8px;
+  background: var(--kl-color-accent);
+}
+
+.kl-radius-sample {
+  inline-size: 2.5rem;
+  block-size: 2.5rem;
+  border: 1px solid var(--kl-slate-8);
+  background: var(--kl-slate-3);
+}
+
+.kl-depth-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--kl-space-6);
+  margin-block-start: var(--kl-space-4);
+}
+
+.kl-depth-sample {
+  display: grid;
+  place-items: center;
+  inline-size: 10rem;
+  block-size: 6rem;
+  border-radius: var(--kl-radius-md);
+  background: var(--kl-color-surface);
+  color: var(--kl-color-muted);
+  font-family: var(--kl-docs-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.kl-focus-sample {
+  display: inline-block;
+  padding: var(--kl-space-1) var(--kl-space-3);
+  border: 1px solid var(--kl-slate-8);
+  border-radius: var(--kl-radius-sm);
+  background: var(--kl-slate-3);
+  box-shadow: var(--kl-focus-ring);
+  color: var(--kl-color-text);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 22px;
 }
