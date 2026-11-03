@@ -1,0 +1,92 @@
+.kl-switch {
+  --kl-switch-width: 2.75rem;
+  --kl-switch-height: 1.5rem;
+  --kl-switch-border: 2px;
+  --kl-switch-thumb-size: calc(var(--kl-switch-height) - 4 * var(--kl-switch-border));
+  --kl-switch-travel: calc(
+    var(--kl-switch-width) - var(--kl-switch-thumb-size) - 4 * var(--kl-switch-border)
+  );
+  --kl-switch-direction: 1;
+
+  all: unset;
+  box-sizing: border-box;
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  inline-size: var(--kl-switch-width);
+  block-size: var(--kl-switch-height);
+  padding-inline: var(--kl-switch-border);
+  border: var(--kl-switch-border) solid var(--kl-color-slate);
+  border-radius: var(--kl-radius-full);
+  background-color: transparent;
+  cursor: pointer;
+  vertical-align: middle;
+  transition:
+    background-color var(--kl-duration-base) var(--kl-easing),
+    border-color var(--kl-duration-base) var(--kl-easing);
+}
+
+.kl-switch:dir(rtl) {
+  --kl-switch-direction: -1;
+}
+
+.kl-switch:focus-visible {
+  outline: var(--kl-focus-ring-width) solid var(--kl-color-focus);
+  outline-offset: var(--kl-focus-ring-offset);
+}
+
+.kl-switch[data-state='checked'] {
+  border-color: var(--kl-color-accent);
+  background-color: var(--kl-color-accent);
+}
+
+.kl-switch:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.kl-switch-thumb {
+  display: block;
+  inline-size: var(--kl-switch-thumb-size);
+  block-size: var(--kl-switch-thumb-size);
+  border-radius: var(--kl-radius-full);
+  background-color: var(--kl-color-slate);
+  pointer-events: none;
+  transition:
+    transform var(--kl-duration-base) var(--kl-easing),
+    background-color var(--kl-duration-base) var(--kl-easing);
+}
+
+.kl-switch[data-state='checked'] .kl-switch-thumb {
+  background-color: var(--kl-color-on-accent);
+  transform: translateX(calc(var(--kl-switch-travel) * var(--kl-switch-direction)));
+}
+
+/*
+ * The track fill is the only colour cue that differs between states, so the
+ * switch opts out of forced colours and repaints itself with the system
+ * palette the tokens already point at. Thumb position still carries the state
+ * for users who cannot tell the colours apart.
+ */
+@media (forced-colors: active) {
+  .kl-switch {
+    forced-color-adjust: none;
+  }
+
+  .kl-switch:disabled {
+    opacity: 1;
+    border-color: GrayText;
+  }
+
+  .kl-switch:disabled .kl-switch-thumb {
+    background-color: GrayText;
+  }
+
+  .kl-switch:disabled[data-state='checked'] {
+    background-color: GrayText;
+  }
+
+  .kl-switch:disabled[data-state='checked'] .kl-switch-thumb {
+    background-color: Canvas;
+  }
+}

@@ -1,0 +1,89 @@
+/*
+ * Keyline design tokens.
+ *
+ * Every colour is declared once with light-dark(), so the active theme is
+ * decided by `color-scheme` alone: the OS preference by default, or an
+ * explicit [data-theme] on any ancestor. Contrast ratios noted beside each
+ * pair were measured against both backgrounds; non-text UI colours stay at
+ * 3:1 or above (WCAG 1.4.11), text at 4.5:1 or above (WCAG 1.4.3).
+ */
+
+:root {
+  color-scheme: light dark;
+}
+
+[data-theme='light'] {
+  color-scheme: light;
+}
+
+[data-theme='dark'] {
+  color-scheme: dark;
+}
+
+:root,
+[data-theme] {
+  --kl-color-bg: light-dark(#eef2f7, #04060a);
+  --kl-color-surface: light-dark(#ffffff, #0a0f17);
+  --kl-color-line: light-dark(#c9d3e1, #232d3d);
+  --kl-color-text: light-dark(#0a0f18, #e6ecf5);
+  /* 6.4:1 on bg in both themes */
+  --kl-color-muted: light-dark(#4a5873, #8796ad);
+  /* 5.4:1 / 6.5:1 on bg */
+  --kl-color-accent: light-dark(#1f56e0, #5b8dff);
+  /* text or icons placed on top of the accent; 6.1:1 / 6.5:1 */
+  --kl-color-on-accent: light-dark(#ffffff, #04060a);
+  /* control outlines and "off" states; 5.0:1 / 5.2:1 on bg */
+  --kl-color-slate: light-dark(#56688a, #6f82a3);
+  --kl-color-focus: var(--kl-color-accent);
+
+  --kl-font-family:
+    system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans', Ubuntu, Cantarell, sans-serif;
+  --kl-font-family-mono: ui-monospace, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+  --kl-font-size: 1rem;
+  --kl-line-height: 1.5;
+
+  --kl-space-1: 0.25rem;
+  --kl-space-2: 0.5rem;
+  --kl-space-3: 0.75rem;
+  --kl-space-4: 1rem;
+
+  --kl-radius-sm: 0.25rem;
+  --kl-radius-md: 0.5rem;
+  --kl-radius-full: 9999px;
+
+  --kl-focus-ring-width: 2px;
+  --kl-focus-ring-offset: 2px;
+
+  --kl-duration-fast: 120ms;
+  --kl-duration-base: 200ms;
+  --kl-easing: cubic-bezier(0.2, 0, 0, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root,
+  [data-theme] {
+    --kl-duration-fast: 0ms;
+    --kl-duration-base: 0ms;
+  }
+}
+
+/*
+ * In Windows High Contrast and other forced-colour modes the browser
+ * replaces author colours. Pointing the tokens at system colours keeps
+ * anything that opts out with `forced-color-adjust: none` (state that is
+ * only visible through colour, like a switch track) in the user's palette.
+ */
+@media (forced-colors: active) {
+  :root,
+  [data-theme] {
+    --kl-color-bg: Canvas;
+    --kl-color-surface: Canvas;
+    --kl-color-line: CanvasText;
+    --kl-color-text: CanvasText;
+    --kl-color-muted: CanvasText;
+    --kl-color-accent: Highlight;
+    --kl-color-on-accent: HighlightText;
+    --kl-color-slate: ButtonText;
+    --kl-color-focus: Highlight;
+  }
+}
