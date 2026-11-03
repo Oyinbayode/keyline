@@ -26,7 +26,10 @@ export default tseslint.config(
       ],
       'no-restricted-syntax': [
         'error',
-        { selector: 'TSEnumDeclaration', message: 'Use a union of string literals instead of enum.' },
+        {
+          selector: 'TSEnumDeclaration',
+          message: 'Use a union of string literals instead of enum.',
+        },
       ],
     },
   },
