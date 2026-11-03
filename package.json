@@ -75,7 +75,10 @@
     "size": "size-limit",
     "check:package": "publint && attw --pack . --profile node16 --exclude-entrypoints styles.css tokens.css",
     "storybook": "storybook dev -p 6006",
-    "build:storybook": "storybook build --quiet"
+    "build:storybook": "storybook build --quiet",
+    "changeset": "changeset",
+    "release": "changeset publish",
+    "prepublishOnly": "pnpm build"
   },
   "peerDependencies": {
     "react": "^19.0.0",
@@ -125,5 +128,8 @@
   "packageManager": "pnpm@10.32.1",
   "engines": {
     "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

@@ -1,0 +1,132 @@
+# Keyline
+
+Accessible React components with a keyboard and screen-reader contract you can read, and tests that prove it.
+
+[Docs and live examples](https://oyinbayode.github.io/keyline/) · [npm](https://www.npmjs.com/package/keyline) · MIT
+
+## Problem
+
+Most component libraries say they are "accessible" and stop there. You cannot tell which keys work, what a screen reader announces, or whether anyone tried one. The failures that matter (a control you cannot reach with <kbd>Tab</kbd>, focus escaping a dialog, a state shown only in colour) are invisible with a mouse and a typical monitor, so they ship.
+
+## Solution
+
+Keyline is a small React 19 + TypeScript library where each component:
+
+- **follows a named WAI-ARIA APG pattern** and links to it;
+- **documents its keyboard contract** in a table;
+- **says what was tested and how**: unit tests, axe-core (0 violations in every state), Playwright in Chromium and Firefox, the Guidepup virtual screen reader, and manual runs with real screen readers, each marked pass or pending;
+- **uses native elements first**, so the browser provides focus, key handling, and form behaviour;
+- **is styled by design tokens**: light and dark themes, reduced motion, forced colours, and right-to-left handled in CSS custom properties you can override.
+
+Available now: **Switch**. Next: Tabs, Dialog, Toast, Menu, Combobox, Date picker.
+
+## Install
+
+```sh
+pnpm add keyline
+# or: npm install keyline
+```
+
+React 19 is a peer dependency.
+
+## Usage
+
+```tsx
+import { Switch } from 'keyline';
+import 'keyline/styles.css';
+
+export function WifiSetting() {
+  return (
+    <label>
+      <Switch defaultChecked onCheckedChange={(isOn) => console.log(isOn)} />
+      Wi-Fi
+    </label>
+  );
+}
+```
+
+Controlled:
+
+```tsx
+const [isOn, setIsOn] = useState(false);
+<Switch aria-label="Wi-Fi" checked={isOn} onCheckedChange={setIsOn} />;
+```
+
+Every component accepts `className`, `style`, and `ref`, passes other props to its root element, and exposes its state as `data-state` for custom styling. Per-component entry points (`keyline/switch`, `keyline/primitives`) and ESM tree-shaking keep imports small.
+
+If you lint with `eslint-plugin-jsx-a11y`, tell `label-has-associated-control` that `Switch` is a control:
+
+```js
+'jsx-a11y/label-has-associated-control': ['error', { controlComponents: ['Switch'], assert: 'either' }],
+```
+
+## Theming
+
+The stylesheet is driven entirely by CSS custom properties. It follows the OS colour scheme by default; force a theme on any subtree with `data-theme`:
+
+```html
+<div data-theme="light">…</div>
+<div data-theme="dark">…</div>
+```
+
+Rebrand by overriding tokens:
+
+```css
+:root {
+  --kl-color-accent: light-dark(#0f7b5f, #3ccf9f);
+  --kl-focus-ring-width: 3px;
+}
+```
+
+`keyline/tokens.css` ships the tokens alone if you want to style components yourself. All tokens are listed on the [Tokens page](https://oyinbayode.github.io/keyline/?path=/docs/tokens--docs). System fonts only; no web fonts are loaded.
+
+## Accessibility statement
+
+Keyline targets WCAG 2.2 AA and the [WAI-ARIA Authoring Practices](https://www.w3.org/WAI/ARIA/apg/). This is what is actually tested for each component, as of the version in `package.json`:
+
+| Check                                                      | Tooling                                           | Switch  |
+| ---------------------------------------------------------- | ------------------------------------------------- | ------- |
+| Behaviour (controlled, uncontrolled, labels, forms, refs)  | Vitest + Testing Library, jsdom                   | Pass    |
+| axe-core, 0 violations in every state                      | vitest-axe                                        | Pass    |
+| axe-core on every Storybook story, light and dark          | Playwright + @axe-core/playwright                 | Pass    |
+| Keyboard: Tab, Shift+Tab, Space, Enter, disabled skipped   | Playwright, Chromium and Firefox                  | Pass    |
+| Focus ring, reduced motion, RTL, forced colours (emulated) | Playwright, Chromium (Firefox: no forced colours) | Pass    |
+| Announced role, name, and state                            | Guidepup virtual screen reader                    | Pass    |
+| Orca + Firefox (Linux)                                     | Manual                                            | Pending |
+| TalkBack + Chrome (Android)                                | Manual                                            | Pending |
+
+Not tested: NVDA, JAWS, Narrator, VoiceOver (macOS, iOS), real Windows High Contrast. Manual results are recorded in [docs/manual-testing.md](docs/manual-testing.md). Found a barrier? [Open an issue](https://github.com/Oyinbayode/keyline/issues) with the component, browser, assistive technology, and what you heard or expected.
+
+## Bundle size
+
+Minified + brotli, React excluded, enforced in CI by `size-limit` (see `.size-limit.json`):
+
+| Import                                    | Size    | Budget |
+| ----------------------------------------- | ------- | ------ |
+| `import { Switch } from 'keyline'`        | 624 B   | 750 B  |
+| `import { Switch } from 'keyline/switch'` | 624 B   | 750 B  |
+| `keyline/primitives` (all)                | 1.49 kB | 1.8 kB |
+| `keyline` (everything)                    | 1.77 kB | 2.2 kB |
+| `keyline/styles.css`                      | 979 B   | 1.2 kB |
+
+## Contributing
+
+```sh
+pnpm install
+pnpm storybook          # docs at localhost:6006
+pnpm test               # unit, axe, virtual screen reader
+pnpm build:storybook && pnpm test:e2e   # Playwright, Chromium + Firefox
+pnpm lint && pnpm typecheck && pnpm build && pnpm size
+```
+
+- New components copy `src/components/switch/` as the template: component, CSS, unit + axe tests, screen-reader test, stories, and an MDX page in Problem → Solution form with a Keyboard table and What's tested.
+- Every PR that changes the package needs a changeset: `pnpm changeset`.
+- Never mark a manual screen-reader check as "pass" without having run it; "pending" is fine.
+
+### Releasing
+
+Releases are automated with [Changesets](https://github.com/changesets/changesets). Merged changesets open a "Version Packages" PR; merging it publishes to npm and tags `keyline@x.y.z`. The workflow needs an `NPM_TOKEN` repository secret (an npm automation or granular token with publish rights to `keyline`).
+
+## License
+
+[MIT](LICENSE) © Oyinbayode Akinleye
