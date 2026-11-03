@@ -3,9 +3,17 @@
  *
  * Every colour is declared once with light-dark(), so the active theme is
  * decided by `color-scheme` alone: the OS preference by default, or an
- * explicit [data-theme] on any ancestor. Contrast ratios noted beside each
- * pair were measured against both backgrounds; non-text UI colours stay at
- * 3:1 or above (WCAG 1.4.11), text at 4.5:1 or above (WCAG 1.4.3).
+ * explicit [data-theme] on any ancestor. Shadows use light-dark() for their
+ * colour stops for the same reason.
+ *
+ * Two 12-step scales, slate and blue, where the step says what a colour is for:
+ *   1–2   app and subtle backgrounds
+ *   3–5   component fills: rest, hover, active
+ *   6–8   borders and separators; 8 is the strongest, the only one at 3:1
+ *   9–10  solid fills; 9 is the accent, 10 its hover
+ *   11–12 text; 11 secondary, 12 primary
+ * Components should reach for the semantic aliases further down, or for a
+ * step by its role, never for a step because its colour looks right.
  */
 
 :root {
@@ -22,23 +30,57 @@
 
 :root,
 [data-theme] {
-  --kl-color-bg: light-dark(#eef2f7, #04060a);
-  --kl-color-surface: light-dark(#ffffff, #0a0f17);
-  --kl-color-line: light-dark(#c9d3e1, #232d3d);
-  --kl-color-text: light-dark(#0a0f18, #e6ecf5);
-  /* 6.4:1 on bg in both themes */
-  --kl-color-muted: light-dark(#4a5873, #8796ad);
-  /* 5.4:1 / 6.5:1 on bg */
-  --kl-color-accent: light-dark(#1f56e0, #5b8dff);
-  /* text or icons placed on top of the accent; 6.1:1 / 6.5:1 */
-  --kl-color-on-accent: light-dark(#ffffff, #04060a);
-  /* control outlines and "off" states; 5.0:1 / 5.2:1 on bg */
-  --kl-color-slate: light-dark(#56688a, #6f82a3);
-  --kl-color-focus: var(--kl-color-accent);
+  --kl-slate-1: light-dark(#fbfcfe, #04060a);
+  --kl-slate-2: light-dark(#f4f6fa, #0a0f17);
+  --kl-slate-3: light-dark(#eef2f7, #111826);
+  --kl-slate-4: light-dark(#e6ebf3, #172033);
+  --kl-slate-5: light-dark(#dde4ee, #1d2840);
+  --kl-slate-6: light-dark(#c9d3e1, #232d3d);
+  --kl-slate-7: light-dark(#b3c0d3, #2e3a4f);
+  /* Nudged from #93a4bd / #3d4b63 to reach 3:1 on steps 1 and 2 (WCAG 1.4.11). */
+  --kl-slate-8: light-dark(#7e8fab, #50607b);
+  --kl-slate-9: light-dark(#56688a, #6f82a3);
+  --kl-slate-10: light-dark(#4a5b7c, #7d90b0);
+  --kl-slate-11: light-dark(#4a5873, #9aa8bf);
+  --kl-slate-12: light-dark(#0a0f18, #e6ecf5);
 
-  --kl-font-family:
-    system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans', Ubuntu, Cantarell, sans-serif;
-  --kl-font-family-mono: ui-monospace, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+  --kl-blue-1: light-dark(#f7f9ff, #070b16);
+  --kl-blue-2: light-dark(#edf2ff, #0a1226);
+  --kl-blue-3: light-dark(#dfe8ff, #0e1b3d);
+  --kl-blue-4: light-dark(#cfdcff, #102352);
+  --kl-blue-5: light-dark(#bccdff, #142c66);
+  --kl-blue-6: light-dark(#a4bbff, #1a377f);
+  --kl-blue-7: light-dark(#86a3f7, #22459c);
+  --kl-blue-8: light-dark(#5f86ea, #2d57c2);
+  --kl-blue-9: light-dark(#1f56e0, #5b8dff);
+  --kl-blue-10: light-dark(#1a4ac4, #7aa3ff);
+  --kl-blue-11: light-dark(#1d4fcf, #93b3ff);
+  --kl-blue-12: light-dark(#0f2a6b, #dbe6ff);
+
+  /* 3:1 or more on slate-1 in both themes: icons, swatches, borders, large text. */
+  --kl-success: light-dark(#1b9a57, #2fbf71);
+  --kl-warning: light-dark(#b46a00, #f5a524);
+  --kl-danger: light-dark(#d32f2f, #f0504f);
+
+  --kl-color-bg: var(--kl-slate-1);
+  --kl-color-surface: var(--kl-slate-2);
+  --kl-color-line: var(--kl-slate-6);
+  /* 18.7:1 / 17.1:1 on bg */
+  --kl-color-text: var(--kl-slate-12);
+  /* 7.0:1 / 8.4:1 on bg */
+  --kl-color-muted: var(--kl-slate-11);
+  /* 5.9:1 / 6.5:1 on bg */
+  --kl-color-accent: var(--kl-blue-9);
+  /* Dark is blue-1, not blue-12: blue-12 on blue-9 is only 2.5:1. 6.1:1 / 6.3:1. */
+  --kl-color-on-accent: light-dark(#ffffff, var(--kl-blue-1));
+  /* Control outlines and "off" states; 5.5:1 / 5.2:1 on bg. Kept from 0.0.x. */
+  --kl-color-slate: var(--kl-slate-9);
+  --kl-color-focus: var(--kl-blue-9);
+
+  /* The package never ships or sets a font: components take the page's. */
+  --kl-font-family: inherit;
+  --kl-font-mono: ui-monospace, 'JetBrains Mono', SFMono-Regular, Menlo, monospace;
+  --kl-font-family-mono: var(--kl-font-mono);
   --kl-font-size: 1rem;
   --kl-line-height: 1.5;
 
@@ -46,17 +88,47 @@
   --kl-space-2: 0.5rem;
   --kl-space-3: 0.75rem;
   --kl-space-4: 1rem;
+  --kl-space-5: 1.5rem;
+  --kl-space-6: 2rem;
+  --kl-space-7: 3rem;
+  --kl-space-8: 4rem;
 
-  --kl-radius-sm: 0.25rem;
-  --kl-radius-md: 0.5rem;
+  --kl-radius-sm: 4px;
+  --kl-radius-md: 6px;
+  --kl-radius-lg: 10px;
+  --kl-radius-xl: 14px;
   --kl-radius-full: 9999px;
 
+  /*
+   * Dark surfaces read as raised by a lighter top edge, since a black shadow
+   * barely shows on a near-black page; light surfaces get layered shadows.
+   */
+  --kl-shadow-raised:
+    inset 0 1px 0 light-dark(transparent, rgba(230, 236, 245, 0.06)),
+    0 1px 2px light-dark(rgba(10, 15, 24, 0.06), rgba(0, 0, 0, 0.4)),
+    0 2px 6px light-dark(rgba(10, 15, 24, 0.06), transparent);
+  --kl-shadow-floating:
+    inset 0 1px 0 light-dark(transparent, rgba(230, 236, 245, 0.06)),
+    0 12px 32px -8px light-dark(rgba(10, 15, 24, 0.12), rgba(0, 0, 0, 0.6)),
+    0 2px 6px light-dark(rgba(10, 15, 24, 0.06), transparent),
+    0 24px 48px -16px light-dark(rgba(10, 15, 24, 0.12), transparent);
+
+  /*
+   * A 2px gap in the background colour, then 2px of accent, so the ring
+   * separates from any fill. Applied as box-shadow, which forced-colours mode
+   * removes; pair it with a transparent outline, which that mode repaints.
+   */
+  --kl-focus-ring: 0 0 0 2px var(--kl-color-bg), 0 0 0 4px var(--kl-color-focus);
   --kl-focus-ring-width: 2px;
   --kl-focus-ring-offset: 2px;
 
   --kl-duration-fast: 120ms;
   --kl-duration-base: 200ms;
-  --kl-easing: cubic-bezier(0.2, 0, 0, 1);
+  --kl-duration-slow: 320ms;
+  --kl-ease: cubic-bezier(0.2, 0, 0, 1);
+  /* Overshoots by about 4%, so only for movement with room to spare. */
+  --kl-ease-spring: cubic-bezier(0.34, 1.3, 0.64, 1);
+  --kl-easing: var(--kl-ease);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -64,6 +136,7 @@
   [data-theme] {
     --kl-duration-fast: 0ms;
     --kl-duration-base: 0ms;
+    --kl-duration-slow: 0ms;
   }
 }
 

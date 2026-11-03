@@ -31,6 +31,6 @@
     "name": "keyline/styles.css",
     "path": "dist/styles.css",
     "rolldown": false,
-    "limit": "1.2 kB"
+    "limit": "1.8 kB"
   }
 ]
