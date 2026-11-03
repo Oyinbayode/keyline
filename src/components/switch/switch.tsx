@@ -60,7 +60,11 @@ export function Switch({
   const composedRef = useMemo(() => composeRefs(buttonRef, ref), [ref]);
 
   useEffect(() => {
-    if (process.env.NODE_ENV === 'production' || !buttonRef.current) return;
+    // Inline, not a helper: minifiers only drop this block in production when
+    // they can see the whole condition. The typeof check stops the ESM build
+    // throwing when loaded unbundled in a browser, where `process` is undefined.
+    if (typeof process === 'undefined' || process.env.NODE_ENV === 'production') return;
+    if (!buttonRef.current) return;
     if (!hasAccessibleName(buttonRef.current)) {
       console.warn(
         'Keyline: Switch has no accessible name, so screen readers will announce only "switch". Wrap it in a <label>, point a <label htmlFor> at its id, or pass aria-label / aria-labelledby.',

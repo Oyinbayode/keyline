@@ -34,7 +34,10 @@ export function useControllableState<T>({
 
   const wasControlled = useRef(isControlled);
   useEffect(() => {
-    if (process.env.NODE_ENV !== 'production' && wasControlled.current !== isControlled) {
+    // Same guard as Switch's warning: inline so production builds drop it, and
+    // safe when there is no `process` global.
+    const isDev = typeof process !== 'undefined' && process.env.NODE_ENV !== 'production';
+    if (isDev && wasControlled.current !== isControlled) {
       const from = wasControlled.current ? 'controlled' : 'uncontrolled';
       const to = isControlled ? 'controlled' : 'uncontrolled';
       console.warn(
