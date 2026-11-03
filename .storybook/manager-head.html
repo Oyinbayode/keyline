@@ -31,10 +31,21 @@
     font-synthesis: none;
   }
 
+  :root {
+    --kl-manager-accent: #5b8dff;
+    --kl-manager-text: #e6ecf5;
+  }
+
+  /* Set by manager.ts when the Theme toolbar is light. */
+  :root[data-kl-theme='light'] {
+    --kl-manager-accent: #1f56e0;
+    --kl-manager-text: #0a0f18;
+  }
+
   .sidebar-header a[href='https://github.com/Oyinbayode/keyline'] {
     padding-block-end: 4px;
-    border-block-end: 1px solid #5b8dff;
-    color: #e6ecf5;
+    border-block-end: 1px solid var(--kl-manager-accent);
+    color: var(--kl-manager-text);
     font-family: 'Instrument Sans', system-ui, sans-serif;
     font-size: 18px;
     font-weight: 600;
@@ -45,16 +56,16 @@
   /* Selection is a 2px accent rule on the inline start, not a filled row. */
   .sidebar-container .sidebar-item[data-selected='true'] {
     background: transparent;
-    box-shadow: inset 2px 0 0 #5b8dff;
-    color: #e6ecf5;
+    box-shadow: inset 2px 0 0 var(--kl-manager-accent);
+    color: var(--kl-manager-text);
     font-weight: 500;
   }
 
   .sidebar-container .sidebar-item[data-selected='true'] svg {
-    color: #5b8dff;
+    color: var(--kl-manager-accent);
   }
 
   [dir='rtl'] .sidebar-container .sidebar-item[data-selected='true'] {
-    box-shadow: inset -2px 0 0 #5b8dff;
+    box-shadow: inset -2px 0 0 var(--kl-manager-accent);
   }
 </style>

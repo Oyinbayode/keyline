@@ -235,7 +235,7 @@ body,
   line-height: 26px;
 }
 
-.sbdocs-content li {
+.sbdocs-content > :is(ul, ol) > li {
   font-size: 16px;
   line-height: 26px;
 }
@@ -403,7 +403,8 @@ body,
 
 .kl-datasheet {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+  /* 120px fits five cells from a 600px column up, so there is never an orphan on a second row. */
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
   margin: 0 0 var(--kl-space-6);
   border-block: 1px solid var(--kl-slate-8);
   font-variant-numeric: tabular-nums;
@@ -432,9 +433,22 @@ body,
 .sbdocs .kl-datasheet dd {
   margin: 0;
   padding: 0;
+  overflow-wrap: anywhere;
   color: var(--kl-color-text);
   font-size: 14px;
   line-height: 22px;
+}
+
+/*
+ * Storybook keeps inline code on one line; in a narrow cell it must wrap
+ * instead of spilling. The mono face marks it as code, so it drops the chip.
+ */
+.sbdocs .kl-datasheet dd code {
+  padding: 0;
+  border: 0;
+  background: none;
+  white-space: normal;
+  overflow-wrap: break-word;
 }
 
 /*
@@ -664,7 +678,7 @@ body,
 }
 
 .kl-token-panel {
-  padding: var(--kl-space-5) var(--kl-space-5) var(--kl-space-6);
+  padding: var(--kl-space-5) var(--kl-space-4) var(--kl-space-6);
   border-block: 1px solid var(--kl-slate-8);
   background: var(--kl-color-bg);
   color: var(--kl-color-text);
@@ -681,33 +695,50 @@ body,
   text-transform: uppercase;
 }
 
+.kl-scale-group {
+  container-type: inline-size;
+}
+
+/*
+ * One unbroken 12-cell strip, so the scale reads as a ramp. The hex caption
+ * drops its "#" so six 12px mono characters (43px, plus 2px air) fit a cell;
+ * only below 12 x 45px (phones) does the strip fold into two rows rather than clip.
+ */
 .kl-scale {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(4.5rem, 1fr));
-  gap: var(--kl-space-3) var(--kl-space-1);
+  grid-template-columns: repeat(12, minmax(0, 1fr));
   margin: 0 0 var(--kl-space-5);
   padding: 0;
   list-style: none;
 }
 
+@container (width < 544px) {
+  .kl-scale {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    row-gap: var(--kl-space-3);
+  }
+}
+
 .sbdocs .kl-scale-step {
   display: grid;
-  gap: var(--kl-space-1);
   margin: 0;
-  color: var(--kl-color-text);
-  font-family: var(--kl-docs-mono);
-  font-size: 11px;
-  line-height: 16px;
+  color: var(--kl-slate-11);
+  font-family: var(--kl-font-mono);
+  font-size: 12px;
+  line-height: 18px;
+  letter-spacing: 0;
   font-variant-numeric: tabular-nums;
 }
 
-.kl-scale-chip {
-  block-size: 2.5rem;
-  border: 1px solid var(--kl-color-line);
+/* Storybook styles bare spans; the captions must keep the mono Caption style. */
+.sbdocs .kl-scale-step > span {
+  padding-inline-end: 2px;
+  font: inherit;
 }
 
-.kl-scale-hex {
-  color: var(--kl-color-muted);
+.kl-scale-chip {
+  block-size: 36px;
+  margin-block-end: var(--kl-space-1);
 }
 
 .kl-token-list {

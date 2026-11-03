@@ -96,7 +96,7 @@ function ScaleStep({ scale, step }: { scale: string; step: number }) {
         style={{ backgroundColor: `var(--kl-${scale}-${String(step)})` }}
       />
       <span>{step}</span>
-      <span className="kl-scale-hex">{hex}</span>
+      <span>{hex.slice(1)}</span>
     </li>
   );
 }
@@ -114,7 +114,7 @@ export function ScaleThemes() {
           aria-label={`${theme} theme scales`}
         >
           {['slate', 'blue'].map((scale) => (
-            <div key={scale}>
+            <div key={scale} className="kl-scale-group">
               <h3>
                 {scale} · {theme}
               </h3>
