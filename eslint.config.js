@@ -20,6 +20,10 @@ export default tseslint.config(
     rules: {
       '@typescript-eslint/consistent-type-imports': 'error',
       '@typescript-eslint/no-import-type-side-effects': 'error',
+      'jsx-a11y/label-has-associated-control': [
+        'error',
+        { assert: 'either', controlComponents: ['Switch'], depth: 3 },
+      ],
       'no-restricted-syntax': [
         'error',
         { selector: 'TSEnumDeclaration', message: 'Use a union of string literals instead of enum.' },
