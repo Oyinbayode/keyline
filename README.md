@@ -69,16 +69,20 @@ The stylesheet is driven entirely by CSS custom properties. It follows the OS co
 <div data-theme="dark">…</div>
 ```
 
-Rebrand by overriding tokens:
+Colours come from two 12-step scales, `--kl-slate-1` … `--kl-slate-12` and `--kl-blue-1` … `--kl-blue-12`, each declared once with `light-dark()`. The step says what a colour is for: 1–2 backgrounds, 3–5 component fills (rest, hover, active), 6–8 borders (8 is the strongest, 3:1 on the background), 9–10 solid fills (9 is the accent, 10 its hover), 11–12 text (4.5:1 or more on steps 1–2). `--kl-success`, `--kl-warning`, and `--kl-danger` cover status. The semantic aliases from 0.0.x (`--kl-color-bg`, `--kl-color-text`, `--kl-color-accent`, …) still work and now point at scale steps.
+
+Rebrand by overriding the accent steps, or an alias:
 
 ```css
 :root {
-  --kl-color-accent: light-dark(#0f7b5f, #3ccf9f);
-  --kl-focus-ring-width: 3px;
+  --kl-blue-9: light-dark(#0f7b5f, #3ccf9f);
+  --kl-blue-10: light-dark(#0c6a52, #5bd9b0);
 }
 ```
 
-`keyline/tokens.css` ships the tokens alone if you want to style components yourself. All tokens are listed on the [Tokens page](https://oyinbayode.github.io/keyline/?path=/docs/tokens--docs). System fonts only; no web fonts are loaded.
+There are also tokens for space (`--kl-space-1` … `--kl-space-8`), radius, depth (`--kl-shadow-raised`, `--kl-shadow-floating`), motion (`--kl-duration-*`, which drop to `0ms` under reduced motion, `--kl-ease`, `--kl-ease-spring`), and the focus ring (`--kl-focus-ring`).
+
+Keyline never ships or sets a font: `--kl-font-family` is `inherit`, so components use your page's font. `keyline/tokens.css` ships the tokens alone if you want to style components yourself. All tokens are shown live on the [Tokens page](https://oyinbayode.github.io/keyline/?path=/docs/tokens--docs).
 
 ## Accessibility statement
 

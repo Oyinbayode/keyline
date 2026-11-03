@@ -1,15 +1,25 @@
 import { ArgTypes, Canvas, Meta } from '@storybook/addon-docs/blocks';
-import { Status } from '../../../docs/blocks';
+import { Datasheet, ProofSheet, Status } from '../../../docs/blocks';
 import * as SwitchStories from './switch.stories';
 
 <Meta of={SwitchStories} />
 
 # Switch
 
-<p className="kl-lede">
+<div className="kl-lede">
   An on/off control for settings that take effect immediately. Follows the{' '}
   <a href="https://www.w3.org/WAI/ARIA/apg/patterns/switch/">WAI-ARIA APG Switch pattern</a>.
-</p>
+</div>
+
+<Datasheet
+  entries={[
+    { label: 'Pattern', value: 'APG Switch' },
+    { label: 'Element', value: <code>{'<button role="switch">'}</code> },
+    { label: 'Size', value: '624 B' },
+    { label: 'Automated tests', value: '6/6 automated' },
+    { label: 'Screen readers', value: 'Orca and TalkBack pending' },
+  ]}
+/>
 
 ```tsx
 import { Switch } from 'keyline';
@@ -40,7 +50,7 @@ Keyline's `Switch` renders a native `<button type="button" role="switch" aria-ch
 - **Name from a real label.** Wrap it in a `<label>`, point a `<label htmlFor>` at its `id`, or pass `aria-label` / `aria-labelledby`. Buttons are labelable elements, so clicking the label text toggles the switch. In development it warns in the console if no name is found.
 - **State in the accessibility tree.** `aria-checked` is always `"true"` or `"false"`; the thumb is `aria-hidden`.
 - **State shown three ways.** Track fill, thumb colour, and thumb position all change. In forced-colours mode the switch repaints itself with system colours (`Highlight`, `ButtonText`, `GrayText`) rather than letting the browser flatten it.
-- **Visible focus.** A `:focus-visible` outline from `--kl-color-focus` with a 2px offset, so it never merges with the track.
+- **Visible focus.** A `:focus-visible` double ring from `--kl-focus-ring`: a 2px gap in the page colour, then 2px of `--kl-color-focus`, so it never merges with the track. A transparent outline stays underneath for forced-colours mode, which drops box shadows.
 - **Reduced motion and RTL.** Transitions read `--kl-duration-base`, which drops to `0ms` under `prefers-reduced-motion: reduce`. The thumb's travel flips under `:dir(rtl)`, and spacing uses logical properties.
 - **Truly disabled.** `disabled` sets the native attribute: out of the tab order, not clickable, announced as "disabled".
 - **Forms.** Give it a `name` and it submits `name=value` while on, nothing while off or disabled, like a checkbox.
@@ -50,27 +60,39 @@ Keyline's `Switch` renders a native `<button type="button" role="switch" aria-ch
 
 ### Labelled by a wrapping label
 
-<Canvas of={SwitchStories.WrappingLabel} />
+<ProofSheet figure={1} title="Wrapping label">
+  <Canvas of={SwitchStories.WrappingLabel} />
+</ProofSheet>
 
 ### States
 
-<Canvas of={SwitchStories.States} />
+<ProofSheet figure={2} title="States">
+  <Canvas of={SwitchStories.States} />
+</ProofSheet>
 
 ### Labelled by `htmlFor` and `aria-labelledby`
 
-<Canvas of={SwitchStories.LabelledByElsewhere} />
+<ProofSheet figure={3} title="htmlFor and aria-labelledby">
+  <Canvas of={SwitchStories.LabelledByElsewhere} />
+</ProofSheet>
 
 ### Controlled
 
-<Canvas of={SwitchStories.Controlled} />
+<ProofSheet figure={4} title="Controlled">
+  <Canvas of={SwitchStories.Controlled} />
+</ProofSheet>
 
 ### In a form
 
-<Canvas of={SwitchStories.InAForm} />
+<ProofSheet figure={5} title="In a form">
+  <Canvas of={SwitchStories.InAForm} />
+</ProofSheet>
 
 ### Right to left
 
-<Canvas of={SwitchStories.RightToLeft} />
+<ProofSheet figure={6} title="Right to left">
+  <Canvas of={SwitchStories.RightToLeft} />
+</ProofSheet>
 
 ## Props
 
@@ -129,13 +151,13 @@ Run against the [Keyboard test fixture](?path=/story/components-switch--keyboard
 
 ## Bundle size
 
-Measured by `size-limit` (minified + brotli, React excluded) for v0.0.1:
+Measured by `size-limit` (minified + brotli, React excluded) for v0.1.0:
 
-| Import                                         | Size  |
-| ---------------------------------------------- | ----- |
-| `import { Switch } from 'keyline/switch'`      | 624 B |
-| `import { Switch } from 'keyline'`             | 624 B |
-| `keyline/styles.css` (tokens + all components) | 979 B |
+| Import                                         | Size    |
+| ---------------------------------------------- | ------- |
+| `import { Switch } from 'keyline/switch'`      | 624 B   |
+| `import { Switch } from 'keyline'`             | 624 B   |
+| `keyline/styles.css` (tokens + all components) | 1.56 kB |
 
 ## Known limitations
 

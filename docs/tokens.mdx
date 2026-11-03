@@ -1,14 +1,22 @@
 import { Meta } from '@storybook/addon-docs/blocks';
-import { TokenThemes } from './blocks';
+import {
+  DepthSamples,
+  FocusRingSamples,
+  RadiusScale,
+  ScaleThemes,
+  SpaceScale,
+  TokenThemes,
+  TypeSpecimens,
+} from './blocks';
 
 <Meta title="Tokens" />
 
 # Tokens
 
-<p className="kl-lede">
-  Every colour, radius, duration, and focus style in Keyline is a CSS custom property. Change the
-  tokens and every component follows.
-</p>
+<div className="kl-lede">
+  Every colour, space, radius, shadow, duration, and focus style in Keyline is a CSS custom
+  property. Change the tokens and every component follows.
+</div>
 
 ## Problem
 
@@ -16,17 +24,49 @@ Theming a component library usually means fighting it: overriding deeply nested 
 
 ## Solution
 
-- **One declaration per colour.** Each token is written once with `light-dark()`, so the theme follows `color-scheme`: the OS preference by default, or `data-theme="light"` / `data-theme="dark"` on any ancestor.
-- **Contrast is part of the token.** Text colours are at least 4.5:1 against the background in both themes; control outlines and states (`--kl-color-slate`, `--kl-color-accent`) are at least 3:1 (WCAG 1.4.3 and 1.4.11).
+- **One declaration per colour.** Each token is written once with `light-dark()`, so the theme follows `color-scheme`: the OS preference by default, or `data-theme="light"` / `data-theme="dark"` on any ancestor. Shadows use `light-dark()` for their colour stops, so they switch too.
+- **Scales with jobs.** Two 12-step scales, slate and blue, where the step number says what the colour is for: 1–2 backgrounds, 3–5 component fills (rest, hover, active), 6–8 borders (8 is the strongest), 9–10 solid fills (9 is the accent, 10 its hover), 11–12 text.
+- **Contrast is part of the token.** Steps 11 and 12 are at least 4.5:1 on steps 1 and 2 in both themes; step 8 and the accent are at least 3:1 (WCAG 1.4.3 and 1.4.11).
 - **Motion is a token.** `--kl-duration-*` drops to `0ms` under `prefers-reduced-motion: reduce`, so no component needs its own media query.
-- **Forced colours are a token too.** Under `forced-colors: active` the colour tokens point at system colours (`Canvas`, `CanvasText`, `Highlight`, `ButtonText`), so components that must keep a colour cue repaint in the user's palette.
+- **Forced colours are a token too.** Under `forced-colors: active` the semantic colour tokens point at system colours (`Canvas`, `CanvasText`, `Highlight`, `ButtonText`), so components that must keep a colour cue repaint in the user's palette.
+- **No font.** `--kl-font-family` is `inherit`: components take your page's font, and the package never loads one. These docs use Instrument Sans and JetBrains Mono, served from this site.
 - **Logical properties.** Spacing and sizing use `inline` / `block`, so right-to-left layouts need no overrides.
 
-## Both themes
+## Scales
 
-Values below are read back from the browser, not copied from the stylesheet.
+Twelve steps per scale, per theme. Values are read back from the browser, not copied from the stylesheet.
+
+<ScaleThemes />
+
+## Semantic colours
+
+The aliases components use, and the three status colours. Success, warning, and danger are at least 3:1 on the background: use them for icons, swatches, and borders, with the words in text colour.
 
 <TokenThemes />
+
+## Type
+
+The docs type scale. It is not shipped in the package; it is here so the documentation has one rhythm. Three weights only: 400 for body, 500 for labels, 600 for headings. Lowercase text is never letter-spaced; only the uppercase mono label is tracked.
+
+<TypeSpecimens />
+
+## Space and radius
+
+<SpaceScale />
+
+<RadiusScale />
+
+## Depth
+
+On dark surfaces a black shadow barely shows, so raised surfaces get a faint light rim on their top edge. Light surfaces get layered shadows instead.
+
+<DepthSamples />
+
+## Focus ring
+
+`--kl-focus-ring` is two box shadows: a 2px gap in the page colour, then 2px of `--kl-color-focus`, so the ring stands clear of any fill. Forced-colours mode removes box shadows, so components keep a transparent `outline` underneath, which that mode paints in the system highlight colour.
+
+<FocusRingSamples />
 
 ## Using them
 
@@ -37,30 +77,34 @@ Values below are read back from the browser, not copied from the stylesheet.
 /* Force a theme for a subtree */
 <div data-theme="light">…</div>
 
-/* Rebrand */
+/* Rebrand: swap the accent steps */
 :root {
-  --kl-color-accent: light-dark(#0f7b5f, #3ccf9f);
-  --kl-radius-full: 0.375rem;
+  --kl-blue-9: light-dark(#0f7b5f, #3ccf9f);
+  --kl-blue-10: light-dark(#0c6a52, #5bd9b0);
 }
 ```
 
 `keyline/tokens.css` ships the tokens alone if you are styling components yourself.
 
-| Token                                                  | Purpose                                       |
-| ------------------------------------------------------ | --------------------------------------------- |
-| `--kl-color-bg`                                        | Page background                               |
-| `--kl-color-surface`                                   | Raised surfaces (menus, dialogs)              |
-| `--kl-color-line`                                      | Decorative borders and dividers               |
-| `--kl-color-text`                                      | Body text                                     |
-| `--kl-color-muted`                                     | Secondary text                                |
-| `--kl-color-accent`                                    | Selected / on state, links, focus             |
-| `--kl-color-on-accent`                                 | Text and icons placed on the accent           |
-| `--kl-color-slate`                                     | Control outlines and off state                |
-| `--kl-color-focus`                                     | Focus ring colour (defaults to accent)        |
-| `--kl-focus-ring-width`                                | Focus ring thickness                          |
-| `--kl-focus-ring-offset`                               | Gap between control and focus ring            |
-| `--kl-duration-fast`, `--kl-duration-base`             | Transition durations (0 under reduced motion) |
-| `--kl-easing`                                          | Transition easing                             |
-| `--kl-radius-sm`, `--kl-radius-md`, `--kl-radius-full` | Corner radii                                  |
-| `--kl-space-1` … `--kl-space-4`                        | Spacing scale (0.25rem steps)                 |
-| `--kl-font-family`, `--kl-font-family-mono`            | System font stacks; no web fonts required     |
+| Token                                          | Purpose                                              |
+| ---------------------------------------------- | ---------------------------------------------------- |
+| `--kl-slate-1` … `--kl-slate-12`               | Neutral scale                                        |
+| `--kl-blue-1` … `--kl-blue-12`                 | Accent scale                                         |
+| `--kl-success`, `--kl-warning`, `--kl-danger`  | Status colours, 3:1 or more on the background        |
+| `--kl-color-bg`                                | Page background (slate-1)                            |
+| `--kl-color-surface`                           | Raised surfaces: menus, dialogs (slate-2)            |
+| `--kl-color-line`                              | Decorative borders and dividers (slate-6)            |
+| `--kl-color-text`                              | Body text (slate-12)                                 |
+| `--kl-color-muted`                             | Secondary text (slate-11)                            |
+| `--kl-color-accent`                            | Selected / on state, links, focus (blue-9)           |
+| `--kl-color-on-accent`                         | Text and icons placed on the accent                  |
+| `--kl-color-slate`                             | Control outlines (slate-9, kept from 0.0.x)          |
+| `--kl-color-focus`                             | Focus ring colour (blue-9)                           |
+| `--kl-focus-ring`                              | The double focus ring, as a box shadow               |
+| `--kl-shadow-raised`, `--kl-shadow-floating`   | Depth for raised and floating surfaces               |
+| `--kl-duration-fast`, `-base`, `-slow`         | 120, 200, 320ms; 0 under reduced motion              |
+| `--kl-ease`, `--kl-ease-spring`                | Standard easing, and a slight overshoot for movement |
+| `--kl-space-1` … `--kl-space-8`                | 4, 8, 12, 16, 24, 32, 48, 64px                       |
+| `--kl-radius-sm`, `-md`, `-lg`, `-xl`, `-full` | 4, 6, 10, 14, 9999px                                 |
+| `--kl-font-family`                             | `inherit`: components use your page's font           |
+| `--kl-font-mono`                               | Monospace stack; no font file is loaded              |

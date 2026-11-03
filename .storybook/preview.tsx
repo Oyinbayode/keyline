@@ -1,7 +1,10 @@
+import { DocsContainer } from '@storybook/addon-docs/blocks';
 import type { Decorator, Preview } from '@storybook/react-vite';
+import type { ComponentProps } from 'react';
 import '../src/styles/index.css';
 import './docs.css';
-import { keylineTheme } from './theme';
+import { useDocsTheme } from './docs-theme';
+import { keylineDark, keylineLight } from './theme';
 
 const withThemeAndDirection: Decorator = (Story, context) => {
   const theme: unknown = context.globals.theme;
@@ -16,6 +19,12 @@ const withThemeAndDirection: Decorator = (Story, context) => {
     </div>
   );
 };
+
+// Storybook's own docs blocks (ArgTypes, source) are themed in JS, so they need the matching object.
+function KeylineDocsContainer(props: ComponentProps<typeof DocsContainer>) {
+  const theme = useDocsTheme();
+  return <DocsContainer {...props} theme={theme === 'light' ? keylineLight : keylineDark} />;
+}
 
 const preview: Preview = {
   decorators: [withThemeAndDirection],
@@ -50,7 +59,7 @@ const preview: Preview = {
   parameters: {
     layout: 'fullscreen',
     controls: { expanded: true },
-    docs: { theme: keylineTheme },
+    docs: { container: KeylineDocsContainer },
     a11y: { test: 'error' },
     options: {
       storySort: { order: ['Introduction', 'Tokens', 'Components'] },

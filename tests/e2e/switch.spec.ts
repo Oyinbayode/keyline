@@ -7,8 +7,8 @@ function openStory(page: Page, storyName: string) {
 
 function focusRing(locator: Locator) {
   return locator.evaluate((element) => {
-    const { outlineStyle, outlineWidth } = getComputedStyle(element);
-    return { outlineStyle, outlineWidth };
+    const { outlineStyle, outlineWidth, boxShadow } = getComputedStyle(element);
+    return { outlineStyle, outlineWidth, boxShadow };
   });
 }
 
@@ -80,11 +80,16 @@ test.describe('Switch focus and display preferences', () => {
     const wifi = page.getByRole('switch', { name: 'Wi-Fi' });
 
     await wifi.click();
-    expect((await focusRing(wifi)).outlineStyle).toBe('none');
+    const afterClick = await focusRing(wifi);
+    expect(afterClick.outlineStyle).toBe('none');
 
     await page.keyboard.press('Shift+Tab');
     await page.keyboard.press('Tab');
-    expect(await focusRing(wifi)).toEqual({ outlineStyle: 'solid', outlineWidth: '2px' });
+    const afterTab = await focusRing(wifi);
+    // The visible ring is a box-shadow; the transparent outline is what forced-colours mode paints.
+    expect(afterTab).toMatchObject({ outlineStyle: 'solid', outlineWidth: '2px' });
+    expect(afterTab.boxShadow).not.toBe(afterClick.boxShadow);
+    expect(afterTab.boxShadow).toContain('0px 0px 0px 4px');
   });
 
   test('drops the thumb animation when reduced motion is requested', async ({ page }) => {

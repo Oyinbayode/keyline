@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createRef, useState } from 'react';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { axe } from 'vitest-axe';
 import { Switch } from './switch';
 
@@ -257,5 +257,22 @@ describe('Switch', () => {
 
       expect(await axe(container)).toHaveNoViolations();
     });
+  });
+});
+
+describe('Switch without a process global', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.resetModules();
+  });
+
+  // The ESM build loaded unbundled in a browser has no `process` to read NODE_ENV from.
+  it('imports and renders instead of throwing', async () => {
+    vi.stubGlobal('process', undefined);
+
+    const { Switch: UnbundledSwitch } = await import('./switch');
+    render(<UnbundledSwitch aria-label="Wi-Fi" />);
+
+    expect(getSwitch('Wi-Fi')).toBeInTheDocument();
   });
 });
