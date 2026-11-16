@@ -7,3 +7,5 @@ export { getTabbableElements } from './tabbable';
 export { useControllableState } from './use-controllable-state';
 export type { UseControllableStateOptions } from './use-controllable-state';
 export { useId } from './use-id';
+export { useRovingFocus } from './use-roving-focus';
+export type { RovingOrientation, UseRovingFocusOptions } from './use-roving-focus';

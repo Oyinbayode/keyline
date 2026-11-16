@@ -1,0 +1,203 @@
+import { ArgTypes, Canvas, Meta } from '@storybook/addon-docs/blocks';
+import { Datasheet, ProofSheet, Status } from '../../../docs/blocks';
+import * as TabsStories from './tabs.stories';
+
+<Meta of={TabsStories} />
+
+# Tabs
+
+<div className="kl-lede">
+  Layered sections of content where one panel shows at a time. Follows the{' '}
+  <a href="https://www.w3.org/WAI/ARIA/apg/patterns/tabs/">WAI-ARIA APG Tabs pattern</a>.
+</div>
+
+<Datasheet
+  entries={[
+    { label: 'Pattern', value: 'APG Tabs' },
+    { label: 'Element', value: <code>{'<button role="tab">'}</code> },
+    { label: 'Size', value: '1.59 kB' },
+    { label: 'Automated tests', value: '6/6 automated' },
+    { label: 'Screen readers', value: 'Orca and TalkBack pending' },
+  ]}
+/>
+
+```tsx
+import { Tabs } from '@oyinbayode/keyline/tabs';
+import '@oyinbayode/keyline/styles.css';
+
+<Tabs.Root defaultValue="account">
+  <Tabs.List aria-label="Settings">
+    <Tabs.Tab value="account">Account</Tabs.Tab>
+    <Tabs.Tab value="password">Password</Tabs.Tab>
+  </Tabs.List>
+  <Tabs.Panel value="account">…</Tabs.Panel>
+  <Tabs.Panel value="password">…</Tabs.Panel>
+</Tabs.Root>;
+```
+
+## Problem
+
+Tabs look like a row of buttons over a box, so that is how they are usually built. Each of these ships every week:
+
+- **`<div>` tabs with click handlers only.** Nothing to focus and nothing to press. Keyboard and switch users can see the other panels but never reach them, and screen readers announce the labels as plain text.
+- **Every tab in the tab order.** Tabs built as plain buttons each take a <kbd>Tab</kbd> stop. Ten tabs means ten key presses before reaching the panel, and the "tab list" is never announced as one control.
+- **`aria-selected` missing or on the wrong element.** Selection lives in a CSS class, or `aria-selected` sits on the wrapping `<li>` and not on the element with `role="tab"`. The screen reader says "tab" and never "selected", so nobody can tell which panel they are in.
+- **Panels not associated with their tabs.** Without `aria-controls` and `aria-labelledby`, the panel is an unnamed region. Arriving in it from <kbd>Tab</kbd>, a screen reader user does not hear which section they are reading.
+- **Arrow keys not implemented, or not flipped in RTL.** The APG's main interaction is missing, so screen reader users who press the arrows (as their software tells them to) get nothing. Where arrows do work, <kbd>←</kbd> often still means "previous" in Arabic and Hebrew layouts, where the previous tab is on the right.
+- **Hidden panels still read.** Inactive panels hidden with `opacity: 0` or moved off-screen stay in the accessibility tree. A screen reader reads all of them in a row and a keyboard user tabs into invisible links.
+- **Selection shown by colour only.** A tinted background or a coloured label is the only cue. It disappears in Windows High Contrast, where the browser repaints the colours, and for users who cannot tell the two colours apart.
+
+## Solution
+
+`Tabs.Tab` is a native `<button type="button" role="tab">` inside a `role="tablist"`, and each `Tabs.Panel` is a `role="tabpanel"` wired to its tab. Keyboard behaviour comes from the shared `useRovingFocus` primitive.
+
+- **One tab stop for the list.** Only the selected tab has `tabIndex={0}`; the rest are `-1`. <kbd>Tab</kbd> lands on the selected tab, and the next <kbd>Tab</kbd> goes to its panel, which is focusable (`tabIndex={0}`) as the APG recommends.
+- **Arrow keys, in reading direction.** <kbd>←</kbd> <kbd>→</kbd> move between tabs (<kbd>↑</kbd> <kbd>↓</kbd> when `orientation="vertical"`), wrapping at the ends and skipping disabled tabs. <kbd>Home</kbd> and <kbd>End</kbd> jump to the ends. Under `dir="rtl"`, <kbd>→</kbd> moves towards the end of the line, which is to the left. The arrows are handled even at the ends, so they never scroll the page.
+- **Automatic or manual activation.** By default a tab is selected as soon as it gets focus, which is right when panels render instantly. If a panel is slow (it fetches or renders a lot), pass `activationMode="manual"`: arrows only move focus, and <kbd>Enter</kbd> or <kbd>Space</kbd> selects.
+- **State on the right element.** `aria-selected` is on each `role="tab"` button, always `"true"` or `"false"`. Each tab has `aria-controls` pointing to its panel's id, and each panel has `aria-labelledby` pointing to its tab, so arriving in a panel announces "Account, tab panel". The ids are generated; you only supply `value`.
+- **Inactive panels really hidden.** Inactive panels get the `hidden` attribute, which takes them out of the layout, the tab order and the accessibility tree. Their content is not rendered unless you pass `keepMounted`, and kept content stays hidden.
+- **Selection shown by shape.** The selected tab has a 2px keyline (a real border, on the inline-start edge when vertical) over the list's 1px hairline, and its text changes from slate-11 to slate-12. In forced-colours mode the tabs repaint themselves with system colours: the keyline turns `Highlight` and unselected borders disappear.
+- **Selection never lost.** If the selected tab becomes disabled or is removed, the nearest enabled tab is selected instead (the one that slides into its place, otherwise the one before it) and `onValueChange` reports it. With no `defaultValue`, the first enabled tab starts selected.
+- **A name for the list.** In development, `Tabs.List` warns if it has neither `aria-label` nor `aria-labelledby`.
+- **Controlled or uncontrolled.** Pass `value` + `onValueChange` to own the state, or `defaultValue` to let the tabs own it.
+
+## Examples
+
+### Horizontal
+
+<ProofSheet figure={1} title="Horizontal">
+  <Canvas of={TabsStories.Horizontal} />
+</ProofSheet>
+
+### Vertical
+
+<ProofSheet figure={2} title="Vertical">
+  <Canvas of={TabsStories.Vertical} />
+</ProofSheet>
+
+### Manual activation
+
+Arrow keys move focus only. Press <kbd>Enter</kbd> or <kbd>Space</kbd> to show the focused tab's panel.
+
+<ProofSheet figure={3} title="Manual activation">
+  <Canvas of={TabsStories.ManualActivation} />
+</ProofSheet>
+
+### Disabled tab
+
+<ProofSheet figure={4} title="Disabled tab">
+  <Canvas of={TabsStories.DisabledTab} />
+</ProofSheet>
+
+### Controlled
+
+<ProofSheet figure={5} title="Controlled">
+  <Canvas of={TabsStories.Controlled} />
+</ProofSheet>
+
+### Keep inactive panels mounted
+
+The draft panel keeps its text while hidden. Its panel opts out of the tab sequence (`tabIndex={-1}`) because the textarea inside is already a tab stop.
+
+<ProofSheet figure={6} title="Keep mounted">
+  <Canvas of={TabsStories.KeepMounted} />
+</ProofSheet>
+
+### Right to left
+
+<ProofSheet figure={7} title="Right to left">
+  <Canvas of={TabsStories.RightToLeft} />
+</ProofSheet>
+
+## Props
+
+`Tabs.Root` renders a `<div>`, `Tabs.List` a `<div role="tablist">`, `Tabs.Tab` a `<button>`, and `Tabs.Panel` a `<div role="tabpanel">`. Each part passes other props (`className`, `style`, `aria-*`, `data-*`, event handlers, `ref`) to its element. The component owns `role`, `id`, `aria-selected`, `aria-controls`, `aria-labelledby`, `hidden`, and the tabs' `tabIndex`. An `onClick` on a tab that calls `event.preventDefault()` cancels the selection.
+
+Styling hooks: `data-state="active" | "inactive"` on tabs and panels, `data-disabled` on disabled tabs, and `data-orientation` on every part.
+
+<ArgTypes of={TabsStories} />
+
+| Part         | Prop          | Type                          | Default            |
+| ------------ | ------------- | ----------------------------- | ------------------ |
+| `Tabs.Tab`   | `value`       | `string`                      | (required)         |
+| `Tabs.Tab`   | `disabled`    | `boolean`                     | `false`            |
+| `Tabs.Panel` | `value`       | `string`                      | (required)         |
+| `Tabs.Panel` | `keepMounted` | `boolean`                     | `false`            |
+| `Tabs.Panel` | `tabIndex`    | `number`                      | `0`                |
+| `Tabs.List`  | `aria-label`  | `string` or `aria-labelledby` | (warns if neither) |
+
+## Keyboard
+
+| Key                                 | Action                                                                                                |
+| ----------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| <kbd>Tab</kbd>                      | Into the list: focuses the selected tab. From a tab: moves to its panel.                              |
+| <kbd>Shift</kbd> + <kbd>Tab</kbd>   | From the panel: back to the selected tab.                                                             |
+| <kbd>→</kbd> / <kbd>←</kbd>         | Next / previous tab, wrapping and skipping disabled tabs. Swapped under `dir="rtl"`. Horizontal only. |
+| <kbd>↓</kbd> / <kbd>↑</kbd>         | Next / previous tab. Vertical only.                                                                   |
+| <kbd>Home</kbd> / <kbd>End</kbd>    | First / last enabled tab.                                                                             |
+| <kbd>Enter</kbd> / <kbd>Space</kbd> | Selects the focused tab. Only needed with `activationMode="manual"`.                                  |
+
+In automatic mode every focus move also selects. That matches the APG's recommendation for panels that render without delay.
+
+## Screen reader output
+
+What the [Guidepup virtual screen reader](https://www.guidepup.dev/docs/virtual) announces, asserted in `tabs.screen-reader.test.tsx`:
+
+| Moment                           | Announcement                                                              |
+| -------------------------------- | ------------------------------------------------------------------------- |
+| Reaching the list                | "tablist, Settings, orientated horizontally"                              |
+| The selected tab                 | "tab, Account, selected, 1 control, position 1, set size 3"               |
+| An unselected tab                | "tab, Password, not selected, 1 control, position 2, set size 3"          |
+| A disabled tab                   | "tab, Billing, not selected, 1 control, disabled, position 3, set size 3" |
+| <kbd>→</kbd> in automatic mode   | "tab, Password, selected, 1 control, position 2, set size 3"              |
+| <kbd>→</kbd> in manual mode      | "tab, Password, not selected, 1 control, position 2, set size 3"          |
+| <kbd>Tab</kbd> into the panel    | "tabpanel, Account"                                                       |
+| Reading on past the active panel | Inactive panels are skipped entirely                                      |
+
+Real screen readers word this differently. Orca, NVDA and JAWS say "page tab" or "tab", "selected", and "1 of 3"; VoiceOver says "selected, tab, 1 of 3"; TalkBack says "tab, 1 of 3, selected". The role, name, selected state and position are what matter.
+
+## What's tested
+
+| Check                                                                                         | Environment                                                      | Status                     |
+| --------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- | -------------------------- |
+| Behaviour: selection, roving tabindex, both activation modes, fallback, keepMounted, refs     | Vitest + Testing Library, jsdom                                  | <Status value="pass" />    |
+| axe-core, 0 violations: horizontal, vertical, disabled tab, manual mode, panels kept mounted  | vitest-axe (axe-core 4.14), jsdom                                | <Status value="pass" />    |
+| Keyboard: Tab sequence, arrows with wrap and disabled skip, Home/End, manual Enter and Space  | Playwright, Chromium and Firefox                                 | <Status value="pass" />    |
+| Focus ring, keyline position (incl. vertical RTL), RTL arrows, reduced motion, forced colours | Playwright, Chromium and Firefox (forced colours: Chromium only) | <Status value="pass" />    |
+| Announced role, name, selected state, position; inactive panels skipped                       | Guidepup virtual screen reader                                   | <Status value="pass" />    |
+| axe-core on every story, light and dark themes                                                | Playwright + @axe-core/playwright, Chromium and Firefox          | <Status value="pass" />    |
+| Manual: Orca + Firefox                                                                        | Linux desktop                                                    | <Status value="pending" /> |
+| Manual: TalkBack + Chrome                                                                     | Android                                                          | <Status value="pending" /> |
+
+Not tested yet: NVDA, JAWS, Narrator, VoiceOver (macOS and iOS), and real Windows High Contrast (forced colours are emulated in Chromium). A virtual screen reader checks the accessibility tree; it is not a substitute for a person using a real one.
+
+### Manual checklist (Orca + Firefox, TalkBack + Chrome)
+
+Run against the [Keyboard test fixture](?path=/story/components-tabs--keyboard-fixture) story and record results in `docs/manual-testing.md`.
+
+1. Tab from "Before" into the first list. Expect "Settings" with a tab-list role, then "Account", tab, selected, 1 of 3.
+2. Press <kbd>→</kbd>. Expect focus to skip the disabled "Password" and announce "Billing", selected, 3 of 3.
+3. Press <kbd>Tab</kbd>. Expect the Billing panel to be announced by name ("Billing", tab panel) and its text to be read next.
+4. Browse mode (Orca: arrow down; TalkBack: swipe right) past the panel. Expect the Account and Password panels' text never to be read.
+5. In "Manual settings", press <kbd>→</kbd>. Expect "Password", not selected. Press <kbd>Enter</kbd>. Expect "selected".
+6. In "Vertical settings", press <kbd>↓</kbd>. Expect the next tab; <kbd>→</kbd> should do nothing.
+7. TalkBack: double-tap "Billing" in the first list. Expect it to become selected and its panel to show.
+8. Visual: focus ring and the selected keyline visible in both light and dark themes.
+
+## Bundle size
+
+Measured by `size-limit` (minified + brotli, React excluded):
+
+| Import                                                     | Size    |
+| ---------------------------------------------------------- | ------- |
+| `import { Tabs } from '@oyinbayode/keyline/tabs'`          | 1.59 kB |
+| `import { Tabs } from '@oyinbayode/keyline'`               | 1.6 kB  |
+| `@oyinbayode/keyline/styles.css` (tokens + all components) | 1.9 kB  |
+
+## Known limitations
+
+- **Disabled tabs are not focusable,** like Switch and native buttons, so arrow-key users do not hear them; they are announced in browse mode. If the reason it is disabled matters, say so in visible text.
+- **No overflow handling.** A list wider than its container overflows it; there is no scrolling or overflow menu yet. Keep labels short, or use vertical tabs.
+- **No deletable or reorderable tabs built in.** Removing a tab is supported (selection falls back), but the APG's <kbd>Delete</kbd> key is not wired up.
+- **Tab values become part of element ids.** Whitespace is replaced, so `"a b"` and `"a_b"` would collide; use distinct values.
+- **Real Windows High Contrast has not been checked by hand,** only emulated.
