@@ -23,10 +23,11 @@ Keyline is a small React 19 + TypeScript library where each component:
 
 Available now: **Switch**, **Tabs**, **Dialog**. Next: Toast, Menu, Combobox, Date picker.
 
-| Component | APG pattern                                                | Import                       | Docs                                                                               |
-| --------- | ---------------------------------------------------------- | ---------------------------- | ---------------------------------------------------------------------------------- |
-| Switch    | [Switch](https://www.w3.org/WAI/ARIA/apg/patterns/switch/) | `@oyinbayode/keyline/switch` | [Switch](https://oyinbayode.github.io/keyline/?path=/docs/components-switch--docs) |
-| Tabs      | [Tabs](https://www.w3.org/WAI/ARIA/apg/patterns/tabs/)     | `@oyinbayode/keyline/tabs`   | [Tabs](https://oyinbayode.github.io/keyline/?path=/docs/components-tabs--docs)     |
+| Component | APG pattern                                                              | Import                       | Docs                                                                               |
+| --------- | ------------------------------------------------------------------------ | ---------------------------- | ---------------------------------------------------------------------------------- |
+| Switch    | [Switch](https://www.w3.org/WAI/ARIA/apg/patterns/switch/)               | `@oyinbayode/keyline/switch` | [Switch](https://oyinbayode.github.io/keyline/?path=/docs/components-switch--docs) |
+| Tabs      | [Tabs](https://www.w3.org/WAI/ARIA/apg/patterns/tabs/)                   | `@oyinbayode/keyline/tabs`   | [Tabs](https://oyinbayode.github.io/keyline/?path=/docs/components-tabs--docs)     |
+| Dialog    | [Dialog (Modal)](https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/) | `@oyinbayode/keyline/dialog` | [Dialog](https://oyinbayode.github.io/keyline/?path=/docs/components-dialog--docs) |
 
 ## Install
 
