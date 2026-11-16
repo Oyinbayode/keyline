@@ -1,6 +1,6 @@
 {
   "name": "keyline",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Accessible React components with a keyboard and screen-reader contract you can read and test.",
   "keywords": [
     "react",
