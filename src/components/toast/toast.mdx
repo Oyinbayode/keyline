@@ -18,7 +18,7 @@ import * as ToastStories from './toast.stories';
   entries={[
     { label: 'Pattern', value: 'APG Alert + WCAG 4.1.3' },
     { label: 'Element', value: <code>{'<section> + <ol>'}</code> },
-    { label: 'Size', value: '2.1 kB' },
+    { label: 'Size', value: '2.35 kB' },
     { label: 'Automated tests', value: '6/6 automated' },
     { label: 'Screen readers', value: 'Orca and TalkBack pending' },
   ]}
@@ -59,7 +59,9 @@ A toast is a box that slides in and fades out. That is easy to build and easy to
 - **Focus never moves on its own.** A toast never takes focus, so typing carries on. To get to the toasts, press <kbd>F8</kbd>: focus jumps to the landmark, and <kbd>Tab</kbd> reaches each toast's buttons.
 - **Time that waits for people.** The default is 6 seconds and the minimum 5 seconds: shorter durations are raised, with a development warning. The countdown pauses while the pointer is over any toast, while focus is inside the landmark, and while the window is in the background or the tab is hidden. It resumes with the time that was left.
 - **Actions never time out.** A toast with an `action` stays until it is used or dismissed. **The action must also be available somewhere that does not disappear** (an Archive page, a history list, the item's own menu). A toast is a shortcut, never the only way.
-- **Tone by shape, colour, and words.** Each tone has a 2px inline-start keyline in its semantic colour and an icon with its own shape: a circle for neutral, a tick for success, a triangle for warning, a diamond for danger. Non-neutral icons are labelled ("Success", "Warning", "Error"), and the announcement starts with the same word.
+- **Tone by shape and words, in a slug line.** Each toast opens with a mono line, like a printer's job ticket: an icon with its own shape (a circle for neutral, a tick for success, a triangle for warning, a diamond for danger) and the tone's name, NOTE, SUCCESS, WARNING or ERROR, in the tone's colour. Those text colours are at least 4.5:1 on the toast in both themes. The slug words are hidden from assistive technology: the tone reaches it once, through the icon's text alternative and the announcement prefix ("Warning: …"), so it is never read twice. Neutral is neither labelled nor announced as a tone.
+- **The timer, visible.** The slug's inline end says PAUSED while the countdown waits (pointer over the stack, focus inside, window in the background) and HELD on a toast with an action. A 1px fuse on the bottom edge, in the tone's colour, burns towards the inline start over the time left. It is drawn from the same numbers as the timer, so it stops when the timer stops and resumes from where it was. Under reduced motion it stays full width and still. Held toasts have no fuse.
+- **Labels you can translate.** `toneLabels`, `pausedLabel` and `heldLabel` on the provider replace the English words everywhere they appear.
 - **Dismissal that keeps your place.** Every toast has a close button named after it ("Dismiss: Draft saved"). <kbd>Esc</kbd> dismisses the focused toast. If focus was on that toast, it moves to the next toast, else back to where it was before you entered the landmark.
 - **Works under a modal.** While a Keyline `Dialog` is open, the landmark and both live regions are rendered _inside_ the topmost open dialog, so they are not inert. They move back when it closes. Announcements already made are not repeated after a move, and running timers keep their remaining time.
 - **Queued, not stacked forever.** At most `limit` toasts (default 3) show at once; the rest wait in order and are announced when they appear.
@@ -162,7 +164,7 @@ Real screen readers do not speak the "polite:" / "assertive:" prefix; they read 
 | axe-core, 0 violations: empty, every tone, with an action                                                                        | vitest-axe (axe-core 4.14), jsdom                                | <Status value="pass" />    |
 | Never takes focus mid-typing, F8, Tab, Esc with focus moving on, hover and focus pause, actions persist                          | Playwright, Chromium and Firefox (fake clock)                    | <Status value="pass" />    |
 | Inside a modal dialog: not inert, buttons work, Esc stays with the toast, moves back on close                                    | Playwright, Chromium and Firefox                                 | <Status value="pass" />    |
-| Position and RTL, tone keyline and icon shapes, reduced motion, forced colours                                                   | Playwright, Chromium and Firefox (forced colours: Chromium only) | <Status value="pass" />    |
+| Position and RTL, slug line, fuse (pause, resume, RTL, reduced motion), forced colours                                           | Playwright, Chromium and Firefox (forced colours: Chromium only) | <Status value="pass" />    |
 | Announcements once each, polite vs assertive, none repeated after moving into a dialog                                           | Guidepup virtual screen reader                                   | <Status value="pass" />    |
 | axe-core on every story, light and dark themes                                                                                   | Playwright + @axe-core/playwright, Chromium and Firefox          | <Status value="pass" />    |
 | Manual: Orca + Firefox                                                                                                           | Linux desktop                                                    | <Status value="pending" /> |
@@ -181,7 +183,7 @@ Run against the [Keyboard test fixture](?path=/story/components-toast--keyboard-
 5. Press <kbd>Esc</kbd> on a toast. Expect it to go and focus to move to the next toast, or back to "Message".
 6. Open "Open settings", then "Save settings". Expect "Success: Settings saved" to be read while the dialog is open, and its "Dismiss" button to work.
 7. TalkBack: swipe to the toast list. Expect the toasts to be readable and the timer to wait while one is focused.
-8. Visual: tone keylines and icon shapes distinguishable in both light and dark themes.
+8. Visual: slug lines, icon shapes, PAUSED / HELD and the fuse readable in both light and dark themes.
 
 ## Bundle size
 
@@ -189,14 +191,14 @@ Measured by `size-limit` (minified + brotli, React excluded):
 
 | Import                                                                | Size    |
 | --------------------------------------------------------------------- | ------- |
-| `import { ToastProvider, useToast } from '@oyinbayode/keyline/toast'` | 2.1 kB  |
-| `import { ToastProvider, useToast } from '@oyinbayode/keyline'`       | 2.09 kB |
-| `@oyinbayode/keyline/styles.css` (tokens + all components)            | 2.75 kB |
+| `import { ToastProvider, useToast } from '@oyinbayode/keyline/toast'` | 2.35 kB |
+| `import { ToastProvider, useToast } from '@oyinbayode/keyline'`       | 2.36 kB |
+| `@oyinbayode/keyline/styles.css` (tokens + all components)            | 2.99 kB |
 
 ## Known limitations
 
 - **Only Keyline dialogs are tracked.** The landmark moves into Keyline `Dialog`s. A modal opened with another library or a bare `showModal()` will still make it inert.
-- **English labels.** The tone words ("Success", "Warning", "Error") and the "Dismiss:" prefix are English; localisation props are not available yet. Pass a custom `Toast.Close` with your own `aria-label` meanwhile.
+- **The close button's "Dismiss:" prefix is English.** Tone and timer words are props; for the close button, pass a custom `Toast.Close` with your own `aria-label`.
 - **Theme and font come from the page.** The landmark is portalled to `<body>`, so it follows `data-theme` and the font set on `<html>` or `<body>`, not on the provider's ancestors. Inside a dialog it follows the dialog's.
 - **One landmark per provider.** Render one `ToastProvider` near the root. Several providers render several landmarks with the same name.
 - **No swipe to dismiss,** by design: it has no keyboard equivalent and is easy to trigger by accident. Use the close button.

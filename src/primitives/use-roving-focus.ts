@@ -1,5 +1,4 @@
 import type { KeyboardEvent } from 'react';
-import { useCallback } from 'react';
 
 export type RovingOrientation = 'horizontal' | 'vertical' | 'both';
 
@@ -61,42 +60,40 @@ export function useRovingFocus({
   loop = true,
   onNavigate,
 }: UseRovingFocusOptions): (event: KeyboardEvent<HTMLElement>) => void {
-  return useCallback(
-    (event: KeyboardEvent<HTMLElement>) => {
-      if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey) return;
+  // Not memoised: callers pass an inline onNavigate, so a memo would miss on every render anyway.
+  return (event: KeyboardEvent<HTMLElement>) => {
+    if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey) return;
 
-      const container = event.currentTarget;
-      const items = Array.from(container.querySelectorAll<HTMLElement>(itemSelector));
-      // Keyboard events only fire on elements, never on text nodes.
-      const current = (event.target as Element).closest<HTMLElement>(itemSelector);
-      const currentIndex = current ? items.indexOf(current) : -1;
-      if (currentIndex === -1) return;
+    const container = event.currentTarget;
+    const items = Array.from(container.querySelectorAll<HTMLElement>(itemSelector));
+    // Keyboard events only fire on elements, never on text nodes.
+    const current = (event.target as Element).closest<HTMLElement>(itemSelector);
+    const currentIndex = current ? items.indexOf(current) : -1;
+    if (currentIndex === -1) return;
 
-      const walk = walkForKey(
-        event.key,
-        orientation,
-        container.matches(':dir(rtl)'),
-        currentIndex,
-        items.length,
-      );
-      if (!walk) return;
-      // Handled even when there is nowhere to go, so the page does not scroll instead.
-      event.preventDefault();
+    const walk = walkForKey(
+      event.key,
+      orientation,
+      container.matches(':dir(rtl)'),
+      currentIndex,
+      items.length,
+    );
+    if (!walk) return;
+    // Handled even when there is nowhere to go, so the page does not scroll instead.
+    event.preventDefault();
 
-      const [start, step] = walk;
-      const wraps = loop && start === currentIndex;
-      for (let offset = 1; offset <= items.length; offset++) {
-        let index = start + step * offset;
-        if (wraps) index = (index + items.length) % items.length;
-        const target = items[index];
-        if (!target || target === current) return;
-        if (!isDisabled(target)) {
-          target.focus();
-          onNavigate?.(target);
-          return;
-        }
+    const [start, step] = walk;
+    const wraps = loop && start === currentIndex;
+    for (let offset = 1; offset <= items.length; offset++) {
+      let index = start + step * offset;
+      if (wraps) index = (index + items.length) % items.length;
+      const target = items[index];
+      if (!target || target === current) return;
+      if (!isDisabled(target)) {
+        target.focus();
+        onNavigate?.(target);
+        return;
       }
-    },
-    [itemSelector, orientation, loop, onNavigate],
-  );
+    }
+  };
 }

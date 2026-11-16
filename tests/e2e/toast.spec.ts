@@ -125,6 +125,99 @@ test.describe('Toast timing', () => {
   });
 });
 
+test.describe('Toast slug state and fuse', () => {
+  test.beforeEach(async ({ page }) => {
+    await openStory(page, 'keyboard-fixture');
+  });
+
+  // innerText, not textContent: the slug is uppercased by CSS, and that is what people read.
+  const slugText = (page: Page) =>
+    toasts(page)
+      .first()
+      .locator('.kl-toast-slug')
+      .evaluate((slug) => (slug as HTMLElement).innerText.replace(/\s+/g, '\n'));
+
+  const fuse = (page: Page) =>
+    toasts(page)
+      .first()
+      .locator('.kl-toast-fuse')
+      .evaluate((element) => ({
+        transform: element.style.transform,
+        duration: element.style.transitionDuration,
+      }));
+
+  test('burns down over the countdown, freezes on hover with PAUSED, resumes from there', async ({
+    page,
+  }) => {
+    await button(page, 'Show neutral').click();
+    expect(await fuse(page)).toEqual({ transform: 'scaleX(0)', duration: '6000ms' });
+    await page.clock.runFor(3000);
+
+    await toasts(page).first().hover();
+    expect(await fuse(page)).toEqual({ transform: 'scaleX(0.5)', duration: '0ms' });
+    await expect(toasts(page).first().locator('.kl-toast-state')).toHaveText('Paused');
+
+    await page.clock.runFor(20_000);
+    await page.mouse.move(5, 5);
+    expect(await fuse(page)).toEqual({ transform: 'scaleX(0)', duration: '3000ms' });
+    await expect(toasts(page).first().locator('.kl-toast-state')).toHaveText('');
+  });
+
+  test('shows PAUSED while focus is in the landmark', async ({ page }) => {
+    await button(page, 'Show neutral').click();
+    await page.keyboard.press('F8');
+
+    await expect(toasts(page).first()).toHaveAttribute('data-timer', 'paused');
+    expect(await slugText(page)).toBe('NOTE\nPAUSED');
+  });
+
+  test('shows HELD and no fuse on a toast with an action', async ({ page }) => {
+    await button(page, 'Show with action').click();
+
+    expect(await slugText(page)).toBe('NOTE\nHELD');
+    await expect(toasts(page).first().locator('.kl-toast-fuse')).toHaveCount(0);
+  });
+
+  test('burns towards the inline start, so it flips in RTL', async ({ page }) => {
+    await button(page, 'Show neutral').click();
+    const origin = () =>
+      toasts(page)
+        .first()
+        .locator('.kl-toast-fuse')
+        .evaluate((element) => getComputedStyle(element).transformOrigin.split(' ')[0]);
+    expect(await origin()).toBe('0px');
+
+    await openStory(page, 'right-to-left');
+    await page.getByRole('button', { name: 'إظهار إشعار' }).click();
+    const width = await toasts(page)
+      .first()
+      .locator('.kl-toast-fuse')
+      .evaluate((element) => `${String(element.getBoundingClientRect().width)}px`);
+    expect(await origin()).not.toBe('0px');
+    expect(width).not.toBe('0px');
+  });
+
+  test('stays full width and still under reduced motion', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await openStory(page, 'keyboard-fixture');
+    await button(page, 'Show neutral').click();
+    await page.clock.runFor(3000);
+
+    const drawn = await toasts(page)
+      .first()
+      .evaluate((item) => {
+        const element = item.querySelector('.kl-toast-fuse') as HTMLElement;
+        return {
+          transform: getComputedStyle(element).transform,
+          ratio: element.getBoundingClientRect().width / item.clientWidth,
+        };
+      });
+
+    expect(drawn.transform).toBe('none');
+    expect(drawn.ratio).toBeCloseTo(1, 1);
+  });
+});
+
 test.describe('Toast with a modal dialog open', () => {
   test.beforeEach(async ({ page }) => {
     await openStory(page, 'keyboard-fixture');
@@ -186,7 +279,9 @@ test.describe('Toast display preferences', () => {
     expect(rtl?.x).toBeLessThan(40);
   });
 
-  test('puts the tone on a 2px inline-start keyline and a distinct icon', async ({ page }) => {
+  test('names the tone in a slug line, with a distinct icon and an even border', async ({
+    page,
+  }) => {
     await openStory(page, 'tones');
     await button(page, 'Show success').click();
     await button(page, 'Show danger').click();
@@ -195,16 +290,28 @@ test.describe('Toast display preferences', () => {
       [0, 1].map((index) =>
         toasts(page)
           .nth(index)
-          .evaluate((item) => ({
-            width: getComputedStyle(item).borderLeftWidth,
-            colour: getComputedStyle(item).borderLeftColor,
-            path: item.querySelector('.kl-toast-icon path')?.getAttribute('d'),
-          })),
+          .evaluate((item) => {
+            const style = getComputedStyle(item);
+            const slug = item.querySelector('.kl-toast-slug') as HTMLElement;
+            return {
+              borders: [
+                style.borderTopWidth,
+                style.borderRightWidth,
+                style.borderBottomWidth,
+                style.borderLeftWidth,
+              ],
+              word: slug.innerText,
+              wordColour: getComputedStyle(slug).color,
+              path: item.querySelector('.kl-toast-icon path')?.getAttribute('d'),
+            };
+          }),
       ),
     );
 
-    expect(success?.width).toBe('2px');
-    expect(success?.colour).not.toBe(danger?.colour);
+    expect(success?.borders).toEqual(['1px', '1px', '1px', '1px']);
+    expect(success?.word).toBe('SUCCESS');
+    expect(danger?.word).toBe('ERROR');
+    expect(success?.wordColour).not.toBe(danger?.wordColour);
     expect(success?.path).not.toBe(danger?.path);
   });
 
@@ -220,16 +327,20 @@ test.describe('Toast display preferences', () => {
     expect(durations.split(',').map((duration) => duration.trim())).toEqual(['0s', '0s']);
   });
 
-  test('keeps the tone keyline, wider, in forced-colours mode', async ({ page, browserName }) => {
+  test('keeps the fuse visible in forced-colours mode', async ({ page, browserName }) => {
     test.skip(browserName !== 'chromium', 'Only Chromium can emulate forced-colors.');
     await page.emulateMedia({ forcedColors: 'active' });
     await openStory(page, 'tones');
     await button(page, 'Show warning').click();
 
-    const width = await toasts(page)
+    const [fuse, canvas] = await toasts(page)
       .first()
-      .evaluate((item) => getComputedStyle(item).borderLeftWidth);
+      .evaluate((item) => [
+        getComputedStyle(item.querySelector('.kl-toast-fuse') as HTMLElement).backgroundColor,
+        getComputedStyle(item).backgroundColor,
+      ]);
 
-    expect(width).toBe('4px');
+    expect(fuse).not.toBe(canvas);
+    expect(fuse).not.toBe('rgba(0, 0, 0, 0)');
   });
 });

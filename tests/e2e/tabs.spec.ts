@@ -137,22 +137,56 @@ test.describe('Tabs focus and display preferences', () => {
     expect(unselected.colour).toBe('rgba(0, 0, 0, 0)');
   });
 
-  test('puts the keyline on the inline-start edge when vertical, flipping in RTL', async ({
+  test('marks a vertical tab with a keyline under its label, never a bar on one side', async ({
     page,
   }) => {
     await openStory(page, 'vertical');
-    const leftWidth = await page
-      .getByRole('tab', { name: 'Account' })
-      .evaluate((tab) => getComputedStyle(tab).borderLeftWidth);
-    expect(leftWidth).toBe('2px');
+    const shape = (name: string) =>
+      page.getByRole('tab', { name }).evaluate((tab) => {
+        const label = tab.querySelector('.kl-tab-label') as HTMLElement;
+        const tabStyle = getComputedStyle(tab);
+        const labelStyle = getComputedStyle(label);
+        return {
+          tabSides: [tabStyle.borderLeftWidth, tabStyle.borderRightWidth],
+          underline: labelStyle.borderBottomWidth,
+          underlineColour: labelStyle.borderBottomColor,
+          labelWidth: label.getBoundingClientRect().width,
+          textWidth: (() => {
+            const range = document.createRange();
+            range.selectNodeContents(label);
+            return range.getBoundingClientRect().width;
+          })(),
+        };
+      });
 
-    await page.goto(
-      '/iframe.html?id=components-tabs--vertical&viewMode=story&globals=direction:rtl',
-    );
-    const rightWidth = await page
-      .getByRole('tab', { name: 'Account' })
-      .evaluate((tab) => getComputedStyle(tab).borderRightWidth);
-    expect(rightWidth).toBe('2px');
+    const selected = await shape('Account');
+    const unselected = await shape('Password');
+
+    expect(selected.tabSides).toEqual(['0px', '0px']);
+    expect(selected.underline).toBe('2px');
+    expect(selected.labelWidth).toBeCloseTo(selected.textWidth, 0);
+    expect(selected.underlineColour).not.toBe(unselected.underlineColour);
+    expect(unselected.underlineColour).toBe('rgba(0, 0, 0, 0)');
+  });
+
+  test('separates a vertical list from its panel with space, not a divider', async ({ page }) => {
+    await openStory(page, 'vertical');
+
+    const layout = await page.getByRole('tablist').evaluate((list) => {
+      const style = getComputedStyle(list);
+      const panel = document.querySelector('[role="tabpanel"]:not([hidden])') as HTMLElement;
+      return {
+        borders: [style.borderLeftWidth, style.borderRightWidth, style.borderBottomWidth],
+        gap: panel.getBoundingClientRect().left - list.getBoundingClientRect().right,
+        tabStarts: [...list.querySelectorAll('[role="tab"]')].map(
+          (tab) => tab.getBoundingClientRect().left - list.getBoundingClientRect().left,
+        ),
+      };
+    });
+
+    expect(layout.borders).toEqual(['0px', '0px', '0px']);
+    expect(layout.gap).toBeGreaterThanOrEqual(32);
+    expect(new Set(layout.tabStarts)).toEqual(new Set([0]));
   });
 
   test('flips Left and Right in right-to-left layouts', async ({ page }) => {
@@ -178,6 +212,29 @@ test.describe('Tabs focus and display preferences', () => {
       .evaluate((tab) => getComputedStyle(tab).transitionDuration);
 
     expect(durations.split(',').map((duration) => duration.trim())).toEqual(['0s', '0s']);
+  });
+
+  test('keeps the vertical label keyline in forced-colours mode', async ({ page, browserName }) => {
+    test.skip(browserName !== 'chromium', 'Only Chromium can emulate forced-colors.');
+    await page.emulateMedia({ forcedColors: 'active' });
+    await openStory(page, 'vertical');
+
+    const highlight = await page.evaluate(() => {
+      const probe = document.createElement('div');
+      probe.style.color = 'Highlight';
+      document.body.append(probe);
+      const colour = getComputedStyle(probe).color;
+      probe.remove();
+      return colour;
+    });
+    const underline = (name: string) =>
+      page
+        .getByRole('tab', { name })
+        .locator('.kl-tab-label')
+        .evaluate((label) => getComputedStyle(label).borderBottomColor);
+
+    expect(await underline('Account')).toBe(highlight);
+    expect(await underline('Password')).not.toBe(highlight);
   });
 
   test('keeps the selected keyline in forced-colours mode', async ({ page, browserName }) => {

@@ -1,7 +1,8 @@
 <!--
   Manager chrome only. Fonts are served from staticDirs, never from Google Fonts.
   Storybook's theme API has no hooks for the brand or the selected-item marker,
-  so they are styled here against its stable attributes.
+  so they are styled here against its stable attributes
+  (data-selected, data-nodetype, .sidebar-item).
 -->
 <style>
   @font-face {
@@ -34,12 +35,16 @@
   :root {
     --kl-manager-accent: #5b8dff;
     --kl-manager-text: #e6ecf5;
+    --kl-manager-mark: #50607b;
+    --kl-manager-bg: #0a0f17;
   }
 
   /* Set by manager.ts when the Theme toolbar is light. */
   :root[data-kl-theme='light'] {
     --kl-manager-accent: #1f56e0;
     --kl-manager-text: #0a0f18;
+    --kl-manager-mark: #7e8fab;
+    --kl-manager-bg: #f4f6fa;
   }
 
   .sidebar-header a[href='https://github.com/Oyinbayode/keyline'] {
@@ -53,19 +58,98 @@
     text-decoration: none;
   }
 
-  /* Selection is a 2px accent rule on the inline start, not a filled row. */
-  .sidebar-container .sidebar-item[data-selected='true'] {
+  /*
+   * The current page is marked like a print proof: four crop marks just
+   * outside the row's corners, never a bar on one side. Each mark is 7x7 with
+   * strokes on its two outer sides, 5px outside the inline edges and 3px
+   * outside the block edges, drawn as eight 1px gradients on one pseudo-element
+   * so Storybook's markup is left alone. The marks are symmetric, so RTL needs
+   * nothing extra.
+   */
+  /* Rows clip by default; the marks sit outside them. The label truncates on its own. */
+  .sidebar-container .sidebar-item {
+    --kl-crop: transparent;
+
+    overflow: visible;
+  }
+
+  .sidebar-container .sidebar-item::before {
+    content: '';
+    position: absolute;
+    inset: -3px -5px;
+    pointer-events: none;
+    background:
+      linear-gradient(var(--kl-crop), var(--kl-crop)) left top / 7px 1px,
+      linear-gradient(var(--kl-crop), var(--kl-crop)) left top / 1px 7px,
+      linear-gradient(var(--kl-crop), var(--kl-crop)) right top / 7px 1px,
+      linear-gradient(var(--kl-crop), var(--kl-crop)) right top / 1px 7px,
+      linear-gradient(var(--kl-crop), var(--kl-crop)) left bottom / 7px 1px,
+      linear-gradient(var(--kl-crop), var(--kl-crop)) left bottom / 1px 7px,
+      linear-gradient(var(--kl-crop), var(--kl-crop)) right bottom / 7px 1px,
+      linear-gradient(var(--kl-crop), var(--kl-crop)) right bottom / 1px 7px;
+    background-repeat: no-repeat;
+  }
+
+  .sidebar-container .sidebar-item:hover {
+    --kl-crop: var(--kl-manager-mark);
     background: transparent;
-    box-shadow: inset 2px 0 0 var(--kl-manager-accent);
+  }
+
+  .sidebar-container .sidebar-item[data-selected='true'],
+  .sidebar-container .sidebar-item[data-selected='true']:hover {
+    --kl-crop: var(--kl-manager-accent);
+    background: transparent;
     color: var(--kl-manager-text);
     font-weight: 500;
+  }
+
+  .sidebar-container .sidebar-item[data-selected='true'] a {
+    color: var(--kl-manager-text);
   }
 
   .sidebar-container .sidebar-item[data-selected='true'] svg {
     color: var(--kl-manager-accent);
   }
 
-  [dir='rtl'] .sidebar-container .sidebar-item[data-selected='true'] {
-    box-shadow: inset -2px 0 0 var(--kl-manager-accent);
+  /*
+   * Two-digit position among siblings. The sidebar is one flat list in which
+   * a component's entries follow its row, so one counter for the whole list,
+   * set back to 0 at every component row and section heading, numbers each
+   * component's entries from 01. counter-set, not counter-reset: a reset on a
+   * sibling opens a nested scope that Chromium did not carry to the rows after it.
+   */
+  .sidebar-container {
+    counter-reset: kl-entry;
+  }
+
+  .sidebar-container :is(.sidebar-subheading, .sidebar-item[data-nodetype='component']) {
+    counter-set: kl-entry 0;
+  }
+
+  .sidebar-container .sidebar-item:is([data-nodetype='document'], [data-nodetype='story']) {
+    counter-increment: kl-entry;
+  }
+
+  .sidebar-container .sidebar-item[data-selected='true']::after {
+    content: counter(kl-entry, decimal-leading-zero);
+    position: absolute;
+    inset-block: 0;
+    inset-inline-end: 8px;
+    display: flex;
+    align-items: center;
+    color: var(--kl-manager-accent);
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 10px;
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    pointer-events: none;
+  }
+
+  /* Keyboard focus gets the same double ring as the components. */
+  .sidebar-container .sidebar-item a:focus-visible {
+    outline: 2px solid transparent;
+    box-shadow:
+      0 0 0 2px var(--kl-manager-bg),
+      0 0 0 4px var(--kl-manager-accent);
   }
 </style>

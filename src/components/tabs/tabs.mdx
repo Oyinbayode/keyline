@@ -15,7 +15,7 @@ import * as TabsStories from './tabs.stories';
   entries={[
     { label: 'Pattern', value: 'APG Tabs' },
     { label: 'Element', value: <code>{'<button role="tab">'}</code> },
-    { label: 'Size', value: '1.59 kB' },
+    { label: 'Size', value: '1.6 kB' },
     { label: 'Automated tests', value: '6/6 automated' },
     { label: 'Screen readers', value: 'Orca and TalkBack pending' },
   ]}
@@ -56,7 +56,7 @@ Tabs look like a row of buttons over a box, so that is how they are usually buil
 - **Automatic or manual activation.** By default a tab is selected as soon as it gets focus, which is right when panels render instantly. If a panel is slow (it fetches or renders a lot), pass `activationMode="manual"`: arrows only move focus, and <kbd>Enter</kbd> or <kbd>Space</kbd> selects.
 - **State on the right element.** `aria-selected` is on each `role="tab"` button, always `"true"` or `"false"`. Each tab has `aria-controls` pointing to its panel's id, and each panel has `aria-labelledby` pointing to its tab, so arriving in a panel announces "Account, tab panel". The ids are generated; you only supply `value`.
 - **Inactive panels really hidden.** Inactive panels get the `hidden` attribute, which takes them out of the layout, the tab order and the accessibility tree. Their content is not rendered unless you pass `keepMounted`, and kept content stays hidden.
-- **Selection shown by shape.** The selected tab has a 2px keyline (a real border, on the inline-start edge when vertical) over the list's 1px hairline, and its text changes from slate-11 to slate-12. In forced-colours mode the tabs repaint themselves with system colours: the keyline turns `Highlight` and unselected borders disappear.
+- **Selection shown by shape.** The selected tab has a 2px keyline, a real border, and its text changes from slate-11 to slate-12. Horizontal tabs put it over the list's 1px hairline. Vertical tabs underline the label, only as wide as the text: no bar down one side, and space, not a divider, between the list and the panel. In forced-colours mode the tabs repaint themselves with system colours: the keyline turns `Highlight` and unselected borders disappear.
 - **Selection never lost.** If the selected tab becomes disabled or is removed, the nearest enabled tab is selected instead (the one that slides into its place, otherwise the one before it) and `onValueChange` reports it. With no `defaultValue`, the first enabled tab starts selected.
 - **A name for the list.** In development, `Tabs.List` warns if it has neither `aria-label` nor `aria-labelledby`.
 - **Controlled or uncontrolled.** Pass `value` + `onValueChange` to own the state, or `defaultValue` to let the tabs own it.
@@ -158,16 +158,16 @@ Real screen readers word this differently. Orca, NVDA and JAWS say "page tab" or
 
 ## What's tested
 
-| Check                                                                                         | Environment                                                      | Status                     |
-| --------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- | -------------------------- |
-| Behaviour: selection, roving tabindex, both activation modes, fallback, keepMounted, refs     | Vitest + Testing Library, jsdom                                  | <Status value="pass" />    |
-| axe-core, 0 violations: horizontal, vertical, disabled tab, manual mode, panels kept mounted  | vitest-axe (axe-core 4.14), jsdom                                | <Status value="pass" />    |
-| Keyboard: Tab sequence, arrows with wrap and disabled skip, Home/End, manual Enter and Space  | Playwright, Chromium and Firefox                                 | <Status value="pass" />    |
-| Focus ring, keyline position (incl. vertical RTL), RTL arrows, reduced motion, forced colours | Playwright, Chromium and Firefox (forced colours: Chromium only) | <Status value="pass" />    |
-| Announced role, name, selected state, position; inactive panels skipped                       | Guidepup virtual screen reader                                   | <Status value="pass" />    |
-| axe-core on every story, light and dark themes                                                | Playwright + @axe-core/playwright, Chromium and Firefox          | <Status value="pass" />    |
-| Manual: Orca + Firefox                                                                        | Linux desktop                                                    | <Status value="pending" /> |
-| Manual: TalkBack + Chrome                                                                     | Android                                                          | <Status value="pending" /> |
+| Check                                                                                                    | Environment                                                      | Status                     |
+| -------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- | -------------------------- |
+| Behaviour: selection, roving tabindex, both activation modes, fallback, keepMounted, refs                | Vitest + Testing Library, jsdom                                  | <Status value="pass" />    |
+| axe-core, 0 violations: horizontal, vertical, disabled tab, manual mode, panels kept mounted             | vitest-axe (axe-core 4.14), jsdom                                | <Status value="pass" />    |
+| Keyboard: Tab sequence, arrows with wrap and disabled skip, Home/End, manual Enter and Space             | Playwright, Chromium and Firefox                                 | <Status value="pass" />    |
+| Focus ring, keyline position (under the label when vertical), RTL arrows, reduced motion, forced colours | Playwright, Chromium and Firefox (forced colours: Chromium only) | <Status value="pass" />    |
+| Announced role, name, selected state, position; inactive panels skipped                                  | Guidepup virtual screen reader                                   | <Status value="pass" />    |
+| axe-core on every story, light and dark themes                                                           | Playwright + @axe-core/playwright, Chromium and Firefox          | <Status value="pass" />    |
+| Manual: Orca + Firefox                                                                                   | Linux desktop                                                    | <Status value="pending" /> |
+| Manual: TalkBack + Chrome                                                                                | Android                                                          | <Status value="pending" /> |
 
 Not tested yet: NVDA, JAWS, Narrator, VoiceOver (macOS and iOS), and real Windows High Contrast (forced colours are emulated in Chromium). A virtual screen reader checks the accessibility tree; it is not a substitute for a person using a real one.
 
@@ -190,9 +190,9 @@ Measured by `size-limit` (minified + brotli, React excluded):
 
 | Import                                                     | Size    |
 | ---------------------------------------------------------- | ------- |
-| `import { Tabs } from '@oyinbayode/keyline/tabs'`          | 1.59 kB |
+| `import { Tabs } from '@oyinbayode/keyline/tabs'`          | 1.6 kB  |
 | `import { Tabs } from '@oyinbayode/keyline'`               | 1.6 kB  |
-| `@oyinbayode/keyline/styles.css` (tokens + all components) | 1.9 kB  |
+| `@oyinbayode/keyline/styles.css` (tokens + all components) | 2.99 kB |
 
 ## Known limitations
 

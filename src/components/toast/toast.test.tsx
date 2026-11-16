@@ -56,6 +56,7 @@ const viewport = () => screen.getByRole('region', { name: 'Notifications (F8)' }
 const polite = () => screen.getByRole('status');
 const assertive = () => screen.getByRole('alert');
 const toasts = () => within(viewport()).queryAllByRole('listitem');
+const fuseOf = (item: Element | undefined) => item?.querySelector<HTMLElement>('.kl-toast-fuse');
 
 beforeEach(() => {
   vi.useFakeTimers();
@@ -262,7 +263,10 @@ describe('Toast', () => {
       });
       advance(0);
 
-      expect(toasts().map((item) => item.textContent)).toEqual(['Second', 'Third']);
+      expect(toasts().map((item) => item.querySelector('.kl-toast-title')?.textContent)).toEqual([
+        'Second',
+        'Third',
+      ]);
       expect(polite()).toHaveTextContent('Third');
     });
   });
@@ -325,7 +329,9 @@ describe('Toast', () => {
       fireEvent.keyDown(close, { key: 'Escape' });
       advance(0);
 
-      expect(toasts().map((item) => item.textContent)).toEqual(['Second']);
+      expect(toasts().map((item) => item.querySelector('.kl-toast-title')?.textContent)).toEqual([
+        'Second',
+      ]);
       expect(toasts()[0]).toHaveFocus();
     });
 
@@ -377,6 +383,109 @@ describe('Toast', () => {
       show({ title: 'Saved' });
       fireEvent.keyDown(input, { key: 'F8' });
       expect(viewport()).toHaveFocus();
+    });
+  });
+
+  describe('slug line and fuse', () => {
+    it('shows the tone name and timer state as hidden chrome, so the tone is read once', () => {
+      renderProvider();
+      show({ title: 'Storage almost full', tone: 'warning' });
+      const item = toasts()[0] as HTMLElement;
+
+      expect(within(item).getByText('Warning', { selector: 'span' })).toHaveAttribute(
+        'aria-hidden',
+        'true',
+      );
+      expect(within(item).getAllByRole('img', { name: 'Warning' })).toHaveLength(1);
+      expect(within(item).queryByText('Warning', { ignore: '[aria-hidden="true"]' })).toBeNull();
+      expect(item.querySelector('.kl-toast-state')).toHaveAttribute('aria-hidden', 'true');
+    });
+
+    it('names the neutral tone in the slug but neither labels its icon nor announces it', () => {
+      renderProvider();
+      show({ title: 'Draft saved' });
+
+      expect(within(toasts()[0] as HTMLElement).getByText('Note')).toHaveAttribute(
+        'aria-hidden',
+        'true',
+      );
+      expect(polite()).toHaveTextContent(/^Draft saved$/);
+    });
+
+    it('marks the timer running, paused, or held, with the state word to match', () => {
+      renderProvider({ limit: 4 });
+      show({ title: 'Saved' });
+      show({ title: 'Archived', action: { label: 'Undo', onClick: () => {} } });
+      const [timed, held] = toasts();
+
+      expect(timed).toHaveAttribute('data-timer', 'running');
+      expect(timed?.querySelector('.kl-toast-state')).toBeEmptyDOMElement();
+      expect(held).toHaveAttribute('data-timer', 'held');
+      expect(held?.querySelector('.kl-toast-state')).toHaveTextContent('Held');
+
+      fireEvent.pointerEnter(viewport());
+      expect(timed).toHaveAttribute('data-timer', 'paused');
+      expect(timed?.querySelector('.kl-toast-state')).toHaveTextContent('Paused');
+      expect(held).toHaveAttribute('data-timer', 'held');
+    });
+
+    it('takes tone, paused, and held labels from the provider, for localisation', () => {
+      renderProvider({
+        limit: 4,
+        toneLabels: { warning: 'Avertissement' },
+        pausedLabel: 'En pause',
+        heldLabel: 'Retenu',
+      });
+      show({ title: 'Stockage presque plein', tone: 'warning' });
+      show({ title: 'Archivé', action: { label: 'Annuler', onClick: () => {} } });
+      fireEvent.pointerEnter(viewport());
+      const [warning, held] = toasts();
+
+      expect(
+        within(warning as HTMLElement).getByRole('img', { name: 'Avertissement' }),
+      ).toBeVisible();
+      expect(warning?.querySelector('.kl-toast-state')).toHaveTextContent('En pause');
+      expect(held?.querySelector('.kl-toast-state')).toHaveTextContent('Retenu');
+      expect(polite()).toHaveTextContent('Avertissement: Stockage presque plein');
+    });
+
+    it('draws a fuse only on toasts with a countdown', () => {
+      renderProvider({ limit: 4 });
+      show({ title: 'Saved' });
+      show({ title: 'Archived', action: { label: 'Undo', onClick: () => {} } });
+      const [timed, held] = toasts();
+
+      expect(fuseOf(timed)).toHaveAttribute('aria-hidden', 'true');
+      expect(fuseOf(held)).toBeNull();
+    });
+
+    it('burns the fuse from the timer: full, then down over the remaining time', () => {
+      renderProvider();
+      show({ title: 'Saved' });
+
+      expect(fuseOf(toasts()[0])).toHaveStyle({
+        transform: 'scaleX(0)',
+        transitionDuration: '6000ms',
+      });
+    });
+
+    it('freezes the fuse at the share left while paused, and resumes from there', () => {
+      renderProvider();
+      show({ title: 'Saved' });
+      advance(3000);
+
+      fireEvent.pointerEnter(viewport());
+      expect(fuseOf(toasts()[0])).toHaveStyle({
+        transform: 'scaleX(0.5)',
+        transitionDuration: '0ms',
+      });
+
+      advance(10_000);
+      fireEvent.pointerLeave(viewport());
+      expect(fuseOf(toasts()[0])).toHaveStyle({
+        transform: 'scaleX(0)',
+        transitionDuration: '3000ms',
+      });
     });
   });
 
@@ -453,6 +562,17 @@ describe('Toast', () => {
       show({ title: 'While the dialog is open' });
       expect(polite()).toHaveTextContent('While the dialog is open');
       expect(document.querySelector('dialog')).toContainElement(polite());
+    });
+
+    it('keeps the fuse where it was when the toasts move', () => {
+      renderProvider({}, <WithDialog />);
+      show({ title: 'Saved' });
+      advance(1500);
+      fireEvent.pointerEnter(viewport());
+
+      fireEvent.click(screen.getByRole('button', { name: 'Open settings' }));
+
+      expect(fuseOf(toasts()[0])).toHaveStyle({ transform: 'scaleX(0.75)' });
     });
 
     it('keeps the remaining time when the toasts move', () => {

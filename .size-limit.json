@@ -53,14 +53,14 @@
     "path": "dist/index.js",
     "import": "{ ToastProvider, useToast }",
     "ignore": ["react", "react-dom"],
-    "limit": "2.3 kB"
+    "limit": "2.4 kB"
   },
   {
     "name": "@oyinbayode/keyline/toast",
     "path": "dist/toast.js",
     "import": "{ ToastProvider, useToast }",
     "ignore": ["react", "react-dom"],
-    "limit": "2.3 kB"
+    "limit": "2.4 kB"
   },
   {
     "name": "@oyinbayode/keyline/primitives",
@@ -73,6 +73,6 @@
     "name": "@oyinbayode/keyline/styles.css",
     "path": "dist/styles.css",
     "rolldown": false,
-    "limit": "3 kB"
+    "limit": "3.3 kB"
   }
 ]
