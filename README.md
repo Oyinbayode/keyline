@@ -1,5 +1,8 @@
 # Keyline
 
+[![npm](https://img.shields.io/npm/v/@oyinbayode/keyline?style=flat-square&label=npm&color=1f56e0)](https://www.npmjs.com/package/@oyinbayode/keyline)
+[![CI](https://img.shields.io/github/actions/workflow/status/Oyinbayode/keyline/ci.yml?branch=main&style=flat-square&label=CI)](https://github.com/Oyinbayode/keyline/actions/workflows/ci.yml)
+
 Accessible React components with a keyboard and screen-reader contract you can read, and tests that prove it.
 
 [Docs and live examples](https://oyinbayode.github.io/keyline/) · [npm](https://www.npmjs.com/package/@oyinbayode/keyline) · MIT
@@ -129,7 +132,7 @@ pnpm lint && pnpm typecheck && pnpm build && pnpm size
 
 ### Releasing
 
-Releases are automated with [Changesets](https://github.com/changesets/changesets). Merged changesets open a "Version Packages" PR; merging it publishes to npm and tags `@oyinbayode/keyline@x.y.z`. The workflow needs an `NPM_TOKEN` repository secret (an npm automation or granular token with publish rights to `@oyinbayode/keyline`).
+Releases are automated with [Changesets](https://github.com/changesets/changesets). Merged changesets open a "Version Packages" PR; merging it publishes to npm and tags `@oyinbayode/keyline@x.y.z`. Publishing uses [npm trusted publishing](https://docs.npmjs.com/trusted-publishers): `.github/workflows/release.yml` is registered as the package's trusted publisher on npmjs.com, so there is no npm token in the repository and every release carries a provenance attestation.
 
 ## License
 
