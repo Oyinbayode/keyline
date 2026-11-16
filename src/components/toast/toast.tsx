@@ -60,7 +60,7 @@ export interface ToastProviderProps {
   /** Custom layout for each toast, built from the Toast parts. */
   renderToast?: (toast: ToastData) => ReactNode;
   /**
-   * Writing direction of the viewport. It is portalled to <body> (or into an
+   * Writing direction of the viewport. It is portalled to `<body>` (or into an
    * open dialog), so it inherits `<html dir>`, not the provider's ancestors.
    */
   dir?: 'ltr' | 'rtl';
@@ -381,12 +381,12 @@ export function ToastProvider({
   );
 }
 
-/* Distinct shapes, so the tone never depends on colour: circle, tick, triangle, octagon. */
+/* Distinct shapes, so the tone never depends on colour: circle, tick, triangle, diamond. */
 const toneIcons: Record<ToastTone, string> = {
   neutral: 'M8 1.5a6.5 6.5 0 1 1 0 13a6.5 6.5 0 0 1 0-13ZM8 7v4.5M8 4.5v.5',
   success: 'M2.5 8.5l3.5 3.5l7.5-8',
   warning: 'M8 1.5L15 14H1ZM8 6v4M8 12v.5',
-  danger: 'M5.3 1.5h5.4l3.8 3.8v5.4l-3.8 3.8H5.3l-3.8-3.8V5.3ZM5.5 5.5l5 5M10.5 5.5l-5 5',
+  danger: 'M8 1L15 8L8 15L1 8ZM6 6l4 4M10 6l-4 4',
 };
 
 export type ToastRootProps = Omit<ComponentPropsWithRef<'li'>, 'id'>;

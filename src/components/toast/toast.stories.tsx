@@ -51,7 +51,9 @@ function ToneButtons() {
 
 export const Playground: Story = {};
 
-export const Tones: Story = {};
+export const Tones: Story = {
+  args: { limit: 4 },
+};
 
 function ActionExample() {
   const { toast } = useToast();

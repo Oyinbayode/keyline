@@ -72,6 +72,14 @@ body,
 }
 
 /*
+ * The package never sets a font, so anything portalled to <body> (the toast
+ * landmark) takes the page's. This is the docs site's page font.
+ */
+body {
+  font-family: var(--kl-docs-sans);
+}
+
+/*
  * Type scale. The classes are also used by the specimens on the Tokens page;
  * scoped under .sbdocs to outrank Storybook's injected element styles.
  */

@@ -5,11 +5,19 @@ async function openStory(page: Page, storyName: string) {
   // A fake clock, so the 6-second timers can be fast-forwarded instead of waited out.
   await page.clock.install();
   await page.goto(`/iframe.html?id=components-toast--${storyName}&viewMode=story`);
+  // Installed clocks keep running in real time; pause so a slow machine cannot spend a toast's time.
+  await page.clock.pauseAt((await page.evaluate(() => Date.now())) + 1000);
 }
 
 const button = (page: Page, name: string) => page.getByRole('button', { name, exact: true });
 const viewport = (page: Page) => page.getByRole('region', { name: 'Notifications (F8)' });
 const toasts = (page: Page) => viewport(page).getByRole('listitem');
+
+// A dismissed toast is removed after its exit transition, on the paused clock too.
+async function settle(page: Page) {
+  await page.waitForTimeout(50);
+  await page.clock.runFor(400);
+}
 
 test.describe('Toast focus', () => {
   test.beforeEach(async ({ page }) => {
@@ -56,10 +64,12 @@ test.describe('Toast focus', () => {
     await expect(button(page, 'Dismiss: Draft saved')).toBeFocused();
 
     await page.keyboard.press('Escape');
+    await settle(page);
     await expect(toasts(page)).toHaveCount(1);
     await expect(toasts(page).first()).toBeFocused();
 
     await page.keyboard.press('Escape');
+    await settle(page);
     await expect(toasts(page)).toHaveCount(0);
     await expect(input).toBeFocused();
   });
@@ -77,6 +87,7 @@ test.describe('Toast timing', () => {
     await expect(toasts(page)).toHaveCount(1);
 
     await page.clock.runFor(600);
+    await settle(page);
     await expect(toasts(page)).toHaveCount(0);
   });
 
@@ -92,6 +103,7 @@ test.describe('Toast timing', () => {
     await page.clock.runFor(2500);
     await expect(toasts(page)).toHaveCount(1);
     await page.clock.runFor(1000);
+    await settle(page);
     await expect(toasts(page)).toHaveCount(0);
   });
 
@@ -130,6 +142,7 @@ test.describe('Toast with a modal dialog open', () => {
     await button(page, 'Save settings').click();
     await expect(toasts(page)).toHaveCount(2);
     await button(page, 'Dismiss: Settings saved').click();
+    await settle(page);
     await expect(toasts(page)).toHaveCount(1);
     expect(await dialog.evaluate((element) => (element as HTMLDialogElement).open)).toBe(true);
   });
@@ -141,6 +154,7 @@ test.describe('Toast with a modal dialog open', () => {
 
     await button(page, 'Dismiss: Settings saved').focus();
     await page.keyboard.press('Escape');
+    await settle(page);
 
     await expect(toasts(page)).toHaveCount(0);
     expect(await dialog.evaluate((element) => (element as HTMLDialogElement).open)).toBe(true);
