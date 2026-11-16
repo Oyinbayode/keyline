@@ -663,6 +663,11 @@ body,
   box-shadow: var(--kl-focus-ring);
 }
 
+/* Makes a story's page scroll, so scroll-lock tests have something to lock. */
+.kl-example-tall {
+  block-size: 150vh;
+}
+
 .kl-example-output {
   color: var(--kl-color-muted);
   font-family: var(--kl-docs-mono);

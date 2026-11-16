@@ -1,0 +1,92 @@
+/*
+ * The native <dialog> already sits in the top layer above everything, so
+ * there is no z-index here. Enter and exit are transitions between the
+ * [open] and closed styles: @starting-style supplies the "before" state on
+ * open, and allow-discrete keeps `display` and `overlay` (the top layer)
+ * around until the exit finishes. All durations come from --kl-duration-*,
+ * which are 0ms under prefers-reduced-motion.
+ */
+.kl-dialog {
+  --kl-dialog-offset: 0.5rem;
+
+  box-sizing: border-box;
+  inline-size: calc(100% - 2 * var(--kl-space-4));
+  max-inline-size: 32rem;
+  max-block-size: calc(100% - 2 * var(--kl-space-4));
+  margin: auto;
+  padding: var(--kl-space-5);
+  overflow: auto;
+  border: 1px solid var(--kl-slate-6);
+  border-radius: var(--kl-radius-lg);
+  background-color: var(--kl-slate-2);
+  box-shadow: var(--kl-shadow-floating);
+  color: var(--kl-color-text);
+  font-family: var(--kl-font-family);
+  font-size: var(--kl-font-size);
+  line-height: var(--kl-line-height);
+  opacity: 0;
+  transform: translateY(var(--kl-dialog-offset));
+  transition:
+    opacity var(--kl-duration-base) var(--kl-ease),
+    transform var(--kl-duration-base) var(--kl-ease),
+    overlay var(--kl-duration-base) allow-discrete,
+    display var(--kl-duration-base) allow-discrete;
+}
+
+.kl-dialog[open] {
+  opacity: 1;
+  transform: none;
+}
+
+@starting-style {
+  .kl-dialog[open] {
+    opacity: 0;
+    transform: translateY(var(--kl-dialog-offset));
+  }
+}
+
+/* slate-1 at about 70%: the page stays legible as context but clearly behind. No blur. */
+.kl-dialog::backdrop {
+  background-color: color-mix(in srgb, var(--kl-slate-1) 70%, transparent);
+  opacity: 0;
+  transition:
+    opacity var(--kl-duration-base) var(--kl-ease),
+    overlay var(--kl-duration-base) allow-discrete,
+    display var(--kl-duration-base) allow-discrete;
+}
+
+.kl-dialog[open]::backdrop {
+  opacity: 1;
+}
+
+@starting-style {
+  .kl-dialog[open]::backdrop {
+    opacity: 0;
+  }
+}
+
+/* The dialog is a focus target only as a last resort, so it shows a ring like anything else. */
+.kl-dialog:focus-visible {
+  outline: var(--kl-focus-ring-width) solid transparent;
+  outline-offset: var(--kl-focus-ring-offset);
+  box-shadow: var(--kl-shadow-floating), var(--kl-focus-ring);
+}
+
+.kl-dialog-title {
+  margin: 0 0 var(--kl-space-2);
+  font-family: var(--kl-font-family);
+  font-size: 1.125rem;
+  font-weight: 600;
+  line-height: 1.75rem;
+}
+
+.kl-dialog-description {
+  margin: 0 0 var(--kl-space-4);
+  color: var(--kl-color-muted);
+}
+
+@media (forced-colors: active) {
+  .kl-dialog {
+    border-color: CanvasText;
+  }
+}
