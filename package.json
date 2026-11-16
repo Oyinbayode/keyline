@@ -97,7 +97,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "vite build && node scripts/build-css.ts",
+    "build": "vite build && node scripts/build-css.ts && node scripts/check-dir-selectors.ts dist",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
@@ -108,7 +108,7 @@
     "size": "size-limit",
     "check:package": "publint && attw --pack . --profile node16 --exclude-entrypoints styles.css tokens.css",
     "storybook": "storybook dev -p 6006",
-    "build:storybook": "storybook build --quiet",
+    "build:storybook": "storybook build --quiet && node scripts/check-dir-selectors.ts storybook-static/assets",
     "changeset": "changeset",
     "release": "changeset publish",
     "prepublishOnly": "pnpm build"
