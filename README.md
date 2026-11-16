@@ -2,7 +2,7 @@
 
 Accessible React components with a keyboard and screen-reader contract you can read, and tests that prove it.
 
-[Docs and live examples](https://oyinbayode.github.io/keyline/) · [npm](https://www.npmjs.com/package/keyline) · MIT
+[Docs and live examples](https://oyinbayode.github.io/keyline/) · [npm](https://www.npmjs.com/package/@oyinbayode/keyline) · MIT
 
 ## Problem
 
@@ -23,8 +23,8 @@ Available now: **Switch**. Next: Tabs, Dialog, Toast, Menu, Combobox, Date picke
 ## Install
 
 ```sh
-pnpm add keyline
-# or: npm install keyline
+pnpm add @oyinbayode/keyline
+# or: npm install @oyinbayode/keyline
 ```
 
 React 19 is a peer dependency.
@@ -32,8 +32,8 @@ React 19 is a peer dependency.
 ## Usage
 
 ```tsx
-import { Switch } from 'keyline';
-import 'keyline/styles.css';
+import { Switch } from '@oyinbayode/keyline';
+import '@oyinbayode/keyline/styles.css';
 
 export function WifiSetting() {
   return (
@@ -52,7 +52,7 @@ const [isOn, setIsOn] = useState(false);
 <Switch aria-label="Wi-Fi" checked={isOn} onCheckedChange={setIsOn} />;
 ```
 
-Every component accepts `className`, `style`, and `ref`, passes other props to its root element, and exposes its state as `data-state` for custom styling. Per-component entry points (`keyline/switch`, `keyline/primitives`) and ESM tree-shaking keep imports small.
+Every component accepts `className`, `style`, and `ref`, passes other props to its root element, and exposes its state as `data-state` for custom styling. Per-component entry points (`@oyinbayode/keyline/switch`, `@oyinbayode/keyline/primitives`) and ESM tree-shaking keep imports small.
 
 If you lint with `eslint-plugin-jsx-a11y`, tell `label-has-associated-control` that `Switch` is a control:
 
@@ -82,7 +82,7 @@ Rebrand by overriding the accent steps, or an alias:
 
 There are also tokens for space (`--kl-space-1` … `--kl-space-8`), radius, depth (`--kl-shadow-raised`, `--kl-shadow-floating`), motion (`--kl-duration-*`, which drop to `0ms` under reduced motion, `--kl-ease`, `--kl-ease-spring`), and the focus ring (`--kl-focus-ring`).
 
-Keyline never ships or sets a font: `--kl-font-family` is `inherit`, so components use your page's font. `keyline/tokens.css` ships the tokens alone if you want to style components yourself. All tokens are shown live on the [Tokens page](https://oyinbayode.github.io/keyline/?path=/docs/tokens--docs).
+Keyline never ships or sets a font: `--kl-font-family` is `inherit`, so components use your page's font. `@oyinbayode/keyline/tokens.css` ships the tokens alone if you want to style components yourself. All tokens are shown live on the [Tokens page](https://oyinbayode.github.io/keyline/?path=/docs/tokens--docs).
 
 ## Accessibility statement
 
@@ -105,13 +105,13 @@ Not tested: NVDA, JAWS, Narrator, VoiceOver (macOS, iOS), real Windows High Cont
 
 Minified + brotli, React excluded, enforced in CI by `size-limit` (see `.size-limit.json`):
 
-| Import                                    | Size    | Budget |
-| ----------------------------------------- | ------- | ------ |
-| `import { Switch } from 'keyline'`        | 624 B   | 750 B  |
-| `import { Switch } from 'keyline/switch'` | 624 B   | 750 B  |
-| `keyline/primitives` (all)                | 1.49 kB | 1.8 kB |
-| `keyline` (everything)                    | 1.77 kB | 2.2 kB |
-| `keyline/styles.css`                      | 979 B   | 1.2 kB |
+| Import                                                | Size    | Budget |
+| ----------------------------------------------------- | ------- | ------ |
+| `import { Switch } from '@oyinbayode/keyline'`        | 624 B   | 750 B  |
+| `import { Switch } from '@oyinbayode/keyline/switch'` | 624 B   | 750 B  |
+| `@oyinbayode/keyline/primitives` (all)                | 1.49 kB | 1.8 kB |
+| `@oyinbayode/keyline` (everything)                    | 1.77 kB | 2.2 kB |
+| `@oyinbayode/keyline/styles.css`                      | 1.56 kB | 1.8 kB |
 
 ## Contributing
 
@@ -129,7 +129,7 @@ pnpm lint && pnpm typecheck && pnpm build && pnpm size
 
 ### Releasing
 
-Releases are automated with [Changesets](https://github.com/changesets/changesets). Merged changesets open a "Version Packages" PR; merging it publishes to npm and tags `keyline@x.y.z`. The workflow needs an `NPM_TOKEN` repository secret (an npm automation or granular token with publish rights to `keyline`).
+Releases are automated with [Changesets](https://github.com/changesets/changesets). Merged changesets open a "Version Packages" PR; merging it publishes to npm and tags `@oyinbayode/keyline@x.y.z`. The workflow needs an `NPM_TOKEN` repository secret (an npm automation or granular token with publish rights to `@oyinbayode/keyline`).
 
 ## License
 

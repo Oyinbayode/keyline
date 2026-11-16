@@ -22,8 +22,8 @@ import * as SwitchStories from './switch.stories';
 />
 
 ```tsx
-import { Switch } from 'keyline';
-import 'keyline/styles.css';
+import { Switch } from '@oyinbayode/keyline';
+import '@oyinbayode/keyline/styles.css';
 
 <label>
   <Switch defaultChecked onCheckedChange={(isOn) => save({ wifi: isOn })} />
@@ -153,11 +153,11 @@ Run against the [Keyboard test fixture](?path=/story/components-switch--keyboard
 
 Measured by `size-limit` (minified + brotli, React excluded) for v0.1.0:
 
-| Import                                         | Size    |
-| ---------------------------------------------- | ------- |
-| `import { Switch } from 'keyline/switch'`      | 624 B   |
-| `import { Switch } from 'keyline'`             | 624 B   |
-| `keyline/styles.css` (tokens + all components) | 1.56 kB |
+| Import                                                     | Size    |
+| ---------------------------------------------------------- | ------- |
+| `import { Switch } from '@oyinbayode/keyline/switch'`      | 624 B   |
+| `import { Switch } from '@oyinbayode/keyline'`             | 624 B   |
+| `@oyinbayode/keyline/styles.css` (tokens + all components) | 1.56 kB |
 
 ## Known limitations
 

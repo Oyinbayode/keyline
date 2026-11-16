@@ -1,4 +1,4 @@
-# keyline
+# @oyinbayode/keyline
 
 ## 0.1.0
 

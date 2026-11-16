@@ -12,7 +12,7 @@ export default defineConfig({
   plugins: [
     react(),
     // One bundled declaration file per entry, in both module flavours, so
-    // `require('keyline')` gets real CJS types instead of ESM types in disguise.
+    // `require('@oyinbayode/keyline')` gets real CJS types instead of ESM types in disguise.
     dts({
       tsconfigPath: './tsconfig.build.json',
       bundleTypes: true,

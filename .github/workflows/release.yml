@@ -2,7 +2,7 @@ name: Release
 
 # Changesets flow: merging changesets into main opens (or updates) a
 # "Version Packages" PR. Merging that PR bumps the version, publishes to npm,
-# and pushes the `keyline@x.y.z` tag and GitHub release.
+# and pushes the `@oyinbayode/keyline@x.y.z` tag and GitHub release.
 
 on:
   push:

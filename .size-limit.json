@@ -1,34 +1,34 @@
 [
   {
-    "name": "keyline (everything)",
+    "name": "@oyinbayode/keyline (everything)",
     "path": "dist/index.js",
     "import": "*",
     "ignore": ["react", "react-dom"],
     "limit": "2.2 kB"
   },
   {
-    "name": "keyline: Switch",
+    "name": "@oyinbayode/keyline: Switch",
     "path": "dist/index.js",
     "import": "{ Switch }",
     "ignore": ["react", "react-dom"],
     "limit": "750 B"
   },
   {
-    "name": "keyline/switch",
+    "name": "@oyinbayode/keyline/switch",
     "path": "dist/switch.js",
     "import": "{ Switch }",
     "ignore": ["react", "react-dom"],
     "limit": "750 B"
   },
   {
-    "name": "keyline/primitives",
+    "name": "@oyinbayode/keyline/primitives",
     "path": "dist/primitives.js",
     "import": "*",
     "ignore": ["react", "react-dom"],
     "limit": "1.8 kB"
   },
   {
-    "name": "keyline/styles.css",
+    "name": "@oyinbayode/keyline/styles.css",
     "path": "dist/styles.css",
     "rolldown": false,
     "limit": "1.8 kB"
