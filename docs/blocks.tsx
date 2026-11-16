@@ -345,7 +345,6 @@ export function StateWithoutStripes() {
           {crops.map((entry, index) => (
             <li key={entry} aria-current={index === 1 ? 'page' : undefined}>
               {entry}
-              {index === 1 && <span aria-hidden="true">02</span>}
             </li>
           ))}
         </ul>

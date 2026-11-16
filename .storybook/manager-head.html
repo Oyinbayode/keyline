@@ -111,40 +111,6 @@
     color: var(--kl-manager-accent);
   }
 
-  /*
-   * Two-digit position among siblings. The sidebar is one flat list in which
-   * a component's entries follow its row, so one counter for the whole list,
-   * set back to 0 at every component row and section heading, numbers each
-   * component's entries from 01. counter-set, not counter-reset: a reset on a
-   * sibling opens a nested scope that Chromium did not carry to the rows after it.
-   */
-  .sidebar-container {
-    counter-reset: kl-entry;
-  }
-
-  .sidebar-container :is(.sidebar-subheading, .sidebar-item[data-nodetype='component']) {
-    counter-set: kl-entry 0;
-  }
-
-  .sidebar-container .sidebar-item:is([data-nodetype='document'], [data-nodetype='story']) {
-    counter-increment: kl-entry;
-  }
-
-  .sidebar-container .sidebar-item[data-selected='true']::after {
-    content: counter(kl-entry, decimal-leading-zero);
-    position: absolute;
-    inset-block: 0;
-    inset-inline-end: 8px;
-    display: flex;
-    align-items: center;
-    color: var(--kl-manager-accent);
-    font-family: 'JetBrains Mono', ui-monospace, monospace;
-    font-size: 10px;
-    font-weight: 400;
-    letter-spacing: 0.04em;
-    pointer-events: none;
-  }
-
   /* Keyboard focus gets the same double ring as the components. */
   .sidebar-container .sidebar-item a:focus-visible {
     outline: 2px solid transparent;

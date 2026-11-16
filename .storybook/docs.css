@@ -947,8 +947,6 @@ body {
 
 .kl-crop-sample li {
   position: relative;
-  display: flex;
-  justify-content: space-between;
   padding: var(--kl-space-1) var(--kl-space-2);
   color: var(--kl-color-muted);
 }
@@ -974,10 +972,4 @@ body {
     linear-gradient(var(--kl-crop), var(--kl-crop)) right bottom / 7px 1px,
     linear-gradient(var(--kl-crop), var(--kl-crop)) right bottom / 1px 7px;
   background-repeat: no-repeat;
-}
-
-.kl-crop-sample li span {
-  color: var(--kl-color-accent);
-  font-family: var(--kl-docs-mono);
-  font-size: 10px;
 }
