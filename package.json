@@ -10,7 +10,8 @@
     "components",
     "switch",
     "tabs",
-    "dialog"
+    "dialog",
+    "toast"
   ],
   "homepage": "https://oyinbayode.github.io/keyline/",
   "bugs": "https://github.com/Oyinbayode/keyline/issues",
@@ -66,6 +67,16 @@
       "require": {
         "types": "./dist/tabs.d.cts",
         "default": "./dist/tabs.cjs"
+      }
+    },
+    "./toast": {
+      "import": {
+        "types": "./dist/toast.d.mts",
+        "default": "./dist/toast.js"
+      },
+      "require": {
+        "types": "./dist/toast.d.cts",
+        "default": "./dist/toast.cjs"
       }
     },
     "./primitives": {

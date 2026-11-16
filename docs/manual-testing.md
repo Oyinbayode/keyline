@@ -62,3 +62,23 @@ Steps (from the Dialog docs page), against Components → Dialog → Keyboard te
 | TalkBack _x.y_ | Chrome _x_  | Android _x_    |      | 0.2.0           | Pending |                            |
 
 When a row passes, change the matching "Manual" row in `src/components/dialog/dialog.mdx` from `pending` to `pass`.
+
+## Toast
+
+Steps (from the Toast docs page), against Components → Toast → Keyboard test fixture:
+
+1. Activate "Show neutral". Expect "Draft saved" to be read once, and focus to stay on the button.
+2. Activate "Show danger". Expect "Error: Upload failed" to interrupt whatever was being read.
+3. Activate "Show in half a second", then type in "Message". Expect the announcement without the caret leaving the field.
+4. Press F8. Expect "Notifications (F8)", region; Tab to reach "Dismiss: …".
+5. Press Esc on a toast. Expect it to go and focus to move to the next toast, or back to "Message".
+6. Open "Open settings", then "Save settings". Expect "Success: Settings saved" to be read while the dialog is open, and its "Dismiss" button to work.
+7. TalkBack: swipe to the toast list. Expect the toasts to be readable and the timer to wait while one is focused.
+8. Visual: tone keylines and icon shapes distinguishable in both light and dark themes.
+
+| Screen reader  | Browser     | OS             | Date | Keyline version | Result  | What was announced / notes |
+| -------------- | ----------- | -------------- | ---- | --------------- | ------- | -------------------------- |
+| Orca _x.y_     | Firefox _x_ | Linux _distro_ |      | 0.2.0           | Pending |                            |
+| TalkBack _x.y_ | Chrome _x_  | Android _x_    |      | 0.2.0           | Pending |                            |
+
+When a row passes, change the matching "Manual" row in `src/components/toast/toast.mdx` from `pending` to `pass`.
