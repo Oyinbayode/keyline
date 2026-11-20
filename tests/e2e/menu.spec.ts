@@ -399,6 +399,41 @@ test.describe('Menu display preferences', () => {
     });
   });
 
+  test('keyboard focus adds an inset blue-9 ring on all four sides; pointer focus does not', async ({
+    page,
+  }) => {
+    const ring = (name: string) =>
+      item(page, name).evaluate((element) => {
+        const style = getComputedStyle(element);
+        return {
+          style: style.outlineStyle,
+          width: style.outlineWidth,
+          offset: style.outlineOffset,
+          colour: style.outlineColor,
+        };
+      });
+
+    await page.goto('/iframe.html?id=components-menu--basic&viewMode=story&globals=theme:light');
+    await button(page, 'Edit').focus();
+    await page.keyboard.press('Enter');
+    await page.keyboard.press('ArrowDown');
+    await expect(item(page, 'Copy')).toBeFocused();
+    // Light theme blue-9 #1f56e0.
+    expect(await ring('Copy')).toEqual({
+      style: 'solid',
+      width: '2px',
+      offset: '-2px',
+      colour: 'rgb(31, 86, 224)',
+    });
+    // A fresh page: after any key press, browsers keep :focus-visible on focus moved by script.
+    await page.reload();
+    await button(page, 'Edit').click();
+    expect((await ring('Cut')).style).toBe('none');
+    await item(page, 'Paste').hover();
+    await expect(item(page, 'Paste')).toBeFocused();
+    expect((await ring('Paste')).style).toBe('none');
+  });
+
   test('forced colours: Highlight on the active item, a visible border and separator', async ({
     page,
     browserName,
@@ -406,7 +441,8 @@ test.describe('Menu display preferences', () => {
     test.skip(browserName !== 'chromium', 'Only Chromium can emulate forced-colors.');
     await page.emulateMedia({ forcedColors: 'active' });
     await openStory(page, 'keyboard-fixture');
-    await button(page, 'Actions').click();
+    await button(page, 'Actions').focus();
+    await page.keyboard.press('Enter');
 
     const styles = await menuOf(page, 'Actions').evaluate((menu) => {
       const probe = document.createElement('div');
@@ -418,6 +454,7 @@ test.describe('Menu display preferences', () => {
       const result = {
         activeMatches:
           active.backgroundColor === system.backgroundColor && active.color === system.color,
+        ring: active.outlineStyle,
         border: getComputedStyle(menu).borderTopWidth,
         separator: separator.borderTopWidth,
       };
@@ -425,6 +462,11 @@ test.describe('Menu display preferences', () => {
       return result;
     });
 
-    expect(styles).toEqual({ activeMatches: true, border: '1px', separator: '1px' });
+    expect(styles).toEqual({
+      activeMatches: true,
+      ring: 'solid',
+      border: '1px',
+      separator: '1px',
+    });
   });
 });

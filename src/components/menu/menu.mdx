@@ -67,6 +67,7 @@ A menu looks like a button with a box of links under it, and that is how most ar
 - **<kbd>Esc</kbd> closes only the menu.** Keyline handles <kbd>Esc</kbd> on the menu itself, which also stops the browser's own close request, so a menu inside a Keyline Dialog closes without closing the dialog. A second <kbd>Esc</kbd> closes the dialog.
 - **The top layer, without a portal.** The menu is a native popover (`popover="auto"`, `showPopover()`), so it renders above everything, outside every `overflow` and `transform`, with no `z-index`. It stays where it is written in the DOM, so inside a modal dialog it is part of the dialog and not inert. The browser closes it on a click outside, and React state follows: `onOpenChange(false)` is called, and a controlled parent that keeps `open` true gets it shown again.
 - **Placed by CSS, mirrored in RTL.** CSS anchor positioning puts the menu under the trigger, lined up with its inline start edge (the right edge under `dir="rtl"`), and `position-try-fallbacks` flips it above or to the other edge when there is no room. Where anchor positioning is missing, a small measured placement does the same and follows scroll and resize.
+- **A focus ring for the keyboard.** The active item is a full-width slate-4 fill, which follows the pointer too. The fill alone is faint against the menu surface (about 1.2:1 in dark mode), so keyboard focus also draws a 2px blue-9 keyline ring inset on all four sides of the item, 5:1 or more against the surface and the fill in both themes. It is drawn on `:focus-visible`, so moving the pointer over items does not show it.
 - **Checked state by shape and weight.** Checkbox items show a tick and radio items a dot, in a fixed gutter at the inline start, and checked labels are set in weight 500. The marks are drawn with borders, so forced-colours mode keeps them, and `aria-checked` carries the state to assistive technology.
 - **Disabled items stay focusable.** A disabled item has `aria-disabled="true"`, is reached by the arrow keys and typeahead, is announced as unavailable, and does nothing when activated. The APG recommends this for menus, because a menu is a short list read one item at a time: an item that silently disappears from the arrow-key order leaves the user unsure the command exists at all. Tabs make the other choice (disabled tabs are skipped), because a tab list is a navigation row whose disabled entries are still read in browse mode.
 
@@ -146,7 +147,7 @@ An `onSelect` that calls `event.preventDefault()` keeps the menu open, here for 
 
 `Menu.CheckboxItem` and `Menu.RadioGroup` are controlled only: what they show is app state that already lives outside the menu. A `Menu.Label` inside a `Menu.Group` or `Menu.RadioGroup` names that group.
 
-Styling hooks: `data-state="open" | "closed"` on the trigger and the menu, `:popover-open` on the open menu, and `aria-checked` and `aria-disabled` on items.
+Styling hooks: `data-state="open" | "closed"` on the trigger and the menu, `:popover-open` on the open menu, `aria-checked` and `aria-disabled` on items, and `:focus` (the fill) and `:focus-visible` (the ring) on the active item.
 
 <ArgTypes of={MenuStories} />
 
@@ -204,7 +205,7 @@ The virtual screen reader counts positions among items of the same role, and sta
 | Keyboard: open keys, arrows with wrap, Home/End, typeahead, Esc, Tab and Shift+Tab, Enter and Space activation | Playwright, Chromium and Firefox                                      | <Status value="pass" />    |
 | Pointer: hover focus, click outside, slow click on the trigger, one menu at a time                             | Playwright, Chromium and Firefox                                      | <Status value="pass" />    |
 | Placement, flipping at the viewport edge and scroll, on CSS anchor positioning and on the measured fallback    | Playwright, Chromium and Firefox                                      | <Status value="pass" />    |
-| Inside a Keyline Dialog, RTL by `dir` alone, active fill, reduced motion, forced colours                       | Playwright, Chromium and Firefox (forced colours: Chromium only)      | <Status value="pass" />    |
+| Inside a Keyline Dialog, RTL by `dir` alone, active fill, keyboard-only ring, reduced motion, forced colours   | Playwright, Chromium and Firefox (forced colours: Chromium only)      | <Status value="pass" />    |
 | Announced role, name, state and description; closed content not read                                           | Guidepup virtual screen reader                                        | <Status value="pass" />    |
 | axe-core on every story, light and dark themes                                                                 | Playwright + @axe-core/playwright, Chromium and Firefox               | <Status value="pass" />    |
 | Manual: Orca + Firefox                                                                                         | Linux desktop                                                         | <Status value="pending" /> |
@@ -245,4 +246,5 @@ Measured by `size-limit` (minified + brotli, React excluded):
 - **Shortcuts are text only.** `shortcut` shows and announces the keys but does not listen for them.
 - **Checkbox and radio items are controlled only.** Keep their state in your component.
 - **Content stays mounted while closed,** so the exit transition can play. Effects inside items run even while the menu is closed.
+- **The ring stays for pointer moves after a key press.** Browsers keep `:focus-visible` on focus moved by script once the keyboard has been used, so after an arrow key, moving the pointer over items carries the ring with it until the next click. Pointer-only use never shows it.
 - **Real Windows High Contrast has not been checked by hand,** only emulated.

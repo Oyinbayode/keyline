@@ -63,6 +63,17 @@
   color: var(--kl-slate-12);
 }
 
+/*
+ * The fill is too faint to be a focus indicator on its own (about 1.2:1 on
+ * the surface in dark mode), so keyboard focus adds an inset keyline ring on
+ * all four sides, blue-9 at 3:1 or more on slate-2 and slate-4 in both
+ * themes. :focus-visible leaves it off when the pointer moved focus there.
+ */
+.kl-menu-item:focus-visible {
+  outline: 2px solid var(--kl-blue-9);
+  outline-offset: -2px;
+}
+
 .kl-menu-item[aria-disabled='true'] {
   color: var(--kl-slate-9);
 }
@@ -139,6 +150,10 @@
     forced-color-adjust: none;
     background-color: Highlight;
     color: HighlightText;
+  }
+
+  .kl-menu-item:focus-visible {
+    outline-color: HighlightText;
   }
 
   /* The item opts out of forced colours, so its parts must follow its system colour too. */
