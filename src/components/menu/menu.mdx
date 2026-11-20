@@ -1,0 +1,248 @@
+import { ArgTypes, Canvas, Meta } from '@storybook/addon-docs/blocks';
+import { Datasheet, ProofSheet, Status } from '../../../docs/blocks';
+import * as MenuStories from './menu.stories';
+
+<Meta of={MenuStories} />
+
+# Menu
+
+<div className="kl-lede">
+  A list of actions or options that opens from a button. Follows the{' '}
+  <a href="https://www.w3.org/WAI/ARIA/apg/patterns/menu-button/">
+    WAI-ARIA APG Menu Button pattern
+  </a>
+  , with the menu itself keyed as in the{' '}
+  <a href="https://www.w3.org/WAI/ARIA/apg/patterns/menubar/">Menu pattern</a>, and opens as a
+  native popover.
+</div>
+
+<Datasheet
+  entries={[
+    { label: 'Pattern', value: 'APG Menu Button' },
+    { label: 'Element', value: <code>{'<div role="menu" popover>'}</code> },
+    { label: 'Size', value: '2.58 kB' },
+    { label: 'Automated tests', value: '7/7 automated' },
+    { label: 'Screen readers', value: 'Orca and TalkBack pending' },
+  ]}
+/>
+
+```tsx
+import { Menu } from '@oyinbayode/keyline/menu';
+import '@oyinbayode/keyline/styles.css';
+
+<Menu.Root>
+  <Menu.Trigger>Edit</Menu.Trigger>
+  <Menu.Content>
+    <Menu.Item shortcut="Ctrl+C" onSelect={copy}>
+      Copy
+    </Menu.Item>
+    <Menu.Item onSelect={paste}>Paste</Menu.Item>
+    <Menu.Separator />
+    <Menu.CheckboxItem checked={wrap} onCheckedChange={setWrap}>
+      Wrap lines
+    </Menu.CheckboxItem>
+  </Menu.Content>
+</Menu.Root>;
+```
+
+## Problem
+
+A menu looks like a button with a box of links under it, and that is how most are built. Then the keyboard and the screen reader find out:
+
+- **A `<div>` that opens on click, with links inside and no roles.** Nothing says the button opens anything, and nothing says what opened. A screen reader hears "link, Copy, link, Paste" somewhere later on the page, if it finds them at all.
+- **Arrow keys not implemented, so every item is a tab stop.** The user has to <kbd>Tab</kbd> through every item to get past the menu, and screen readers that switch to application mode inside `role="menu"` (as the role tells them to) press <kbd>↓</kbd> and get nothing.
+- **Focus not moved into the menu, or not returned.** The menu opens but focus stays on the button, so the keyboard user is still behind it. Or it closes and focus drops to `<body>`, and they start again from the top of the page.
+- **<kbd>Esc</kbd> ignored.** The one universal way out of a popup does nothing, or it closes the menu and also closes the dialog the menu was in.
+- **Clipped or lost.** A menu inside a card with `overflow: hidden` is cut off at the card's edge. A menu portalled to `<body>` escapes the clipping but lands outside a modal dialog, where the browser makes it inert: it shows, and nothing in it can be clicked or focused.
+- **`role="menu"` for site navigation.** A header "menu" of links given `role="menu"` and `role="menuitem"` stops screen readers from treating them as links: no link list, no "visited", and arrow keys the page never handles. **Navigation links are not a menu.** Use a `<nav>` with a list of links, and a disclosure button if it needs to collapse.
+- **Checked state shown by an icon only.** A tick drawn next to "Show ruler" with no `aria-checked` is invisible to screen readers, and a tick drawn in colour alone disappears in forced-colours mode.
+
+## Solution
+
+`Menu.Trigger` is a `<button>` that says what it opens, and `Menu.Content` is a `role="menu"` that the browser shows as a native popover anchored to the trigger.
+
+- **Roles, names and state from the APG.** The trigger has `aria-haspopup="menu"`, `aria-expanded`, and `aria-controls` while the menu is open. The menu is labelled by the trigger, so it is announced as "Edit, menu". Items are `menuitem`, `menuitemcheckbox` or `menuitemradio`, checkable items carry `aria-checked`, groups are `role="group"` named by their `Menu.Label`, and separators are `role="separator"`.
+- **One tab stop, arrow keys inside.** Items are focused by script only (`tabIndex={-1}`), with roving DOM focus rather than `aria-activedescendant`, so every screen reader follows focus without extra support. <kbd>↓</kbd> and <kbd>↑</kbd> move with wrap, <kbd>Home</kbd> and <kbd>End</kbd> jump to the ends, and typing jumps to the next item that starts with what was typed. <kbd>Tab</kbd> closes the menu and lets focus move on.
+- **Focus moved in and back.** <kbd>Enter</kbd>, <kbd>Space</kbd> or <kbd>↓</kbd> on the trigger opens the menu on the first item; <kbd>↑</kbd> opens it on the last. Choosing an item, or <kbd>Esc</kbd>, closes the menu and puts focus back on the trigger.
+- **<kbd>Esc</kbd> closes only the menu.** Keyline handles <kbd>Esc</kbd> on the menu itself, which also stops the browser's own close request, so a menu inside a Keyline Dialog closes without closing the dialog. A second <kbd>Esc</kbd> closes the dialog.
+- **The top layer, without a portal.** The menu is a native popover (`popover="auto"`, `showPopover()`), so it renders above everything, outside every `overflow` and `transform`, with no `z-index`. It stays where it is written in the DOM, so inside a modal dialog it is part of the dialog and not inert. The browser closes it on a click outside, and React state follows: `onOpenChange(false)` is called, and a controlled parent that keeps `open` true gets it shown again.
+- **Placed by CSS, mirrored in RTL.** CSS anchor positioning puts the menu under the trigger, lined up with its inline start edge (the right edge under `dir="rtl"`), and `position-try-fallbacks` flips it above or to the other edge when there is no room. Where anchor positioning is missing, a small measured placement does the same and follows scroll and resize.
+- **Checked state by shape and weight.** Checkbox items show a tick and radio items a dot, in a fixed gutter at the inline start, and checked labels are set in weight 500. The marks are drawn with borders, so forced-colours mode keeps them, and `aria-checked` carries the state to assistive technology.
+- **Disabled items stay focusable.** A disabled item has `aria-disabled="true"`, is reached by the arrow keys and typeahead, is announced as unavailable, and does nothing when activated. The APG recommends this for menus, because a menu is a short list read one item at a time: an item that silently disappears from the arrow-key order leaves the user unsure the command exists at all. Tabs make the other choice (disabled tabs are skipped), because a tab list is a navigation row whose disabled entries are still read in browse mode.
+
+## Examples
+
+### Actions with shortcuts
+
+`shortcut` is display text only, set in mono at the inline end and read as the item's description ("Copy, menu item, Ctrl+C"). Wiring the key itself is up to the app.
+
+<ProofSheet figure={1} title="Actions with shortcuts">
+  <Canvas of={MenuStories.Basic} />
+</ProofSheet>
+
+### Checkbox items
+
+Checkbox and radio items stay open when activated, so several settings can be changed in one visit.
+
+<ProofSheet figure={2} title="Checkbox items">
+  <Canvas of={MenuStories.CheckboxItems} />
+</ProofSheet>
+
+### Radio group
+
+<ProofSheet figure={3} title="Radio group">
+  <Canvas of={MenuStories.RadioItems} />
+</ProofSheet>
+
+### Groups, labels and separators
+
+<ProofSheet figure={4} title="Groups, labels and separators">
+  <Canvas of={MenuStories.Groups} />
+</ProofSheet>
+
+### Disabled items
+
+<ProofSheet figure={5} title="Disabled items">
+  <Canvas of={MenuStories.Disabled} />
+</ProofSheet>
+
+### Keeping the menu open
+
+An `onSelect` that calls `event.preventDefault()` keeps the menu open, here for repeated zoom steps.
+
+<ProofSheet figure={6} title="Keeping the menu open">
+  <Canvas of={MenuStories.KeepOpen} />
+</ProofSheet>
+
+### Controlled
+
+<ProofSheet figure={7} title="Controlled">
+  <Canvas of={MenuStories.Controlled} />
+</ProofSheet>
+
+### Placement and flipping
+
+`side` (`'bottom'` or `'top'`) and `align` (`'start'` or `'end'`, logical) say where the menu prefers to go. Near the edge of the viewport it flips to the other side or edge rather than being cut off.
+
+<ProofSheet figure={8} title="Placement and flipping">
+  <Canvas of={MenuStories.Placement} />
+</ProofSheet>
+
+### Right to left
+
+<ProofSheet figure={9} title="Right to left">
+  <Canvas of={MenuStories.RightToLeft} />
+</ProofSheet>
+
+### Inside a dialog
+
+<ProofSheet figure={10} title="Inside a dialog">
+  <Canvas of={MenuStories.InsideDialog} />
+</ProofSheet>
+
+## Props
+
+`Menu.Root` renders no element. `Menu.Trigger` renders `<button type="button">`; `Menu.Content` a `<div role="menu" popover="auto">`; items, groups, labels and separators render `<div>`s. Each part passes other props (`className`, `style`, `aria-*`, `data-*`, event handlers, `ref`) to its element. An `onClick` on the trigger or an item that calls `event.preventDefault()` cancels the open or the activation.
+
+`Menu.CheckboxItem` and `Menu.RadioGroup` are controlled only: what they show is app state that already lives outside the menu. A `Menu.Label` inside a `Menu.Group` or `Menu.RadioGroup` names that group.
+
+Styling hooks: `data-state="open" | "closed"` on the trigger and the menu, `:popover-open` on the open menu, and `aria-checked` and `aria-disabled` on items.
+
+<ArgTypes of={MenuStories} />
+
+| Part                | Prop              | Type                         | Default    |
+| ------------------- | ----------------- | ---------------------------- | ---------- |
+| `Menu.Content`      | `side`            | `'bottom' \| 'top'`          | `'bottom'` |
+| `Menu.Content`      | `align`           | `'start' \| 'end'`           | `'start'`  |
+| `Menu.Item`         | `onSelect`        | `(event) => void`            |            |
+| `Menu.Item`         | `shortcut`        | `string`                     |            |
+| `Menu.Item` (all)   | `disabled`        | `boolean`                    | `false`    |
+| `Menu.CheckboxItem` | `checked`         | `boolean`                    | (required) |
+| `Menu.CheckboxItem` | `onCheckedChange` | `(checked: boolean) => void` |            |
+| `Menu.RadioGroup`   | `value`           | `string`                     | (required) |
+| `Menu.RadioGroup`   | `onValueChange`   | `(value: string) => void`    |            |
+| `Menu.RadioItem`    | `value`           | `string`                     | (required) |
+
+## Keyboard
+
+| Key                                 | Action                                                                                                |
+| ----------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| <kbd>Enter</kbd> / <kbd>Space</kbd> | On the trigger: opens the menu on the first item. On an item: activates it.                           |
+| <kbd>↓</kbd>                        | On the trigger: opens on the first item. In the menu: next item, wrapping, disabled included.         |
+| <kbd>↑</kbd>                        | On the trigger: opens on the last item. In the menu: previous item, wrapping.                         |
+| <kbd>Home</kbd> / <kbd>End</kbd>    | First / last item.                                                                                    |
+| A printable character               | Next item starting with the typed text. Repeat one letter to cycle; <kbd>Space</kbd> counts mid-word. |
+| <kbd>Esc</kbd>                      | Closes the menu and returns focus to the trigger. Does not close a dialog the menu is in.             |
+| <kbd>Tab</kbd>                      | Closes the menu and moves focus to the next control after the trigger.                                |
+
+Activating a plain item closes the menu unless its `onSelect` calls `event.preventDefault()`. Checkbox and radio items keep it open. Moving the pointer over an item focuses it.
+
+## Screen reader output
+
+What the [Guidepup virtual screen reader](https://www.guidepup.dev/docs/virtual) announces, asserted in `menu.screen-reader.test.tsx`:
+
+| Moment                            | Announcement                                                    |
+| --------------------------------- | --------------------------------------------------------------- |
+| The trigger                       | "button, Actions, not expanded, has popup menu"                 |
+| Opening, first item               | "menuitem, New file, Ctrl+N, position 1, set size 2"            |
+| A disabled item                   | "menuitem, Save, disabled, position 2, set size 2"              |
+| A checkbox item                   | "menuitemcheckbox, Wrap lines, checked, position 1, set size 1" |
+| Toggling it with <kbd>Space</kbd> | "menuitemcheckbox, Wrap lines, not checked, …"                  |
+| A radio item                      | "menuitemradio, Small, checked, position 1, set size 2"         |
+| Reading the open menu             | "menu, Actions, orientated vertically", "group, Text size"      |
+| <kbd>Esc</kbd>                    | "button, Actions, not expanded, has popup menu"                 |
+| Reading on past a closed menu     | Nothing: closed menu content is not in the accessibility tree   |
+
+The virtual screen reader counts positions among items of the same role, and starts a new count after a separator; real screen readers differ (most count every item in the menu). It reads a separator's implicit range ("max value 100, min value 0"), which real screen readers do not. The order and wording of announcements in Orca and TalkBack have not been checked by hand yet (see the checklist).
+
+## What's tested
+
+| Check                                                                                                          | Environment                                                           | Status                     |
+| -------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- | -------------------------- |
+| ARIA wiring; open, focus and activation from the keyboard and pointer; typeahead; state sync; refs             | Vitest + Testing Library, jsdom (with a visibility-only popover stub) | <Status value="pass" />    |
+| axe-core, 0 violations: closed, open with a disabled item and shortcut, checkbox and radio groups              | vitest-axe (axe-core 4.14), jsdom                                     | <Status value="pass" />    |
+| Keyboard: open keys, arrows with wrap, Home/End, typeahead, Esc, Tab and Shift+Tab, Enter and Space activation | Playwright, Chromium and Firefox                                      | <Status value="pass" />    |
+| Pointer: hover focus, click outside, slow click on the trigger, one menu at a time                             | Playwright, Chromium and Firefox                                      | <Status value="pass" />    |
+| Placement, flipping at the viewport edge and scroll, on CSS anchor positioning and on the measured fallback    | Playwright, Chromium and Firefox                                      | <Status value="pass" />    |
+| Inside a Keyline Dialog, RTL by `dir` alone, active fill, reduced motion, forced colours                       | Playwright, Chromium and Firefox (forced colours: Chromium only)      | <Status value="pass" />    |
+| Announced role, name, state and description; closed content not read                                           | Guidepup virtual screen reader                                        | <Status value="pass" />    |
+| axe-core on every story, light and dark themes                                                                 | Playwright + @axe-core/playwright, Chromium and Firefox               | <Status value="pass" />    |
+| Manual: Orca + Firefox                                                                                         | Linux desktop                                                         | <Status value="pending" /> |
+| Manual: TalkBack + Chrome                                                                                      | Android                                                               | <Status value="pending" /> |
+
+Both Chromium and Firefox in the test run support CSS anchor positioning, so the measured fallback is exercised by hiding that support from the page (`CSS.supports` reports it missing). jsdom has no popover API, so unit tests use a stub that only shows and hides the element and queues the `toggle` event. Not tested yet: NVDA, JAWS, Narrator, VoiceOver (macOS and iOS), Safari, and real Windows High Contrast.
+
+### Manual checklist (Orca + Firefox, TalkBack + Chrome)
+
+Run against the [Keyboard test fixture](?path=/story/components-menu--keyboard-fixture) story and record results in `docs/manual-testing.md`.
+
+1. Tab from "Before" to "Actions". Expect a button that says it has a popup menu and is collapsed.
+2. Press <kbd>Enter</kbd>. Expect "Actions", menu, and "New file" with its shortcut.
+3. Press <kbd>↓</kbd> twice. Expect "Save", announced as unavailable or dimmed. Press <kbd>Enter</kbd>: nothing happens.
+4. Type <kbd>D</kbd> twice. Expect "Duplicate", then "Delete".
+5. Press <kbd>Esc</kbd>. Expect the menu to close and "Actions", collapsed, to be announced.
+6. Open "Format". Press <kbd>Space</kbd> on "Wrap lines". Expect "checked" without the menu closing.
+7. Arrow to "Large" and press <kbd>Enter</kbd>. Expect it to be announced as checked, in a group named "Text size".
+8. TalkBack: double-tap "Actions", swipe through the items, double-tap "Duplicate". Expect the menu to close and "Last action: Duplicate" below.
+9. Visual: the active item fill, the tick and dot, and the disabled item are clear in both light and dark themes.
+
+## Bundle size
+
+Measured by `size-limit` (minified + brotli, React excluded):
+
+| Import                                                     | Size    |
+| ---------------------------------------------------------- | ------- |
+| `import { Menu } from '@oyinbayode/keyline/menu'`          | 2.57 kB |
+| `import { Menu } from '@oyinbayode/keyline'`               | 2.58 kB |
+| `@oyinbayode/keyline/styles.css` (tokens + all components) | 3.36 kB |
+
+## Known limitations
+
+- **No submenus.** Items cannot open nested menus yet, so <kbd>→</kbd> and <kbd>←</kbd> do nothing inside the menu.
+- **No context menus.** The menu opens from a button only, not from a right-click or the context-menu key.
+- **No menubar.** A horizontal, always-visible `role="menubar"` is a separate pattern and is not covered.
+- **No press-drag-release selection.** Pressing on the trigger, dragging to an item and releasing does not choose it; click the trigger, then the item.
+- **Shortcuts are text only.** `shortcut` shows and announces the keys but does not listen for them.
+- **Checkbox and radio items are controlled only.** Keep their state in your component.
+- **Content stays mounted while closed,** so the exit transition can play. Effects inside items run even while the menu is closed.
+- **Real Windows High Contrast has not been checked by hand,** only emulated.
