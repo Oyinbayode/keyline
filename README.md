@@ -131,6 +131,8 @@ Minified + brotli, React excluded, enforced in CI by `size-limit` (see `.size-li
 
 ## Contributing
 
+See [CONTRIBUTING.md](CONTRIBUTING.md) for setup and the pull request standard.
+
 ```sh
 pnpm install
 pnpm storybook          # docs at localhost:6006
