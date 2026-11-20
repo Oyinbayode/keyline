@@ -1,0 +1,204 @@
+import { ArgTypes, Canvas, Meta } from '@storybook/addon-docs/blocks';
+import { Datasheet, ProofSheet, Status } from '../../../docs/blocks';
+import * as ToastStories from './toast.stories';
+
+<Meta of={ToastStories} />
+
+# Toast
+
+<div className="kl-lede">
+  Brief status messages that appear without interrupting what the user is doing. Built on the{' '}
+  <a href="https://www.w3.org/WAI/ARIA/apg/patterns/alert/">WAI-ARIA APG Alert pattern</a> and WCAG{' '}
+  <a href="https://www.w3.org/WAI/WCAG22/Understanding/timing-adjustable">2.2.1</a>,{' '}
+  <a href="https://www.w3.org/WAI/WCAG22/Understanding/no-timing">2.2.3</a> and{' '}
+  <a href="https://www.w3.org/WAI/WCAG22/Understanding/status-messages">4.1.3</a>.
+</div>
+
+<Datasheet
+  entries={[
+    { label: 'Pattern', value: 'APG Alert + WCAG 4.1.3' },
+    { label: 'Element', value: <code>{'<section> + <ol>'}</code> },
+    { label: 'Size', value: '2.1 kB' },
+    { label: 'Automated tests', value: '6/6 automated' },
+    { label: 'Screen readers', value: 'Orca and TalkBack pending' },
+  ]}
+/>
+
+```tsx
+import { ToastProvider, useToast } from '@oyinbayode/keyline/toast';
+import '@oyinbayode/keyline/styles.css';
+
+<ToastProvider>
+  <App />
+</ToastProvider>;
+
+function SaveButton() {
+  const { toast } = useToast();
+  return <button onClick={() => toast({ title: 'Draft saved', tone: 'success' })}>Save</button>;
+}
+```
+
+## Problem
+
+A toast is a box that slides in and fades out. That is easy to build and easy to get wrong:
+
+- **It vanishes before a screen reader finishes.** A 3-second timer starts when the toast appears, not when someone has read it. Screen reader users hear half a sentence; people who read slowly or zoom in never see it at all.
+- **Focus is stolen from what the user was typing.** Moving focus to the toast so it gets "announced" yanks the caret out of the form field, and the next keystrokes go nowhere, or into the toast's buttons.
+- **Actions exist only in a disappearing toast.** "Undo" is offered for six seconds, then gone. Anyone who could not reach it in time (keyboard, switch, magnifier, screen reader users) has lost the only way to undo.
+- **No pause on hover or focus.** The toast disappears while the pointer is on it or while a keyboard user is tabbing to its button.
+- **Tone conveyed by colour alone.** Green for success and red for failure, with no other difference. It is lost for colour-blind users, in forced-colours mode, and to screen readers.
+- **Announcements doubled or missing.** A live region rendered _together with_ its text is often not announced at all, because screen readers only announce changes to regions they already know about. Marking the visible toast as a live region _and_ adding one elsewhere announces everything twice.
+- **Made inert by a modal.** A modal `<dialog>` makes everything outside it inert. A toast container on `<body>` goes silent and its close button stops working whenever a dialog is open, which is exactly when "Saved" matters most.
+
+## Solution
+
+`ToastProvider` renders a notifications landmark once; `useToast()` returns `toast()` and `dismiss()`.
+
+- **Two live regions, there from the start.** The provider renders a polite `role="status"` region and an assertive `role="alert"` region, visually hidden, before any toast exists. A toast is announced by adding its text there: neutral, success and warning politely; danger assertively. The text is removed a second later so browse mode does not read every toast twice.
+- **The visible toast is not a live region.** It is a plain list item in an `<ol>` inside a `role="region"` landmark called "Notifications (F8)". Each toast is announced exactly once, through the hidden region.
+- **Focus never moves on its own.** A toast never takes focus, so typing carries on. To get to the toasts, press <kbd>F8</kbd>: focus jumps to the landmark, and <kbd>Tab</kbd> reaches each toast's buttons.
+- **Time that waits for people.** The default is 6 seconds and the minimum 5 seconds: shorter durations are raised, with a development warning. The countdown pauses while the pointer is over any toast, while focus is inside the landmark, and while the window is in the background or the tab is hidden. It resumes with the time that was left.
+- **Actions never time out.** A toast with an `action` stays until it is used or dismissed. **The action must also be available somewhere that does not disappear** (an Archive page, a history list, the item's own menu). A toast is a shortcut, never the only way.
+- **Tone by shape, colour, and words.** Each tone has a 2px inline-start keyline in its semantic colour and an icon with its own shape: a circle for neutral, a tick for success, a triangle for warning, a diamond for danger. Non-neutral icons are labelled ("Success", "Warning", "Error"), and the announcement starts with the same word.
+- **Dismissal that keeps your place.** Every toast has a close button named after it ("Dismiss: Draft saved"). <kbd>Esc</kbd> dismisses the focused toast. If focus was on that toast, it moves to the next toast, else back to where it was before you entered the landmark.
+- **Works under a modal.** While a Keyline `Dialog` is open, the landmark and both live regions are rendered _inside_ the topmost open dialog, so they are not inert. They move back when it closes. Announcements already made are not repeated after a move, and running timers keep their remaining time.
+- **Queued, not stacked forever.** At most `limit` toasts (default 3) show at once; the rest wait in order and are announced when they appear.
+
+## Examples
+
+### Tones
+
+<ProofSheet figure={1} title="Tones">
+  <Canvas of={ToastStories.Tones} />
+</ProofSheet>
+
+### With an action
+
+The same undo is available in the archive list, which does not disappear.
+
+<ProofSheet figure={2} title="With an action">
+  <Canvas of={ToastStories.WithAction} />
+</ProofSheet>
+
+### Queue above the limit
+
+<ProofSheet figure={3} title="Queue">
+  <Canvas of={ToastStories.Queue} />
+</ProofSheet>
+
+### Custom layout
+
+Pass `renderToast` and build each toast from `Toast.Root`, `Toast.Title`, `Toast.Description`, `Toast.Action` and `Toast.Close`. `Toast.Root` keeps the tone icon, Esc handling and state attributes.
+
+<ProofSheet figure={4} title="Custom layout">
+  <Canvas of={ToastStories.CustomLayout} />
+</ProofSheet>
+
+### While a dialog is open
+
+<ProofSheet figure={5} title="While a dialog is open">
+  <Canvas of={ToastStories.InsideADialog} />
+</ProofSheet>
+
+### Right to left
+
+The landmark is portalled to `<body>`, so it takes its direction from `<html dir>`. When only part of the page is right-to-left, pass `dir` to the provider.
+
+<ProofSheet figure={6} title="Right to left">
+  <Canvas of={ToastStories.RightToLeft} />
+</ProofSheet>
+
+## Props
+
+`ToastProvider` renders its children plus the landmark. `useToast()` returns:
+
+| Function         | Description                                                     |
+| ---------------- | --------------------------------------------------------------- |
+| `toast(options)` | Shows a toast (or queues it above `limit`) and returns its id.  |
+| `dismiss(id?)`   | Dismisses that toast, or every toast when called without an id. |
+
+| Option        | Type                                              | Default                   |
+| ------------- | ------------------------------------------------- | ------------------------- |
+| `title`       | `string`                                          | (required)                |
+| `description` | `string`                                          |                           |
+| `tone`        | `'neutral' \| 'success' \| 'warning' \| 'danger'` | `'neutral'`               |
+| `duration`    | `number` (ms, at least 5000; `Infinity` to stay)  | the provider's `duration` |
+| `action`      | `{ label: string; onClick: () => void }`          | (never auto-dismisses)    |
+
+Provider props:
+
+<ArgTypes of={ToastStories} />
+
+Styling hooks: `data-tone` and `data-state="open" | "closed"` on each `.kl-toast`; `--kl-toast-z-index` (default `1000`) for the landmark outside dialogs.
+
+## Keyboard
+
+| Key                                 | Action                                                                                  |
+| ----------------------------------- | --------------------------------------------------------------------------------------- |
+| <kbd>F8</kbd>                       | Moves focus to the notifications landmark, when there are toasts.                       |
+| <kbd>Tab</kbd>                      | From the landmark: through each toast's action and close buttons.                       |
+| <kbd>Esc</kbd>                      | Dismisses the toast that has focus. Inside a dialog, it does not also close the dialog. |
+| <kbd>Enter</kbd> / <kbd>Space</kbd> | On a button: runs the action, or dismisses.                                             |
+
+## Screen reader output
+
+What the [Guidepup virtual screen reader](https://www.guidepup.dev/docs/virtual) records, asserted in `toast.screen-reader.test.tsx`:
+
+| Moment                                              | Announcement                                                                |
+| --------------------------------------------------- | --------------------------------------------------------------------------- |
+| `toast({ title: 'Saved' })`                         | "polite: Saved", once                                                       |
+| `toast({ title: 'Upload failed', tone: 'danger' })` | "assertive: Error: Upload failed", once                                     |
+| A dialog opens, then a success toast fires          | "dialog, Settings", then "polite: Success: Synced"; "Saved" is not repeated |
+| Browsing to the landmark                            | "region, Notifications (F8)", "list", "listitem, … position 1, set size 1"  |
+| Inside a warning toast                              | "image, Warning", the title, "button, Dismiss: Saved"                       |
+
+Real screen readers do not speak the "polite:" / "assertive:" prefix; they read the text, and an assertive message interrupts speech. How long they wait before reading a polite message, and whether they read a moved region, differs between screen readers and has not been checked by hand yet.
+
+## What's tested
+
+| Check                                                                                                                            | Environment                                                      | Status                     |
+| -------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- | -------------------------- |
+| Live regions before any toast, one announcement per toast, timers, pause and resume, clamp, queue, focus on dismiss, dialog move | Vitest + Testing Library, jsdom, fake timers                     | <Status value="pass" />    |
+| axe-core, 0 violations: empty, every tone, with an action                                                                        | vitest-axe (axe-core 4.14), jsdom                                | <Status value="pass" />    |
+| Never takes focus mid-typing, F8, Tab, Esc with focus moving on, hover and focus pause, actions persist                          | Playwright, Chromium and Firefox (fake clock)                    | <Status value="pass" />    |
+| Inside a modal dialog: not inert, buttons work, Esc stays with the toast, moves back on close                                    | Playwright, Chromium and Firefox                                 | <Status value="pass" />    |
+| Position and RTL, tone keyline and icon shapes, reduced motion, forced colours                                                   | Playwright, Chromium and Firefox (forced colours: Chromium only) | <Status value="pass" />    |
+| Announcements once each, polite vs assertive, none repeated after moving into a dialog                                           | Guidepup virtual screen reader                                   | <Status value="pass" />    |
+| axe-core on every story, light and dark themes                                                                                   | Playwright + @axe-core/playwright, Chromium and Firefox          | <Status value="pass" />    |
+| Manual: Orca + Firefox                                                                                                           | Linux desktop                                                    | <Status value="pending" /> |
+| Manual: TalkBack + Chrome                                                                                                        | Android                                                          | <Status value="pending" /> |
+
+The story-wide axe sweep checks the story root; the landmark is portalled outside it, so its markup is covered by the vitest-axe runs instead. Not tested yet: NVDA, JAWS, Narrator, VoiceOver (macOS and iOS), Safari, and real Windows High Contrast.
+
+### Manual checklist (Orca + Firefox, TalkBack + Chrome)
+
+Run against the [Keyboard test fixture](?path=/story/components-toast--keyboard-fixture) story and record results in `docs/manual-testing.md`.
+
+1. Activate "Show neutral". Expect "Draft saved" to be read once, and focus to stay on the button.
+2. Activate "Show danger". Expect "Error: Upload failed" to interrupt whatever was being read.
+3. Activate "Show in half a second", then type in "Message". Expect the announcement without the caret leaving the field.
+4. Press <kbd>F8</kbd>. Expect "Notifications (F8)", region; <kbd>Tab</kbd> to reach "Dismiss: …".
+5. Press <kbd>Esc</kbd> on a toast. Expect it to go and focus to move to the next toast, or back to "Message".
+6. Open "Open settings", then "Save settings". Expect "Success: Settings saved" to be read while the dialog is open, and its "Dismiss" button to work.
+7. TalkBack: swipe to the toast list. Expect the toasts to be readable and the timer to wait while one is focused.
+8. Visual: tone keylines and icon shapes distinguishable in both light and dark themes.
+
+## Bundle size
+
+Measured by `size-limit` (minified + brotli, React excluded):
+
+| Import                                                                | Size    |
+| --------------------------------------------------------------------- | ------- |
+| `import { ToastProvider, useToast } from '@oyinbayode/keyline/toast'` | 2.1 kB  |
+| `import { ToastProvider, useToast } from '@oyinbayode/keyline'`       | 2.09 kB |
+| `@oyinbayode/keyline/styles.css` (tokens + all components)            | 2.75 kB |
+
+## Known limitations
+
+- **Only Keyline dialogs are tracked.** The landmark moves into Keyline `Dialog`s. A modal opened with another library or a bare `showModal()` will still make it inert.
+- **English labels.** The tone words ("Success", "Warning", "Error") and the "Dismiss:" prefix are English; localisation props are not available yet. Pass a custom `Toast.Close` with your own `aria-label` meanwhile.
+- **Theme and font come from the page.** The landmark is portalled to `<body>`, so it follows `data-theme` and the font set on `<html>` or `<body>`, not on the provider's ancestors. Inside a dialog it follows the dialog's.
+- **One landmark per provider.** Render one `ToastProvider` near the root. Several providers render several landmarks with the same name.
+- **No swipe to dismiss,** by design: it has no keyboard equivalent and is easy to trigger by accident. Use the close button.
+- **Timers pause on window blur and hidden tabs,** which needs the page to receive those events; a toast in a background iframe that never gets focus events keeps counting.
+- **Real Windows High Contrast has not been checked by hand,** only emulated.

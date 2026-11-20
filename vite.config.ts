@@ -7,6 +7,7 @@ const entries = {
   dialog: 'src/components/dialog/index.ts',
   switch: 'src/components/switch/index.ts',
   tabs: 'src/components/tabs/index.ts',
+  toast: 'src/components/toast/index.ts',
   primitives: 'src/primitives/index.ts',
 };
 

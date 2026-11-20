@@ -1,0 +1,192 @@
+/*
+ * The viewport is fixed to the bottom inline-end corner. Outside a dialog it
+ * needs a z-index to sit above page content; inside one it is already in the
+ * top layer with the dialog. It lets clicks through except on the toasts.
+ *
+ * Tone is shown twice, never by colour alone: a 2px inline-start keyline in
+ * the semantic colour and an icon whose shape differs per tone.
+ */
+.kl-toast-viewport {
+  position: fixed;
+  inset-block-end: var(--kl-space-4);
+  inset-inline-end: var(--kl-space-4);
+  z-index: var(--kl-toast-z-index, 1000);
+  inline-size: min(24rem, calc(100vw - 2 * var(--kl-space-4)));
+  pointer-events: none;
+}
+
+.kl-toast-viewport:focus-visible {
+  outline: var(--kl-focus-ring-width) solid transparent;
+  outline-offset: var(--kl-focus-ring-offset);
+  border-radius: var(--kl-radius-md);
+  box-shadow: var(--kl-focus-ring);
+}
+
+.kl-toast-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--kl-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.kl-toast {
+  --kl-toast-tone: var(--kl-slate-9);
+
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: 1rem 1fr auto;
+  column-gap: var(--kl-space-3);
+  align-items: start;
+  padding: var(--kl-space-3) var(--kl-space-3) var(--kl-space-3) var(--kl-space-4);
+  border: 1px solid var(--kl-slate-6);
+  border-inline-start: 2px solid var(--kl-toast-tone);
+  border-radius: var(--kl-radius-md);
+  background-color: var(--kl-slate-3);
+  box-shadow: var(--kl-shadow-floating);
+  color: var(--kl-color-text);
+  font-family: var(--kl-font-family);
+  font-size: 0.875rem;
+  line-height: 1.375rem;
+  pointer-events: auto;
+  transition:
+    opacity var(--kl-duration-base) var(--kl-ease),
+    transform var(--kl-duration-base) var(--kl-ease);
+}
+
+.kl-toast[data-tone='success'] {
+  --kl-toast-tone: var(--kl-success);
+}
+
+.kl-toast[data-tone='warning'] {
+  --kl-toast-tone: var(--kl-warning);
+}
+
+.kl-toast[data-tone='danger'] {
+  --kl-toast-tone: var(--kl-danger);
+}
+
+.kl-toast[data-state='closed'] {
+  opacity: 0;
+  transform: translateY(0.25rem);
+}
+
+@starting-style {
+  .kl-toast {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+}
+
+.kl-toast:focus-visible {
+  outline: var(--kl-focus-ring-width) solid transparent;
+  outline-offset: var(--kl-focus-ring-offset);
+  box-shadow: var(--kl-shadow-floating), var(--kl-focus-ring);
+}
+
+.kl-toast > * {
+  grid-column: 2;
+}
+
+.kl-toast-icon {
+  grid-column: 1;
+  grid-row: 1;
+  inline-size: 1rem;
+  block-size: 1rem;
+  margin-block-start: 0.1875rem;
+  color: var(--kl-toast-tone);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.kl-toast-title {
+  margin: 0;
+  font-weight: 600;
+}
+
+.kl-toast-description {
+  margin: 0;
+  color: var(--kl-color-muted);
+}
+
+.kl-toast-action,
+.kl-toast-close {
+  all: unset;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--kl-radius-sm);
+  cursor: pointer;
+  transition:
+    background-color var(--kl-duration-fast) var(--kl-ease),
+    color var(--kl-duration-fast) var(--kl-ease);
+}
+
+.kl-toast-action {
+  justify-self: start;
+  margin-block-start: var(--kl-space-2);
+  padding: var(--kl-space-1) var(--kl-space-3);
+  border: 1px solid var(--kl-slate-8);
+  color: var(--kl-color-text);
+  font-weight: 500;
+}
+
+.kl-toast-close {
+  grid-column: 3;
+  grid-row: 1;
+  inline-size: 1.75rem;
+  block-size: 1.75rem;
+  margin: calc(-1 * var(--kl-space-1));
+  color: var(--kl-color-muted);
+}
+
+.kl-toast-close svg {
+  inline-size: 1rem;
+  block-size: 1rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+}
+
+.kl-toast-action:hover,
+.kl-toast-close:hover {
+  background-color: var(--kl-slate-4);
+  color: var(--kl-color-text);
+}
+
+.kl-toast-action:focus-visible,
+.kl-toast-close:focus-visible {
+  outline: var(--kl-focus-ring-width) solid transparent;
+  outline-offset: var(--kl-focus-ring-offset);
+  box-shadow: var(--kl-focus-ring);
+}
+
+/* Read by screen readers, never seen: the live regions that announce toasts. */
+.kl-visually-hidden {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (forced-colors: active) {
+  .kl-toast {
+    border-inline-start-width: 4px;
+  }
+
+  .kl-toast-action,
+  .kl-toast-close {
+    border: 1px solid ButtonText;
+  }
+}

@@ -4,7 +4,7 @@
     "path": "dist/index.js",
     "import": "*",
     "ignore": ["react", "react-dom"],
-    "limit": "4.2 kB"
+    "limit": "6.1 kB"
   },
   {
     "name": "@oyinbayode/keyline: Switch",
@@ -49,6 +49,20 @@
     "limit": "1.6 kB"
   },
   {
+    "name": "@oyinbayode/keyline: Toast",
+    "path": "dist/index.js",
+    "import": "{ ToastProvider, useToast }",
+    "ignore": ["react", "react-dom"],
+    "limit": "2.3 kB"
+  },
+  {
+    "name": "@oyinbayode/keyline/toast",
+    "path": "dist/toast.js",
+    "import": "{ ToastProvider, useToast }",
+    "ignore": ["react", "react-dom"],
+    "limit": "2.3 kB"
+  },
+  {
     "name": "@oyinbayode/keyline/primitives",
     "path": "dist/primitives.js",
     "import": "*",
@@ -59,6 +73,6 @@
     "name": "@oyinbayode/keyline/styles.css",
     "path": "dist/styles.css",
     "rolldown": false,
-    "limit": "2.4 kB"
+    "limit": "3 kB"
   }
 ]
