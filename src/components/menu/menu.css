@@ -1,0 +1,171 @@
+/*
+ * The menu is a native popover in the top layer, so there is no z-index.
+ * Where it sits is set inline by useAnchoredPopover (CSS anchor positioning,
+ * or measured where that is missing); this file only draws it. Enter and exit
+ * fade on --kl-duration-fast with @starting-style, and allow-discrete keeps
+ * `display` and `overlay` until the exit ends. Motion tokens are 0ms under
+ * reduced motion, so both are instant there.
+ */
+.kl-menu {
+  box-sizing: border-box;
+  min-inline-size: 12rem;
+  max-inline-size: calc(100vw - 2 * var(--kl-space-2));
+  max-block-size: 20rem;
+  margin: var(--kl-space-1) 0;
+  padding: var(--kl-space-1);
+  overflow: auto;
+  border: 1px solid var(--kl-slate-6);
+  border-radius: var(--kl-radius-md);
+  background-color: var(--kl-slate-2);
+  box-shadow: var(--kl-shadow-floating);
+  color: var(--kl-slate-12);
+  font-family: var(--kl-font-family);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  opacity: 0;
+  transition:
+    opacity var(--kl-duration-fast) var(--kl-ease),
+    overlay var(--kl-duration-fast) allow-discrete,
+    display var(--kl-duration-fast) allow-discrete;
+}
+
+.kl-menu:popover-open {
+  opacity: 1;
+}
+
+@starting-style {
+  .kl-menu:popover-open {
+    opacity: 0;
+  }
+}
+
+/* Focus lives on the items; the menu itself is only a fallback target. */
+.kl-menu:focus {
+  outline: none;
+}
+
+.kl-menu-item {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: var(--kl-space-2);
+  min-block-size: 2rem;
+  padding: var(--kl-space-1) var(--kl-space-2);
+  border-radius: var(--kl-radius-sm);
+  outline: none;
+  cursor: default;
+  user-select: none;
+}
+
+/* The active item is a full-width fill: focus follows the pointer, so one rule covers both. */
+.kl-menu-item:focus {
+  background-color: var(--kl-slate-4);
+  color: var(--kl-slate-12);
+}
+
+/*
+ * The fill is too faint to be a focus indicator on its own (about 1.2:1 on
+ * the surface in dark mode), so keyboard focus adds an inset keyline ring on
+ * all four sides, blue-9 at 3:1 or more on slate-2 and slate-4 in both
+ * themes. :focus-visible leaves it off when the pointer moved focus there.
+ */
+.kl-menu-item:focus-visible {
+  outline: 2px solid var(--kl-blue-9);
+  outline-offset: -2px;
+}
+
+.kl-menu-item[aria-disabled='true'] {
+  color: var(--kl-slate-9);
+}
+
+.kl-menu-item[aria-checked='true'] {
+  font-weight: 500;
+}
+
+.kl-menu-item-label {
+  flex: 1;
+}
+
+/* A fixed gutter at the inline start, so checked and unchecked labels line up. */
+.kl-menu-indicator {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  inline-size: 1rem;
+  block-size: 1rem;
+}
+
+/*
+ * Drawn with borders, not colour fills, so forced-colours mode keeps them.
+ * A tick for checkboxes and a dot for radios: two shapes, not one shape in
+ * two colours. The tick is not mirrored in RTL, like printed ticks.
+ */
+.kl-menu-item[role='menuitemcheckbox'][aria-checked='true'] .kl-menu-indicator::before {
+  content: '';
+  inline-size: 0.3125rem;
+  block-size: 0.625rem;
+  border: solid currentColor;
+  border-width: 0 2px 2px 0;
+  transform: translateY(-1px) rotate(45deg);
+}
+
+.kl-menu-item[role='menuitemradio'][aria-checked='true'] .kl-menu-indicator::before {
+  content: '';
+  box-sizing: border-box;
+  inline-size: 0.4375rem;
+  block-size: 0.4375rem;
+  border: 0.21875rem solid currentColor;
+  border-radius: 50%;
+}
+
+.kl-menu-shortcut {
+  padding-inline-start: var(--kl-space-4);
+  color: var(--kl-slate-11);
+  font-family: var(--kl-font-mono);
+  font-size: 0.75rem;
+}
+
+.kl-menu-label {
+  padding: var(--kl-space-2) var(--kl-space-2) var(--kl-space-1);
+  color: var(--kl-slate-11);
+  font-family: var(--kl-font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  line-height: 1rem;
+  text-transform: uppercase;
+}
+
+/* A border, not a background, so it survives forced colours. */
+.kl-menu-separator {
+  margin: var(--kl-space-1) calc(-1 * var(--kl-space-1));
+  border-block-start: 1px solid var(--kl-slate-6);
+}
+
+@media (forced-colors: active) {
+  .kl-menu {
+    border-color: CanvasText;
+  }
+
+  .kl-menu-item:focus {
+    forced-color-adjust: none;
+    background-color: Highlight;
+    color: HighlightText;
+  }
+
+  .kl-menu-item:focus-visible {
+    outline-color: HighlightText;
+  }
+
+  /* The item opts out of forced colours, so its parts must follow its system colour too. */
+  .kl-menu-item:focus .kl-menu-shortcut {
+    color: inherit;
+  }
+
+  .kl-menu-item[aria-disabled='true']:not(:focus) {
+    color: GrayText;
+  }
+
+  .kl-menu-separator {
+    border-color: CanvasText;
+  }
+}

@@ -97,6 +97,35 @@ for (const theme of ['dark', 'light'] as const) {
       await expect(page.getByRole('button', { name: 'Edit profile' })).toBeFocused();
     });
 
+    test('Menu opens at the inline start (the right) and keeps keys and shortcuts in place', async ({
+      page,
+    }) => {
+      await openRtl(page, 'components-menu--basic', theme);
+      const trigger = page.getByRole('button', { name: 'Edit' });
+      await trigger.focus();
+      await page.keyboard.press('ArrowDown');
+      const menu = page.getByRole('menu', { name: 'Edit' });
+      await expectDirOnly(menu);
+      await expect(page.getByRole('menuitem', { name: 'Cut' })).toBeFocused();
+
+      const triggerBox = await trigger.boundingBox();
+      const menuBox = await menu.boundingBox();
+      const cut = page.getByRole('menuitem', { name: 'Cut' });
+      const label = await cut.locator('.kl-menu-item-label').boundingBox();
+      const shortcut = await cut.locator('.kl-menu-shortcut').boundingBox();
+
+      expect((menuBox?.x ?? 0) + (menuBox?.width ?? 0)).toBeCloseTo(
+        (triggerBox?.x ?? 0) + (triggerBox?.width ?? 0),
+        0,
+      );
+      expect(shortcut?.x).toBeLessThan(label?.x ?? 0);
+
+      await page.keyboard.press('ArrowDown');
+      await expect(page.getByRole('menuitem', { name: 'Copy' })).toBeFocused();
+      await page.keyboard.press('Escape');
+      await expect(trigger).toBeFocused();
+    });
+
     test('Toast stacks on the inline-end side and its fuse burns towards the inline start', async ({
       page,
     }) => {
