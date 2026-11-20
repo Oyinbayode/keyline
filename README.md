@@ -130,7 +130,7 @@ Minified + brotli, React excluded, enforced in CI by `size-limit` (see `.size-li
 | `import { ToastProvider, useToast } from '@oyinbayode/keyline/toast'` | 2.35 kB | 2.4 kB |
 | `@oyinbayode/keyline/primitives` (all)                                | 2.69 kB | 3 kB   |
 | `@oyinbayode/keyline` (everything)                                    | 7.55 kB | 8.4 kB |
-| `@oyinbayode/keyline/styles.css`                                      | 3.36 kB | 3.7 kB |
+| `@oyinbayode/keyline/styles.css`                                      | 3.38 kB | 3.7 kB |
 
 ## Contributing
 
