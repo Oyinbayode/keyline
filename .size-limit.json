@@ -4,7 +4,7 @@
     "path": "dist/index.js",
     "import": "*",
     "ignore": ["react", "react-dom"],
-    "limit": "3.1 kB"
+    "limit": "4.2 kB"
   },
   {
     "name": "@oyinbayode/keyline: Switch",
@@ -35,6 +35,20 @@
     "limit": "1.6 kB"
   },
   {
+    "name": "@oyinbayode/keyline: Dialog",
+    "path": "dist/index.js",
+    "import": "{ Dialog }",
+    "ignore": ["react", "react-dom"],
+    "limit": "1.6 kB"
+  },
+  {
+    "name": "@oyinbayode/keyline/dialog",
+    "path": "dist/dialog.js",
+    "import": "{ Dialog }",
+    "ignore": ["react", "react-dom"],
+    "limit": "1.6 kB"
+  },
+  {
     "name": "@oyinbayode/keyline/primitives",
     "path": "dist/primitives.js",
     "import": "*",
@@ -45,6 +59,6 @@
     "name": "@oyinbayode/keyline/styles.css",
     "path": "dist/styles.css",
     "rolldown": false,
-    "limit": "2.1 kB"
+    "limit": "2.4 kB"
   }
 ]

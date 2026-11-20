@@ -42,3 +42,23 @@ Steps (from the Tabs docs page), against Components → Tabs → Keyboard test f
 | TalkBack _x.y_ | Chrome _x_  | Android _x_    |      | 0.2.0           | Pending |                            |
 
 When a row passes, change the matching "Manual" row in `src/components/tabs/tabs.mdx` from `pending` to `pass`.
+
+## Dialog
+
+Steps (from the Dialog docs page), against Components → Dialog → Keyboard test fixture:
+
+1. Tab to "Open form". Expect a button that says it opens a dialog (Orca: "has popup"; TalkBack may not say it).
+2. Press Enter. Expect "Form dialog", dialog, and focus on the "Name" field.
+3. Browse mode (Orca: arrow keys, including past the end; TalkBack: swipe left and right). Expect never to reach "Before", "After" or anything else behind the dialog.
+4. Press Esc. Expect the dialog to close and "Open form" to be announced again.
+5. Open the form, then "Open nested", then press Esc. Expect only the nested dialog to close and focus on "Open nested".
+6. Open "Open text-only". Expect the alert's text to be read, with focus on the dialog itself.
+7. TalkBack: open the form and use the back gesture. Expect it to close the dialog and return to "Open form".
+8. Visual: the dialog surface, its border and the backdrop are clear in both light and dark themes.
+
+| Screen reader  | Browser     | OS             | Date | Keyline version | Result  | What was announced / notes |
+| -------------- | ----------- | -------------- | ---- | --------------- | ------- | -------------------------- |
+| Orca _x.y_     | Firefox _x_ | Linux _distro_ |      | 0.2.0           | Pending |                            |
+| TalkBack _x.y_ | Chrome _x_  | Android _x_    |      | 0.2.0           | Pending |                            |
+
+When a row passes, change the matching "Manual" row in `src/components/dialog/dialog.mdx` from `pending` to `pass`.

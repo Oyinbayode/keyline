@@ -9,7 +9,8 @@
     "wai-aria",
     "components",
     "switch",
-    "tabs"
+    "tabs",
+    "dialog"
   ],
   "homepage": "https://oyinbayode.github.io/keyline/",
   "bugs": "https://github.com/Oyinbayode/keyline/issues",
@@ -35,6 +36,16 @@
       "require": {
         "types": "./dist/index.d.cts",
         "default": "./dist/index.cjs"
+      }
+    },
+    "./dialog": {
+      "import": {
+        "types": "./dist/dialog.d.mts",
+        "default": "./dist/dialog.js"
+      },
+      "require": {
+        "types": "./dist/dialog.d.cts",
+        "default": "./dist/dialog.cjs"
       }
     },
     "./switch": {
