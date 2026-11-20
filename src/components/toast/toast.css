@@ -3,8 +3,10 @@
  * needs a z-index to sit above page content; inside one it is already in the
  * top layer with the dialog. It lets clicks through except on the toasts.
  *
- * Tone is shown twice, never by colour alone: a 2px inline-start keyline in
- * the semantic colour and an icon whose shape differs per tone.
+ * Tone is never shown by colour alone, and never by a bar on one side. Each
+ * toast opens with a slug line, like a printer's job ticket: an icon whose
+ * shape differs per tone, the tone's name, and the timer's state. A 1px fuse
+ * on the bottom edge burns down with the countdown.
  */
 .kl-toast-viewport {
   position: fixed;
@@ -33,15 +35,16 @@
 
 .kl-toast {
   --kl-toast-tone: var(--kl-slate-9);
+  --kl-toast-tone-text: var(--kl-slate-9);
 
+  position: relative;
   box-sizing: border-box;
   display: grid;
-  grid-template-columns: 1rem 1fr auto;
-  column-gap: var(--kl-space-3);
-  align-items: start;
-  padding: var(--kl-space-3) var(--kl-space-3) var(--kl-space-3) var(--kl-space-4);
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  padding: var(--kl-space-3) var(--kl-space-4);
+  overflow: hidden;
   border: 1px solid var(--kl-slate-6);
-  border-inline-start: 2px solid var(--kl-toast-tone);
   border-radius: var(--kl-radius-md);
   background-color: var(--kl-slate-3);
   box-shadow: var(--kl-shadow-floating);
@@ -55,16 +58,20 @@
     transform var(--kl-duration-base) var(--kl-ease);
 }
 
+/* Text colours are the *-text steps, 4.5:1 or more on slate-3 in both themes. */
 .kl-toast[data-tone='success'] {
   --kl-toast-tone: var(--kl-success);
+  --kl-toast-tone-text: var(--kl-success-text);
 }
 
 .kl-toast[data-tone='warning'] {
   --kl-toast-tone: var(--kl-warning);
+  --kl-toast-tone-text: var(--kl-warning-text);
 }
 
 .kl-toast[data-tone='danger'] {
   --kl-toast-tone: var(--kl-danger);
+  --kl-toast-tone-text: var(--kl-danger-text);
 }
 
 .kl-toast[data-state='closed'] {
@@ -86,16 +93,28 @@
 }
 
 .kl-toast > * {
-  grid-column: 2;
+  grid-column: 1 / -1;
+}
+
+.kl-toast-slug {
+  display: flex;
+  grid-column: 1;
+  grid-row: 1;
+  align-items: center;
+  gap: var(--kl-space-2);
+  min-inline-size: 0;
+  color: var(--kl-toast-tone-text);
+  font-family: var(--kl-font-mono);
+  font-size: 10px;
+  line-height: 1rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
 }
 
 .kl-toast-icon {
-  grid-column: 1;
-  grid-row: 1;
-  inline-size: 1rem;
-  block-size: 1rem;
-  margin-block-start: 0.1875rem;
-  color: var(--kl-toast-tone);
+  flex-shrink: 0;
+  inline-size: 0.75rem;
+  block-size: 0.75rem;
   fill: none;
   stroke: currentColor;
   stroke-width: 1.5;
@@ -103,8 +122,37 @@
   stroke-linejoin: round;
 }
 
+.kl-toast-state {
+  margin-inline-start: auto;
+  color: var(--kl-slate-9);
+}
+
+/*
+ * Shrinks towards the inline start, so it burns right to left in LTR and
+ * left to right in RTL. Toast's timer sets transform and transition-duration.
+ */
+.kl-toast-fuse {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: 0;
+  block-size: 1px;
+  background-color: var(--kl-toast-tone);
+  transform-origin: left;
+  transition-property: transform;
+  /* Out of the grid flow, so it spans the padding box, not the content columns. */
+  grid-area: auto;
+  transition-timing-function: linear;
+  pointer-events: none;
+}
+
+/* Both: some build pipelines lower :dir() to :lang() lists, which an unlabelled page never matches. */
+.kl-toast-fuse:dir(rtl),
+[dir='rtl'] .kl-toast-fuse {
+  transform-origin: right;
+}
+
 .kl-toast-title {
-  margin: 0;
+  margin: var(--kl-space-1) 0 0;
   font-weight: 600;
 }
 
@@ -137,11 +185,11 @@
 }
 
 .kl-toast-close {
-  grid-column: 3;
+  grid-column: 2;
   grid-row: 1;
-  inline-size: 1.75rem;
-  block-size: 1.75rem;
-  margin: calc(-1 * var(--kl-space-1));
+  inline-size: 1.5rem;
+  block-size: 1.5rem;
+  margin-inline-start: var(--kl-space-2);
   color: var(--kl-color-muted);
 }
 
@@ -180,9 +228,18 @@
   border: 0;
 }
 
+/* Static and full width: the countdown still runs, it just does not move. */
+@media (prefers-reduced-motion: reduce) {
+  .kl-toast-fuse {
+    transform: none !important;
+    transition: none;
+  }
+}
+
 @media (forced-colors: active) {
-  .kl-toast {
-    border-inline-start-width: 4px;
+  .kl-toast-fuse {
+    forced-color-adjust: none;
+    background-color: CanvasText;
   }
 
   .kl-toast-action,

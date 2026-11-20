@@ -908,3 +908,68 @@ body {
   font-weight: 500;
   line-height: 22px;
 }
+
+/* Tokens page: "State without stripes" samples */
+
+.kl-stripes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--kl-space-6);
+  align-items: start;
+  margin-block: var(--kl-space-5);
+}
+
+.kl-stripes-cell {
+  margin: 0;
+}
+
+.kl-stripes-cell figcaption {
+  margin-block-start: var(--kl-space-3);
+  color: var(--kl-color-muted);
+  font-family: var(--kl-docs-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.kl-stripes .kl-toast-list {
+  max-inline-size: 22rem;
+}
+
+/* The same marks as the sidebar's current row in manager-head.html. */
+.kl-crop-sample {
+  display: grid;
+  gap: var(--kl-space-2);
+  margin: 0;
+  padding: var(--kl-space-1) var(--kl-space-2);
+  list-style: none;
+}
+
+.kl-crop-sample li {
+  position: relative;
+  padding: var(--kl-space-1) var(--kl-space-2);
+  color: var(--kl-color-muted);
+}
+
+.kl-crop-sample li[aria-current] {
+  --kl-crop: var(--kl-color-accent);
+
+  color: var(--kl-color-text);
+  font-weight: 500;
+}
+
+.kl-crop-sample li[aria-current]::before {
+  content: '';
+  position: absolute;
+  inset: -3px -5px;
+  background:
+    linear-gradient(var(--kl-crop), var(--kl-crop)) left top / 7px 1px,
+    linear-gradient(var(--kl-crop), var(--kl-crop)) left top / 1px 7px,
+    linear-gradient(var(--kl-crop), var(--kl-crop)) right top / 7px 1px,
+    linear-gradient(var(--kl-crop), var(--kl-crop)) right top / 1px 7px,
+    linear-gradient(var(--kl-crop), var(--kl-crop)) left bottom / 7px 1px,
+    linear-gradient(var(--kl-crop), var(--kl-crop)) left bottom / 1px 7px,
+    linear-gradient(var(--kl-crop), var(--kl-crop)) right bottom / 7px 1px,
+    linear-gradient(var(--kl-crop), var(--kl-crop)) right bottom / 1px 7px;
+  background-repeat: no-repeat;
+}

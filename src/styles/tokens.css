@@ -61,6 +61,13 @@
   --kl-success: light-dark(#1b9a57, #2fbf71);
   --kl-warning: light-dark(#b46a00, #f5a524);
   --kl-danger: light-dark(#d32f2f, #f0504f);
+  /*
+   * The same tones as text: 4.5:1 or more on slate-1 to slate-3 in both
+   * themes. Light steps are darker; dark already passes (5.0 to 8.7:1).
+   */
+  --kl-success-text: light-dark(#167d46, var(--kl-success));
+  --kl-warning-text: light-dark(#9e5d00, var(--kl-warning));
+  --kl-danger-text: light-dark(#cf2c2c, var(--kl-danger));
 
   --kl-color-bg: var(--kl-slate-1);
   --kl-color-surface: var(--kl-slate-2);

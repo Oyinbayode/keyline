@@ -119,14 +119,17 @@ function Root({
    * are this component's children, so they re-render with it regardless.
    */
   const syncSelection = () => {
-    const list = listRef.current;
-    if (!list) return;
-    const tabs = Array.from(list.querySelectorAll<HTMLButtonElement>('[role="tab"]'));
-    const selected = tabs.findIndex((tab) => tab.getAttribute('aria-selected') === 'true');
-    if (selected !== -1) selectedIndex.current = selected;
-    if (selected !== -1 && !tabs[selected]?.disabled) {
-      requestedFallback.current = undefined;
-      return;
+    const tabs = Array.from(
+      listRef.current?.querySelectorAll<HTMLButtonElement>('[role="tab"]') ?? [],
+    );
+    const selected = tabs.findIndex((tab) => tab.dataset.value === value);
+    const selectedTab = tabs[selected];
+    if (selectedTab) {
+      selectedIndex.current = selected;
+      if (!selectedTab.disabled) {
+        requestedFallback.current = undefined;
+        return;
+      }
     }
 
     // A disabled selected tab is treated as removed, so its neighbours compete the same way.
@@ -239,7 +242,7 @@ function Tab({ value, disabled, className, onClick, ref, children, ...buttonProp
         if (!event.defaultPrevented) select(value);
       }}
     >
-      {children}
+      <span className="kl-tab-label">{children}</span>
     </button>
   );
 }

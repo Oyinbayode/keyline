@@ -64,6 +64,16 @@ export interface ToastProviderProps {
    * open dialog), so it inherits `<html dir>`, not the provider's ancestors.
    */
   dir?: 'ltr' | 'rtl';
+  /**
+   * Tone names, shown in each toast's slug line and used as the icon's text
+   * alternative and the announcement prefix (neutral is never announced).
+   * Default `{ neutral: 'Note', success: 'Success', warning: 'Warning', danger: 'Error' }`.
+   */
+  toneLabels?: Partial<Record<ToastTone, string>>;
+  /** Shown while a toast's countdown is paused. Default `"Paused"`. */
+  pausedLabel?: string;
+  /** Shown on a toast that has no countdown (it has an action). Default `"Held"`. */
+  heldLabel?: string;
 }
 
 interface Announcement {
@@ -74,15 +84,25 @@ interface Announcement {
 }
 
 const MIN_DURATION = 5000;
-const toneLabels: Record<ToastTone, string> = {
-  neutral: '',
+const defaultToneLabels: Record<ToastTone, string> = {
+  neutral: 'Note',
   success: 'Success',
   warning: 'Warning',
   danger: 'Error',
 };
 
+interface ToastLabels {
+  tones: Record<ToastTone, string>;
+  paused: string;
+  held: string;
+}
+
+type TimerState = 'running' | 'paused' | 'held';
+
 const ToastApiContext = createContext<ToastApi | null>(null);
-const ToastItemContext = createContext<(ToastRecord & { dismiss: () => void }) | null>(null);
+const ToastItemContext = createContext<
+  (ToastRecord & { dismiss: () => void; timer: TimerState; labels: ToastLabels }) | null
+>(null);
 
 export function useToast(): ToastApi {
   const api = use(ToastApiContext);
@@ -111,11 +131,16 @@ function clampDuration(duration: number): number {
  * One timer per toast, but the time left lives in the provider: when the
  * viewport moves into or out of a dialog React remounts every toast, and a
  * fresh timer here would start the countdown again.
+ *
+ * The fuse is drawn from the same numbers. Each run sets it to the share of
+ * time left, then transitions it to nothing over exactly that time; a pause
+ * freezes it at the share the timer recorded. There is no second clock.
  */
 function ToastItem({
   record,
   paused,
   remaining,
+  labels,
   dismiss,
   remove,
   children,
@@ -123,11 +148,13 @@ function ToastItem({
   record: ToastRecord;
   paused: boolean;
   remaining: Map<string, number>;
+  labels: ToastLabels;
   dismiss: (id: string) => void;
   remove: (id: string) => void;
   children: ReactNode;
 }) {
   const { id, closing, action, duration } = record;
+  const timed = !action && Number.isFinite(duration);
 
   useEffect(() => {
     if (closing) {
@@ -141,27 +168,43 @@ function ToastItem({
         clearTimeout(timer);
       };
     }
-    if (paused || action || !Number.isFinite(duration)) return;
+    if (!timed) return;
 
+    const fuse = document.getElementById(id)?.querySelector<HTMLElement>('.kl-toast-fuse');
+    const burn = (share: number, ms: number) => {
+      if (fuse)
+        fuse.style.cssText = `transition-duration:${String(ms)}ms;transform:scaleX(${String(share)})`;
+    };
     const left = remaining.get(id) ?? duration;
+    burn(left / duration, 0);
+    if (paused) return;
+
+    // Lays out the starting width first, or the browser would transition from wherever it was.
+    fuse?.getBoundingClientRect();
+    burn(0, left);
     const startedAt = Date.now();
     const timer = setTimeout(() => {
       dismiss(id);
     }, left);
     return () => {
       clearTimeout(timer);
-      remaining.set(id, left - (Date.now() - startedAt));
+      const stillLeft = left - (Date.now() - startedAt);
+      remaining.set(id, stillLeft);
+      burn(stillLeft / duration, 0);
     };
-  }, [id, closing, paused, action, duration, remaining, dismiss, remove]);
+  }, [id, closing, paused, timed, duration, remaining, dismiss, remove]);
 
+  const timer: TimerState = !timed ? 'held' : paused ? 'paused' : 'running';
   const value = useMemo(
     () => ({
       ...record,
+      timer,
+      labels,
       dismiss: () => {
         dismiss(id);
       },
     }),
-    [record, dismiss, id],
+    [record, timer, labels, dismiss, id],
   );
 
   return <ToastItemContext value={value}>{children}</ToastItemContext>;
@@ -194,6 +237,9 @@ export function ToastProvider({
   label = 'Notifications',
   renderToast = DefaultToast,
   dir,
+  toneLabels,
+  pausedLabel = 'Paused',
+  heldLabel = 'Held',
 }: ToastProviderProps) {
   const [toasts, setToasts] = useState<ToastRecord[]>([]);
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
@@ -250,6 +296,14 @@ export function ToastProvider({
   );
 
   const visible = useMemo(() => toasts.slice(0, limit), [toasts, limit]);
+  const labels = useMemo(
+    () => ({
+      tones: { ...defaultToneLabels, ...toneLabels },
+      paused: pausedLabel,
+      held: heldLabel,
+    }),
+    [toneLabels, pausedLabel, heldLabel],
+  );
 
   useEffect(() => {
     const fresh = visible.filter((record) => !announced.has(record.id));
@@ -263,14 +317,14 @@ export function ToastProvider({
       ...current,
       ...fresh.map(({ id, title, description, tone }) => ({
         id,
-        text: [toneLabels[tone] && `${toneLabels[tone]}:`, title, description]
+        text: [tone !== 'neutral' && `${labels.tones[tone]}:`, title, description]
           .filter(Boolean)
           .join(' '),
         assertive: tone === 'danger',
         container: topModal,
       })),
     ]);
-  }, [visible, announced]);
+  }, [visible, announced, labels]);
 
   useEffect(() => {
     if (announcements.length === 0) return;
@@ -368,6 +422,7 @@ export function ToastProvider({
                 record={record}
                 paused={paused}
                 remaining={remaining}
+                labels={labels}
                 dismiss={dismiss}
                 remove={remove}
               >
@@ -381,8 +436,11 @@ export function ToastProvider({
   );
 }
 
-/* Distinct shapes, so the tone never depends on colour: circle, tick, triangle, diamond. */
-const toneIcons: Record<ToastTone, string> = {
+/*
+ * Distinct shapes, so the tone never depends on colour: circle, tick, triangle,
+ * diamond. Exported for the docs' state sample only; not part of the package API.
+ */
+export const toneIcons: Record<ToastTone, string> = {
   neutral: 'M8 1.5a6.5 6.5 0 1 1 0 13a6.5 6.5 0 0 1 0-13ZM8 7v4.5M8 4.5v.5',
   success: 'M2.5 8.5l3.5 3.5l7.5-8',
   warning: 'M8 1.5L15 14H1ZM8 6v4M8 12v.5',
@@ -391,9 +449,15 @@ const toneIcons: Record<ToastTone, string> = {
 
 export type ToastRootProps = Omit<ComponentPropsWithRef<'li'>, 'id'>;
 
+/*
+ * The slug line is visual chrome. Its words are aria-hidden: the tone reaches
+ * assistive technology once, through the icon's text alternative here and the
+ * announcement prefix, and the timer state needs no announcing at all.
+ */
 function Root({ className, onKeyDown, children, ...itemProps }: ToastRootProps) {
-  const { id, tone, closing, dismiss } = useToastItem('Root');
-  const toneLabel = toneLabels[tone];
+  const { id, tone, closing, timer, labels, dismiss } = useToastItem('Root');
+  const toneLabel = labels.tones[tone];
+  const isNeutral = tone === 'neutral';
 
   return (
     // Esc bubbles here from the toast's own buttons, or from the toast after focus moved to it.
@@ -404,6 +468,7 @@ function Root({ className, onKeyDown, children, ...itemProps }: ToastRootProps) 
       tabIndex={-1}
       data-tone={tone}
       data-state={closing ? 'closed' : 'open'}
+      data-timer={timer}
       className={classNames('kl-toast', className)}
       onKeyDown={(event) => {
         onKeyDown?.(event);
@@ -413,16 +478,23 @@ function Root({ className, onKeyDown, children, ...itemProps }: ToastRootProps) 
         dismiss();
       }}
     >
-      <svg
-        className="kl-toast-icon"
-        viewBox="0 0 16 16"
-        role={toneLabel ? 'img' : undefined}
-        aria-label={toneLabel || undefined}
-        aria-hidden={toneLabel ? undefined : true}
-      >
-        <path d={toneIcons[tone]} />
-      </svg>
+      <div className="kl-toast-slug">
+        <svg
+          className="kl-toast-icon"
+          viewBox="0 0 16 16"
+          role={isNeutral ? undefined : 'img'}
+          aria-label={isNeutral ? undefined : toneLabel}
+          aria-hidden={isNeutral || undefined}
+        >
+          <path d={toneIcons[tone]} />
+        </svg>
+        <span aria-hidden="true">{toneLabel}</span>
+        <span className="kl-toast-state" aria-hidden="true">
+          {timer === 'paused' ? labels.paused : timer === 'held' ? labels.held : ''}
+        </span>
+      </div>
       {children}
+      {timer !== 'held' && <span className="kl-toast-fuse" aria-hidden="true" />}
     </li>
   );
 }

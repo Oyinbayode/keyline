@@ -4,6 +4,15 @@ import { Dialog } from '../dialog/dialog';
 import type { ToastTone } from './toast';
 import { Toast, ToastProvider, useToast } from './toast';
 
+/*
+ * The landmark is portalled to <body>, outside the story canvas that the
+ * Direction toolbar sets dir on, so the stories hand the toolbar's direction
+ * to the provider, as an app with a right-to-left section would.
+ */
+function toolbarDirection(globals: Record<string, unknown>): 'rtl' | undefined {
+  return globals.direction === 'rtl' ? 'rtl' : undefined;
+}
+
 const meta = {
   title: 'Components/Toast',
   component: ToastProvider,
@@ -13,8 +22,8 @@ const meta = {
     duration: { control: { type: 'number', min: 5000, step: 1000 } },
     label: { control: 'text' },
   },
-  render: (args) => (
-    <ToastProvider {...args}>
+  render: (args, { globals }) => (
+    <ToastProvider {...args} dir={toolbarDirection(globals)}>
       <ToneButtons />
     </ToastProvider>
   ),
@@ -112,8 +121,8 @@ function ActionExample() {
 
 export const WithAction: Story = {
   name: 'With an action',
-  render: (args) => (
-    <ToastProvider {...args}>
+  render: (args, { globals }) => (
+    <ToastProvider {...args} dir={toolbarDirection(globals)}>
       <ActionExample />
     </ToastProvider>
   ),
@@ -145,8 +154,8 @@ function QueueButton() {
 
 export const Queue: Story = {
   name: 'Queue above the limit',
-  render: (args) => (
-    <ToastProvider {...args}>
+  render: (args, { globals }) => (
+    <ToastProvider {...args} dir={toolbarDirection(globals)}>
       <QueueButton />
     </ToastProvider>
   ),
@@ -154,9 +163,10 @@ export const Queue: Story = {
 
 export const CustomLayout: Story = {
   name: 'Custom layout',
-  render: (args) => (
+  render: (args, { globals }) => (
     <ToastProvider
       {...args}
+      dir={toolbarDirection(globals)}
       renderToast={(toast) => (
         <Toast.Root>
           <Toast.Title />
@@ -200,8 +210,8 @@ function DialogExample() {
 
 export const InsideADialog: Story = {
   name: 'While a dialog is open',
-  render: (args) => (
-    <ToastProvider {...args}>
+  render: (args, { globals }) => (
+    <ToastProvider {...args} dir={toolbarDirection(globals)}>
       <DialogExample />
     </ToastProvider>
   ),
@@ -285,8 +295,8 @@ function FixtureControls() {
 
 export const KeyboardFixture: Story = {
   name: 'Keyboard test fixture',
-  render: (args) => (
-    <ToastProvider {...args}>
+  render: (args, { globals }) => (
+    <ToastProvider {...args} dir={toolbarDirection(globals)}>
       <FixtureControls />
     </ToastProvider>
   ),

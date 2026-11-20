@@ -100,4 +100,19 @@ describe('Toast announcements', () => {
     expect(log).toContain('image, Warning');
     expect(log).toContain('button, Dismiss: Saved');
   });
+
+  it('never reads the slug line: the tone once through the icon, no state words', async () => {
+    render(<Page />);
+    await virtual.start({ container: document.body });
+    await show({ title: 'Saved', tone: 'warning' });
+    await show({ title: 'Archived', action: { label: 'Undo', onClick: () => {} } });
+
+    for (let step = 0; step < 30; step++) await virtual.next();
+    const log = await virtual.spokenPhraseLog();
+
+    // Reached the held toast too, so the absence of its state word means something.
+    expect(log).toContain('button, Dismiss: Archived');
+    expect(log.filter((phrase) => /^(image, )?Warning$/.test(phrase))).toEqual(['image, Warning']);
+    expect(log.some((phrase) => /\b(Note|Held|Paused)\b/i.test(phrase))).toBe(false);
+  });
 });

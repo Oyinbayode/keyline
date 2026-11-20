@@ -120,14 +120,14 @@ Minified + brotli, React excluded, enforced in CI by `size-limit` (see `.size-li
 | `import { Switch } from '@oyinbayode/keyline'`                        | 624 B   | 750 B  |
 | `import { Switch } from '@oyinbayode/keyline/switch'`                 | 624 B   | 750 B  |
 | `import { Tabs } from '@oyinbayode/keyline'`                          | 1.6 kB  | 1.6 kB |
-| `import { Tabs } from '@oyinbayode/keyline/tabs'`                     | 1.59 kB | 1.6 kB |
+| `import { Tabs } from '@oyinbayode/keyline/tabs'`                     | 1.6 kB  | 1.6 kB |
 | `import { Dialog } from '@oyinbayode/keyline'`                        | 1.58 kB | 1.6 kB |
 | `import { Dialog } from '@oyinbayode/keyline/dialog'`                 | 1.58 kB | 1.6 kB |
-| `import { ToastProvider, useToast } from '@oyinbayode/keyline'`       | 2.09 kB | 2.3 kB |
-| `import { ToastProvider, useToast } from '@oyinbayode/keyline/toast'` | 2.1 kB  | 2.3 kB |
-| `@oyinbayode/keyline/primitives` (all)                                | 1.82 kB | 2 kB   |
-| `@oyinbayode/keyline` (everything)                                    | 5.52 kB | 6.1 kB |
-| `@oyinbayode/keyline/styles.css`                                      | 2.75 kB | 3 kB   |
+| `import { ToastProvider, useToast } from '@oyinbayode/keyline'`       | 2.36 kB | 2.4 kB |
+| `import { ToastProvider, useToast } from '@oyinbayode/keyline/toast'` | 2.35 kB | 2.4 kB |
+| `@oyinbayode/keyline/primitives` (all)                                | 1.81 kB | 2 kB   |
+| `@oyinbayode/keyline` (everything)                                    | 5.78 kB | 6.1 kB |
+| `@oyinbayode/keyline/styles.css`                                      | 2.99 kB | 3.3 kB |
 
 ## Contributing
 

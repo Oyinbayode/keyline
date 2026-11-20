@@ -1,7 +1,9 @@
 import type { ReactNode } from 'react';
 import { useLayoutEffect, useRef, useState } from 'react';
 import { useDocsTheme } from '../.storybook/docs-theme';
-import { Switch } from '../src';
+import type { ToastTone } from '../src';
+import { Switch, Tabs } from '../src';
+import { toneIcons } from '../src/components/toast/toast';
 
 type Theme = 'dark' | 'light';
 const themes: readonly Theme[] = ['dark', 'light'];
@@ -309,6 +311,86 @@ export function FocusRingSamples() {
           </div>
         </section>
       ))}
+    </div>
+  );
+}
+
+const crops = ['Introduction', 'Tokens', 'Components'];
+
+const sampleToasts: {
+  tone: ToastTone;
+  word: string;
+  title: string;
+  state: string;
+  fuse?: number;
+}[] = [
+  { tone: 'neutral', word: 'Note', title: 'Draft saved', state: '', fuse: 0.8 },
+  { tone: 'success', word: 'Success', title: 'Invoice sent', state: 'Paused', fuse: 0.45 },
+  { tone: 'warning', word: 'Warning', title: 'Storage almost full', state: 'Held' },
+  { tone: 'danger', word: 'Error', title: 'Upload failed', state: '', fuse: 0.2 },
+];
+
+/*
+ * The three replacements for a stripe on one side, live: crop marks (the
+ * sidebar's current page, reproduced here because the sidebar is outside the
+ * docs frame), the vertical Tabs keyline, and toast slug lines. The toasts are
+ * static markup on the real stylesheet so they do not float over the page.
+ */
+export function StateWithoutStripes() {
+  return (
+    // sb-unstyled opts out of the docs typography, so the samples show the components as shipped.
+    <div className="kl-stripes sb-unstyled">
+      <figure className="kl-stripes-cell">
+        <ul className="kl-crop-sample" aria-label="Sidebar sample">
+          {crops.map((entry, index) => (
+            <li key={entry} aria-current={index === 1 ? 'page' : undefined}>
+              {entry}
+            </li>
+          ))}
+        </ul>
+        <figcaption>Current: crop marks</figcaption>
+      </figure>
+      <figure className="kl-stripes-cell">
+        <Tabs.Root defaultValue="account" orientation="vertical">
+          <Tabs.List aria-label="Settings sample">
+            <Tabs.Tab value="account">Account</Tabs.Tab>
+            <Tabs.Tab value="billing">Billing</Tabs.Tab>
+          </Tabs.List>
+          <Tabs.Panel value="account">Name and email.</Tabs.Panel>
+          <Tabs.Panel value="billing">Invoices.</Tabs.Panel>
+        </Tabs.Root>
+        <figcaption>Selected: keyline under the label</figcaption>
+      </figure>
+      <figure className="kl-stripes-cell">
+        <ol className="kl-toast-list" aria-label="Toast samples">
+          {sampleToasts.map(({ tone, word, title, state, fuse }) => (
+            <li
+              key={tone}
+              className="kl-toast"
+              data-tone={tone}
+              data-state="open"
+              data-timer={fuse === undefined ? 'held' : state ? 'paused' : 'running'}
+            >
+              <div className="kl-toast-slug">
+                <svg className="kl-toast-icon" viewBox="0 0 16 16" aria-hidden="true">
+                  <path d={toneIcons[tone]} />
+                </svg>
+                <span>{word}</span>
+                <span className="kl-toast-state">{state}</span>
+              </div>
+              <p className="kl-toast-title">{title}</p>
+              {fuse !== undefined && (
+                <span
+                  className="kl-toast-fuse"
+                  aria-hidden="true"
+                  style={{ transform: `scaleX(${String(fuse)})` }}
+                />
+              )}
+            </li>
+          ))}
+        </ol>
+        <figcaption>Tone: slug line and fuse</figcaption>
+      </figure>
     </div>
   );
 }

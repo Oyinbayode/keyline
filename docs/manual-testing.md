@@ -74,7 +74,7 @@ Steps (from the Toast docs page), against Components → Toast → Keyboard test
 5. Press Esc on a toast. Expect it to go and focus to move to the next toast, or back to "Message".
 6. Open "Open settings", then "Save settings". Expect "Success: Settings saved" to be read while the dialog is open, and its "Dismiss" button to work.
 7. TalkBack: swipe to the toast list. Expect the toasts to be readable and the timer to wait while one is focused.
-8. Visual: tone keylines and icon shapes distinguishable in both light and dark themes.
+8. Visual: slug lines, icon shapes, PAUSED / HELD and the fuse readable in both light and dark themes.
 
 | Screen reader  | Browser     | OS             | Date | Keyline version | Result  | What was announced / notes |
 | -------------- | ----------- | -------------- | ---- | --------------- | ------- | -------------------------- |

@@ -5,6 +5,7 @@ import {
   RadiusScale,
   ScaleThemes,
   SpaceScale,
+  StateWithoutStripes,
   TokenThemes,
   TypeSpecimens,
 } from './blocks';
@@ -67,6 +68,18 @@ On dark surfaces a black shadow barely shows, so raised surfaces get a faint lig
 `--kl-focus-ring` is two box shadows: a 2px gap in the page colour, then 2px of `--kl-color-focus`, so the ring stands clear of any fill. Forced-colours mode removes box shadows, so components keep a transparent `outline` underneath, which that mode paints in the system highlight colour.
 
 <FocusRingSamples />
+
+## State without stripes
+
+Keyline never marks state with an accent border on one side of a box. A coloured bar down the edge of a row, a tab or a notice is the most generic signal on the web, and it carries one bit of information in the most decorative place. Keyline borrows from print instead:
+
+- **Current page: crop marks.** Four trim marks just outside the corners of the docs sidebar's current row, in the accent colour. Other rows show the same marks in slate-8 on hover.
+- **Selected: a keyline under the label.** Tabs mark the selected tab with a 2px accent border under the label text, only as wide as the label, in both orientations. It is a real border, so forced-colours mode keeps it.
+- **Tone: a slug line.** Each toast opens with a mono line naming its tone beside an icon with its own shape, plus the timer's state. A 1px fuse on the bottom edge burns down with the countdown.
+
+Neutral hairlines between cells, like the datasheet at the top of every page, are separators, not state, and stay.
+
+<StateWithoutStripes />
 
 ## Using them
 

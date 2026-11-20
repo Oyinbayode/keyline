@@ -1,13 +1,14 @@
 /*
- * The selected tab is marked by a 2px keyline that overlaps the list's 1px
- * hairline. It is a real border, not a background or pseudo-element fill, so
- * forced-colours mode keeps it; the text colour change is a second cue, never
- * the only one.
+ * The selected tab is marked by a 2px keyline: horizontally it overlaps the
+ * list's 1px hairline; vertically it underlines the label, only as wide as the
+ * text, because Keyline never marks state with a bar on one side. Either way
+ * it is a real border, so forced-colours mode keeps it; the text colour change
+ * is a second cue, never the only one.
  */
 .kl-tabs[data-orientation='vertical'] {
   display: flex;
   align-items: flex-start;
-  gap: var(--kl-space-5);
+  gap: var(--kl-space-6);
 }
 
 .kl-tabs-list {
@@ -18,8 +19,8 @@
 .kl-tabs-list[data-orientation='vertical'] {
   flex-direction: column;
   flex-shrink: 0;
+  align-items: flex-start;
   border-block-end: 0;
-  border-inline-start: 1px solid var(--kl-slate-6);
 }
 
 .kl-tabs-tab {
@@ -45,9 +46,15 @@
 
 .kl-tabs-tab[data-orientation='vertical'] {
   margin-block-end: 0;
-  margin-inline-start: -1px;
-  border-block-end: 0;
-  border-inline-start: 2px solid transparent;
+  padding-inline: 0;
+  border-block-end-width: 0;
+}
+
+/* Takes its colour from the tab's border, so the active and forced-colours rules below reach it. */
+.kl-tabs-tab[data-orientation='vertical'] .kl-tab-label {
+  padding-block-end: 0.125rem;
+  border-block-end: 2px solid;
+  border-block-end-color: inherit;
 }
 
 .kl-tabs-tab:hover,
