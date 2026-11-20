@@ -17,7 +17,7 @@ import * as SwitchStories from './switch.stories';
     { label: 'Element', value: <code>{'<button role="switch">'}</code> },
     { label: 'Size', value: '624 B' },
     { label: 'Automated tests', value: '6/6 automated' },
-    { label: 'Screen readers', value: 'Orca and TalkBack pending' },
+    { label: 'Screen readers', value: 'Orca pass, TalkBack pending' },
   ]}
 />
 
@@ -132,7 +132,7 @@ Real screen readers word this differently: Orca and NVDA usually say "on" / "off
 | Visible focus ring, forced colours, reduced motion, RTL thumb travel     | Playwright, Chromium (media emulation)                  | <Status value="pass" />    |
 | Announced role, name, and state, before and after toggling               | Guidepup virtual screen reader                          | <Status value="pass" />    |
 | axe-core on every story, light and dark themes                           | Playwright + @axe-core/playwright, Chromium and Firefox | <Status value="pass" />    |
-| Manual: Orca + Firefox                                                   | Linux desktop                                           | <Status value="pending" /> |
+| Manual: Orca + Firefox                                                   | Orca 46.1, Firefox 158, Ubuntu 24.04                    | <Status value="pass" />    |
 | Manual: TalkBack + Chrome                                                | Android                                                 | <Status value="pending" /> |
 
 Not tested yet: NVDA, JAWS, Narrator, VoiceOver (macOS and iOS), and real Windows High Contrast (forced colours are emulated in Chromium). A virtual screen reader checks the accessibility tree; it is not a substitute for a person using a real one.

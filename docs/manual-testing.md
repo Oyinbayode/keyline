@@ -16,10 +16,10 @@ Steps (from the Switch docs page):
 6. TalkBack: double-tap "Wi-Fi". Expect it to toggle and announce the new state.
 7. Visual: focus ring visible in both light and dark themes.
 
-| Screen reader  | Browser     | OS             | Date | Keyline version | Result  | What was announced / notes |
-| -------------- | ----------- | -------------- | ---- | --------------- | ------- | -------------------------- |
-| Orca _x.y_     | Firefox _x_ | Linux _distro_ |      | 0.0.1           | Pending |                            |
-| TalkBack _x.y_ | Chrome _x_  | Android _x_    |      | 0.0.1           | Pending |                            |
+| Screen reader  | Browser     | OS           | Date       | Keyline version | Result  | What was announced / notes                                                                                                                                                                    |
+| -------------- | ----------- | ------------ | ---------- | --------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Orca 46.1      | Firefox 158 | Ubuntu 24.04 | 2026-11-20 | 0.2.0           | Pass    | Steps 1–5 matched: switch role, name "Wi-Fi" and off state announced; Space and Enter announced the new state; Tab skipped the disabled switch; browse mode read "Airplane mode" as disabled. |
+| TalkBack _x.y_ | Chrome _x_  | Android _x_  |            | 0.0.1           | Pending |                                                                                                                                                                                               |
 
 When a row passes, change the matching "Manual" row in `src/components/switch/switch.mdx` from `pending` to `pass` and note anything surprising under "Known limitations".
 
