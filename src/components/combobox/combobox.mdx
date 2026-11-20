@@ -1,0 +1,243 @@
+import { ArgTypes, Canvas, Meta } from '@storybook/addon-docs/blocks';
+import { Datasheet, ProofSheet, Status } from '../../../docs/blocks';
+import * as ComboboxStories from './combobox.stories';
+
+<Meta of={ComboboxStories} />
+
+# Combobox
+
+<div className="kl-lede">
+  A text input that suggests options as you type, and lets you pick one. Follows the{' '}
+  <a href="https://www.w3.org/WAI/ARIA/apg/patterns/combobox/">WAI-ARIA APG Combobox pattern</a> as
+  an editable combobox with list autocomplete.
+</div>
+
+<Datasheet
+  entries={[
+    { label: 'Pattern', value: 'APG Combobox (list autocomplete)' },
+    { label: 'Element', value: <code>{'<input role="combobox">'}</code> },
+    { label: 'Size', value: '3.1 kB' },
+    { label: 'Automated tests', value: '7/7 automated' },
+    { label: 'Screen readers', value: 'Orca and TalkBack pending' },
+  ]}
+/>
+
+```tsx
+import { Combobox } from '@oyinbayode/keyline/combobox';
+import '@oyinbayode/keyline/styles.css';
+
+<Combobox.Root name="fruit" onValueChange={setFruit}>
+  <Combobox.Label>Fruit</Combobox.Label>
+  <Combobox.Input />
+  <Combobox.Trigger />
+  <Combobox.Content>
+    <Combobox.Option value="apple">Apple</Combobox.Option>
+    <Combobox.Option value="banana">Banana</Combobox.Option>
+    <Combobox.Empty>No fruit matches.</Combobox.Empty>
+  </Combobox.Content>
+</Combobox.Root>;
+```
+
+## Problem
+
+An autocomplete is an input with a list under it, and it is one of the easiest controls to make unusable without anyone sighted noticing:
+
+- **A styled `<div>` list with no roles.** Screen readers hear "edit text" and nothing else. The suggestions appear and change as the user types, and they never learn the list exists.
+- **DOM focus moved into the list.** Arrowing down moves real focus to the first suggestion, so the next key the user types goes nowhere: typing stops working until they find their way back to the input.
+- **Options not announced as they are arrowed through.** Focus stays in the input but nothing tells assistive technology which option is highlighted, so the arrow keys appear to do nothing.
+- **No result count.** A blind user cannot tell that filtering happened, how many matches there are, or that there are none.
+- **The first option auto-selected.** The list highlights its first match on every keystroke, so <kbd>Enter</kbd> submits something the user never chose, and a fast typist pressing <kbd>Enter</kbd> to submit the form gets the wrong value.
+- **<kbd>Home</kbd> and <kbd>End</kbd> hijacked.** They jump to the first and last suggestion instead of moving the caret, so editing the typed text gets harder.
+- **A list that closes on the press meant to select.** The input's `blur` runs on `mousedown`, the list closes, and the `click` lands on whatever is underneath it.
+- **IME input broken.** Japanese, Chinese and Korean users confirm a composition with <kbd>Enter</kbd> and pick candidates with the arrows; key handlers that ignore composition choose an option or move the highlight halfway through a word.
+- **Relying on `<datalist>`.** It needs no script, but its list cannot be styled, filtering rules differ between browsers, it does not exist the same way on every mobile browser, and screen reader support for its suggestions is inconsistent.
+
+## Solution
+
+`Combobox.Input` is a real `<input role="combobox">` named by a real `<label>`, and `Combobox.Content` is a `role="listbox"` shown as a native popover next to it.
+
+- **Roles and relationships from the APG.** The input has `aria-autocomplete="list"`, `aria-expanded` and `aria-controls` pointing at the listbox. Options are `role="option"`, the chosen one has `aria-selected="true"`, and disabled ones `aria-disabled="true"`. Groups are `role="group"` named by their `Combobox.GroupLabel`.
+- **Focus never leaves the input.** The active option is virtual: the input's `aria-activedescendant` points at it, so screen readers read it while the caret stays put and typing keeps working. The active option is scrolled into view.
+- **Nothing chosen for the user.** Typing opens and filters the list, but no option is highlighted until the user moves to one, so <kbd>Enter</kbd> with no active option chooses nothing. <kbd>Enter</kbd> on an active option fills the input with its text and closes the list.
+- **A result count, said once.** A polite, visually hidden live region says "3 results" or "No results" half a second after typing settles. It is emptied on every keystroke and filled once, so it is not read for each letter, and a count still pending when an option is chosen is dropped. Pass `resultsMessage` to translate it, with your language's plural rules.
+- **Editing keys stay editing keys.** <kbd>Home</kbd>, <kbd>End</kbd>, <kbd>←</kbd> and <kbd>→</kbd> move the caret, as the APG specifies for editable comboboxes, and clear the active option, since visual focus is back in the text.
+- **Pressing an option keeps focus.** The list and the button call `preventDefault()` on `pointerdown`, so the input is not blurred before the click lands, and the list stays open until the click chooses.
+- **IME-safe.** No key is acted on while `isComposing` is true, so composing text with an input method works as it does in a plain input.
+- **Leaving tidies up.** On blur the list closes. Text that names an option exactly (ignoring case and accents) chooses it; empty text clears the choice; anything else goes back to the chosen option's text, or to empty.
+- **Filtering that forgives accents.** The default filter matches anywhere in the option's text, ignoring case and diacritics, so "cafe" finds "Café" and "cote" finds "Côte d’Ivoire". The matching characters get the print motif's keyline, a 2px underline in blue-9, on a real `<mark>`. Pass `filter` to match differently, or `filter={false}` when the options come already filtered from a server.
+- **In the top layer, beside the input.** The list is a manual native popover, because focus must stay in the input, anchored with CSS anchor positioning: under the input, at least as wide as it, lined up with its inline start edge (the right under `dir="rtl"`), and flipped above when there is no room. It works inside a Keyline Dialog, where <kbd>Esc</kbd> closes the list, then clears the text, and only then closes the dialog.
+- **Forms.** With `name`, a hidden input submits the chosen option's value, not the typed text.
+
+## Examples
+
+### Basic
+
+<ProofSheet figure={1} title="Basic">
+  <Canvas of={ComboboxStories.Basic} />
+</ProofSheet>
+
+### Grouped options
+
+A group whose options are all filtered out is hidden, label and all.
+
+<ProofSheet figure={2} title="Grouped options">
+  <Canvas of={ComboboxStories.Groups} />
+</ProofSheet>
+
+### Disabled options
+
+<ProofSheet figure={3} title="Disabled options">
+  <Canvas of={ComboboxStories.DisabledOptions} />
+</ProofSheet>
+
+### Controlled
+
+<ProofSheet figure={4} title="Controlled">
+  <Canvas of={ComboboxStories.Controlled} />
+</ProofSheet>
+
+### Filtered elsewhere
+
+With `filter={false}` the combobox shows whatever options it is given. Here a timer stands in for a server that returns cities starting with the typed text.
+
+<ProofSheet figure={5} title="Filtered elsewhere">
+  <Canvas of={ComboboxStories.ServerSide} />
+</ProofSheet>
+
+### In a form
+
+<ProofSheet figure={6} title="In a form">
+  <Canvas of={ComboboxStories.InAForm} />
+</ProofSheet>
+
+### Disabled
+
+<ProofSheet figure={7} title="Disabled">
+  <Canvas of={ComboboxStories.Disabled} />
+</ProofSheet>
+
+### Right to left
+
+With the result count translated through `resultsMessage`.
+
+<ProofSheet figure={8} title="Right to left">
+  <Canvas of={ComboboxStories.RightToLeft} />
+</ProofSheet>
+
+### Inside a dialog
+
+<ProofSheet figure={9} title="Inside a dialog">
+  <Canvas of={ComboboxStories.InsideDialog} />
+</ProofSheet>
+
+## Props
+
+`Combobox.Root` renders a `<div>` around the parts, the live region and the hidden form input. `Combobox.Label` renders a `<label>`, `Combobox.Input` an `<input>`, `Combobox.Trigger` a `<button>`, `Combobox.Content` a `<div role="listbox" popover="manual">`, and options, groups, group labels and the empty message render `<div>`s. Each part passes other props (`className`, `style`, `aria-*`, `data-*`, event handlers, `ref`) to its element. An `onClick` on an option that calls `event.preventDefault()` cancels the choice.
+
+Styling hooks: `data-active` on the active option, `aria-selected` and `aria-disabled` on options, `:popover-open` on the open list, and `.kl-combobox-match` on the `<mark>`.
+
+<ArgTypes of={ComboboxStories} />
+
+| Part               | Prop                 | Type                                           | Default                               |
+| ------------------ | -------------------- | ---------------------------------------------- | ------------------------------------- |
+| `Combobox.Root`    | `value`              | `string`                                       |                                       |
+| `Combobox.Root`    | `defaultValue`       | `string`                                       | `''` (none)                           |
+| `Combobox.Root`    | `onValueChange`      | `(value: string) => void`                      |                                       |
+| `Combobox.Root`    | `inputValue`         | `string`                                       |                                       |
+| `Combobox.Root`    | `defaultInputValue`  | `string`                                       | the selected option's text            |
+| `Combobox.Root`    | `onInputValueChange` | `(inputValue: string) => void`                 |                                       |
+| `Combobox.Root`    | `open`               | `boolean`                                      |                                       |
+| `Combobox.Root`    | `onOpenChange`       | `(open: boolean) => void`                      |                                       |
+| `Combobox.Root`    | `filter`             | `(optionText, inputValue) => boolean \| false` | contains, ignoring case and accents   |
+| `Combobox.Root`    | `name`               | `string`                                       |                                       |
+| `Combobox.Root`    | `disabled`           | `boolean`                                      | `false`                               |
+| `Combobox.Root`    | `resultsMessage`     | `(count: number) => string`                    | "No results", "1 result", "3 results" |
+| `Combobox.Trigger` | `aria-label`         | `string`                                       | `'Show suggestions'`                  |
+| `Combobox.Option`  | `value`              | `string`                                       | (required)                            |
+| `Combobox.Option`  | `textValue`          | `string`                                       | `children`, when a string             |
+| `Combobox.Option`  | `disabled`           | `boolean`                                      | `false`                               |
+
+Render a `Combobox.Label`: it names both the input and the list. Each `Combobox.Group` needs a `Combobox.GroupLabel`.
+
+## Keyboard
+
+| Key                                                           | Action                                                                                      |
+| ------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| Typing                                                        | Opens the list and filters it. No option becomes active.                                    |
+| <kbd>↓</kbd>                                                  | Opens the list on the first option, or moves to the next one, wrapping.                     |
+| <kbd>↑</kbd>                                                  | Opens the list on the last option, or moves to the previous one, wrapping.                  |
+| <kbd>Alt</kbd> + <kbd>↓</kbd>                                 | Opens the list without moving.                                                              |
+| <kbd>Alt</kbd> + <kbd>↑</kbd>                                 | Closes the list.                                                                            |
+| <kbd>Enter</kbd>                                              | Chooses the active option, fills the input and closes. With no active option, does nothing. |
+| <kbd>Esc</kbd>                                                | Closes the list; on a closed list, clears the input. Otherwise left for a dialog.           |
+| <kbd>Home</kbd> / <kbd>End</kbd>, <kbd>←</kbd> / <kbd>→</kbd> | Move the caret in the input.                                                                |
+| <kbd>Tab</kbd>                                                | Closes the list without choosing, and moves on.                                             |
+
+The button beside the input is skipped by <kbd>Tab</kbd> (`tabIndex={-1}`), as in the APG examples: everything it does is on the keyboard already.
+
+## Screen reader output
+
+What the [Guidepup virtual screen reader](https://www.guidepup.dev/docs/virtual) announces, asserted in `combobox.screen-reader.test.tsx`:
+
+| Moment                        | Announcement                                                                                                      |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| <kbd>Tab</kbd> to the input   | "combobox, Fruit, Banana, has popup listbox, not expanded, autocomplete in list, 1 control"                       |
+| <kbd>↓</kbd>                  | "combobox, Fruit, has popup listbox, expanded, active descendant Apple, autocomplete in list, …"                  |
+| A disabled option made active | "… active descendant Cherry …"                                                                                    |
+| Typing settles                | "polite: 2 results", once                                                                                         |
+| Nothing matches               | "polite: No results"                                                                                              |
+| <kbd>Enter</kbd> on an option | "combobox, Fruit, Banana, has popup listbox, not expanded, …"                                                     |
+| Reading the open list         | "listbox, Fruit", "option, Banana, selected, position 3, set size 4", "option, Cherry, not selected, disabled, …" |
+
+The virtual screen reader reports the active option as "active descendant Apple" on the combobox; real screen readers read the option itself ("Apple, 1 of 4"). How Orca and TalkBack read the active option and the live count has not been checked by hand yet (see the checklist).
+
+## What's tested
+
+| Check                                                                                                             | Environment                                                           | Status                     |
+| ----------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- | -------------------------- |
+| ARIA wiring; filtering, marking, every key, blur rules, IME composition, pointer, count timing, forms, controlled | Vitest + Testing Library, jsdom (with a visibility-only popover stub) | <Status value="pass" />    |
+| axe-core, 0 violations: closed, open with active, selected and disabled options, groups, no results, disabled     | vitest-axe (axe-core 4.14), jsdom                                     | <Status value="pass" />    |
+| Keyboard: typing, arrows with wrap, Alt+arrows, Enter, Esc, Home/End caret, Tab, scroll into view, composition    | Playwright, Chromium and Firefox                                      | <Status value="pass" />    |
+| Pointer: press on an option keeps focus, the button, click outside; form submission; live count once              | Playwright, Chromium and Firefox                                      | <Status value="pass" />    |
+| Placement and flipping, on CSS anchor positioning and on the measured fallback; inside a Keyline Dialog           | Playwright, Chromium and Firefox                                      | <Status value="pass" />    |
+| RTL by `dir` alone, the match keyline, reduced motion, forced colours                                             | Playwright, Chromium and Firefox (forced colours: Chromium only)      | <Status value="pass" />    |
+| Announced role, name, value, state, active option and result count                                                | Guidepup virtual screen reader                                        | <Status value="pass" />    |
+| axe-core on every story, light and dark themes                                                                    | Playwright + @axe-core/playwright, Chromium and Firefox               | <Status value="pass" />    |
+| Manual: Orca + Firefox                                                                                            | Linux desktop                                                         | <Status value="pending" /> |
+| Manual: TalkBack + Chrome                                                                                         | Android                                                               | <Status value="pending" /> |
+
+Composition is tested with synthetic `keydown` events that carry `isComposing`, not with a real input method. Not tested yet: a real IME, NVDA, JAWS, Narrator, VoiceOver (macOS and iOS), Safari, and real Windows High Contrast.
+
+### Manual checklist (Orca + Firefox, TalkBack + Chrome)
+
+Run against the [Keyboard test fixture](?path=/story/components-combobox--keyboard-fixture) story and record results in `docs/manual-testing.md`.
+
+1. Tab from "Before" into "Country". Expect "Country", combobox (or "edit, has autocomplete"), collapsed.
+2. Type "cura" and wait. Expect "1 result" once, not a count per letter.
+3. Press <kbd>↓</kbd>. Expect "Curaçao" to be read, with the caret still in the input.
+4. Press <kbd>Enter</kbd>. Expect the input to read "Curaçao" and the list to close.
+5. Clear the input, type "egy", press <kbd>↓</kbd>. Expect "Egypt", unavailable or dimmed; <kbd>Enter</kbd> does nothing.
+6. Type "zz" and wait. Expect "No results".
+7. Press <kbd>Esc</kbd> twice. Expect the list to close, then the text to clear.
+8. TalkBack: type in the input, then swipe to the suggestions and double-tap one. Expect it to fill the input.
+9. Visual: the active fill, the underline under the match, the tick on the chosen option and the disabled option are clear in both light and dark themes.
+
+## Bundle size
+
+Measured by `size-limit` (minified + brotli, React excluded):
+
+| Import                                                     | Size    |
+| ---------------------------------------------------------- | ------- |
+| `import { Combobox } from '@oyinbayode/keyline/combobox'`  | 3.1 kB  |
+| `import { Combobox } from '@oyinbayode/keyline'`           | 3.1 kB  |
+| `@oyinbayode/keyline/styles.css` (tokens + all components) | 3.73 kB |
+
+## Known limitations
+
+- **Single selection only.** No multiple selection or tags yet.
+- **No inline autocomplete.** The typed text is never completed in place (`aria-autocomplete="both"`); suggestions are only in the list.
+- **No creating new options.** Text that matches no option is undone on blur; the combobox cannot add it.
+- **No virtualised lists.** Every option is rendered; for thousands of options, filter on a server with `filter={false}` and render only the results.
+- **The input is the anchor.** The list is at least as wide as the input, not the input and button together.
+- **An empty list is not a listbox.** With no options to show, the list drops `role="listbox"` and shows `Combobox.Empty`; the live region says "No results".
+- **Real Windows High Contrast and real IMEs have not been checked by hand,** only emulated.
