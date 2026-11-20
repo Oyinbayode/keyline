@@ -114,6 +114,27 @@ jobs:
       - run: npm install --global npm@11.19.1
       - run: npm --version
       - run: pnpm install --frozen-lockfile --ignore-scripts
+      # npm treats a failed OIDC exchange as "no OIDC" and logs why only at
+      # verbose level, so a registry-side mismatch surfaces later as a bare
+      # ENEEDAUTH. Dry-run the packed tarball first (the exchange runs before
+      # the dry-run check) and stop with npm's own reason if it fails.
+      - uses: actions/download-artifact@v8
+        with:
+          artifact-ids: ${{ needs.pack.outputs.pack-dir-artifact-id }}
+          path: ${{ runner.temp }}/oidc-preflight
+      - name: Check the npm OIDC exchange
+        run: |
+          tarball=$(find "$RUNNER_TEMP/oidc-preflight" -name '*.tgz' -print -quit)
+          if [ -z "$tarball" ]; then
+            echo "Nothing to publish to npm; skipping the check."
+            exit 0
+          fi
+          oidc=$(npm publish "$tarball" --dry-run --loglevel verbose 2>&1 | grep 'verbose oidc' || true)
+          echo "$oidc"
+          if ! grep -q 'Successfully retrieved and set token' <<< "$oidc"; then
+            echo "::error::npm could not exchange this job's OIDC token for a publish token. Check the trusted publisher on npmjs.com against this repository, workflow file and environment."
+            exit 1
+          fi
       - uses: changesets/action/publish@v2
         with:
           pack-dir-artifact-id: ${{ needs.pack.outputs.pack-dir-artifact-id }}
