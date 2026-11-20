@@ -1,0 +1,119 @@
+/*
+ * The selected tab is marked by a 2px keyline that overlaps the list's 1px
+ * hairline. It is a real border, not a background or pseudo-element fill, so
+ * forced-colours mode keeps it; the text colour change is a second cue, never
+ * the only one.
+ */
+.kl-tabs[data-orientation='vertical'] {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--kl-space-5);
+}
+
+.kl-tabs-list {
+  display: flex;
+  border-block-end: 1px solid var(--kl-slate-6);
+}
+
+.kl-tabs-list[data-orientation='vertical'] {
+  flex-direction: column;
+  flex-shrink: 0;
+  border-block-end: 0;
+  border-inline-start: 1px solid var(--kl-slate-6);
+}
+
+.kl-tabs-tab {
+  all: unset;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--kl-space-2);
+  margin-block-end: -1px;
+  padding: var(--kl-space-2) var(--kl-space-3);
+  border-block-end: 2px solid transparent;
+  color: var(--kl-slate-11);
+  font-family: var(--kl-font-family);
+  font-size: var(--kl-font-size);
+  font-weight: 500;
+  line-height: var(--kl-line-height);
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    color var(--kl-duration-fast) var(--kl-ease),
+    border-color var(--kl-duration-fast) var(--kl-ease);
+}
+
+.kl-tabs-tab[data-orientation='vertical'] {
+  margin-block-end: 0;
+  margin-inline-start: -1px;
+  border-block-end: 0;
+  border-inline-start: 2px solid transparent;
+}
+
+.kl-tabs-tab:hover,
+.kl-tabs-tab[data-state='active'] {
+  color: var(--kl-slate-12);
+}
+
+/* The alias, like Switch, so a rebrand through --kl-color-accent reaches the keyline. */
+.kl-tabs-tab[data-state='active'] {
+  border-color: var(--kl-color-accent);
+}
+
+.kl-tabs-tab:disabled {
+  color: var(--kl-slate-9);
+  cursor: not-allowed;
+}
+
+.kl-tabs-tab:focus-visible,
+.kl-tabs-panel:focus-visible {
+  outline: var(--kl-focus-ring-width) solid transparent;
+  outline-offset: var(--kl-focus-ring-offset);
+  box-shadow: var(--kl-focus-ring);
+}
+
+.kl-tabs-tab:focus-visible {
+  border-radius: var(--kl-radius-sm);
+}
+
+.kl-tabs-panel {
+  flex: 1;
+  padding-block: var(--kl-space-4);
+  border-radius: var(--kl-radius-sm);
+  color: var(--kl-color-text);
+}
+
+.kl-tabs-panel[data-orientation='vertical'] {
+  padding-block: var(--kl-space-2);
+}
+
+/*
+ * Forced colours would repaint every tab's border the same system colour, so
+ * the tabs take over: unselected borders vanish into Canvas, the selected one
+ * becomes Highlight, and disabled text uses GrayText.
+ */
+@media (forced-colors: active) {
+  .kl-tabs-tab {
+    forced-color-adjust: none;
+    border-color: Canvas;
+    background-color: Canvas;
+    color: CanvasText;
+  }
+
+  .kl-tabs-tab:hover,
+  .kl-tabs-tab[data-state='active'] {
+    color: CanvasText;
+  }
+
+  .kl-tabs-tab[data-state='active'] {
+    border-color: Highlight;
+  }
+
+  .kl-tabs-tab:disabled {
+    color: GrayText;
+  }
+
+  .kl-tabs-list {
+    border-color: CanvasText;
+  }
+}

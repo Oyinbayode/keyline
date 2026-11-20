@@ -8,7 +8,8 @@
     "a11y",
     "wai-aria",
     "components",
-    "switch"
+    "switch",
+    "tabs"
   ],
   "homepage": "https://oyinbayode.github.io/keyline/",
   "bugs": "https://github.com/Oyinbayode/keyline/issues",
@@ -44,6 +45,16 @@
       "require": {
         "types": "./dist/switch.d.cts",
         "default": "./dist/switch.cjs"
+      }
+    },
+    "./tabs": {
+      "import": {
+        "types": "./dist/tabs.d.mts",
+        "default": "./dist/tabs.js"
+      },
+      "require": {
+        "types": "./dist/tabs.d.cts",
+        "default": "./dist/tabs.cjs"
       }
     },
     "./primitives": {

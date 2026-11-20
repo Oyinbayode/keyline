@@ -4,7 +4,7 @@
     "path": "dist/index.js",
     "import": "*",
     "ignore": ["react", "react-dom"],
-    "limit": "2.2 kB"
+    "limit": "3.1 kB"
   },
   {
     "name": "@oyinbayode/keyline: Switch",
@@ -21,16 +21,30 @@
     "limit": "750 B"
   },
   {
+    "name": "@oyinbayode/keyline: Tabs",
+    "path": "dist/index.js",
+    "import": "{ Tabs }",
+    "ignore": ["react", "react-dom"],
+    "limit": "1.6 kB"
+  },
+  {
+    "name": "@oyinbayode/keyline/tabs",
+    "path": "dist/tabs.js",
+    "import": "{ Tabs }",
+    "ignore": ["react", "react-dom"],
+    "limit": "1.6 kB"
+  },
+  {
     "name": "@oyinbayode/keyline/primitives",
     "path": "dist/primitives.js",
     "import": "*",
     "ignore": ["react", "react-dom"],
-    "limit": "1.8 kB"
+    "limit": "2 kB"
   },
   {
     "name": "@oyinbayode/keyline/styles.css",
     "path": "dist/styles.css",
     "rolldown": false,
-    "limit": "1.8 kB"
+    "limit": "2.1 kB"
   }
 ]

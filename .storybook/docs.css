@@ -641,7 +641,7 @@ body,
   line-height: 22px;
 }
 
-.kl-story-canvas button:not(.kl-switch) {
+.kl-story-canvas button:not([class*='kl-']) {
   padding: var(--kl-space-1) var(--kl-space-3);
   border: 1px solid var(--kl-slate-8);
   border-radius: var(--kl-radius-sm);
@@ -654,11 +654,11 @@ body,
   cursor: pointer;
 }
 
-.kl-story-canvas button:not(.kl-switch):hover {
+.kl-story-canvas button:not([class*='kl-']):hover {
   background: var(--kl-slate-4);
 }
 
-.kl-story-canvas button:not(.kl-switch):focus-visible {
+.kl-story-canvas button:not([class*='kl-']):focus-visible {
   outline: 2px solid transparent;
   box-shadow: var(--kl-focus-ring);
 }
