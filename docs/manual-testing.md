@@ -36,10 +36,10 @@ Steps (from the Tabs docs page), against Components → Tabs → Keyboard test f
 7. TalkBack: double-tap "Billing" in the first list. Expect it to become selected and its panel to show.
 8. Visual: focus ring and the selected keyline visible in both light and dark themes.
 
-| Screen reader  | Browser     | OS             | Date | Keyline version | Result  | What was announced / notes |
-| -------------- | ----------- | -------------- | ---- | --------------- | ------- | -------------------------- |
-| Orca _x.y_     | Firefox _x_ | Linux _distro_ |      | 0.2.0           | Pending |                            |
-| TalkBack _x.y_ | Chrome _x_  | Android _x_    |      | 0.2.0           | Pending |                            |
+| Screen reader  | Browser     | OS           | Date       | Keyline version | Result  | What was announced / notes                                                                                                                                                                                                                                                                                            |
+| -------------- | ----------- | ------------ | ---------- | --------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Orca 46.1      | Firefox 158 | Ubuntu 24.04 | 2026-11-20 | 0.2.0           | Pass    | Steps 1–6 matched: tab list named "Settings"; tabs announced with selected state and position; Right Arrow skipped the disabled tab; the panel was announced by name; hidden panels were not read in browse mode; manual activation selected on Enter; the vertical list moved on Down Arrow and ignored Right Arrow. |
+| TalkBack _x.y_ | Chrome _x_  | Android _x_  |            | 0.2.0           | Pending |                                                                                                                                                                                                                                                                                                                       |
 
 When a row passes, change the matching "Manual" row in `src/components/tabs/tabs.mdx` from `pending` to `pass`.
 
