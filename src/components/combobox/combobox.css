@@ -1,0 +1,211 @@
+/*
+ * The input and its button sit in one row under the label; the list is a
+ * native popover in the top layer, placed inline by useAnchoredPopover and
+ * at least as wide as the input. The list surface and its options match
+ * Menu: slate-2 with a hairline border, and a full-width slate-4 fill for
+ * the active option.
+ */
+.kl-combobox {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--kl-space-1) 0;
+  color: var(--kl-color-text);
+  font-family: var(--kl-font-family);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+.kl-combobox-label {
+  flex-basis: 100%;
+  font-weight: 500;
+}
+
+.kl-combobox-input {
+  box-sizing: border-box;
+  flex: 1;
+  min-inline-size: 14rem;
+  block-size: 2.25rem;
+  margin: 0;
+  /* Room at the inline end for the button, which overlaps it. */
+  padding-block: 0;
+  padding-inline: var(--kl-space-3) 2.25rem;
+  border: 1px solid var(--kl-slate-8);
+  border-radius: var(--kl-radius-md);
+  background-color: var(--kl-slate-1);
+  color: var(--kl-slate-12);
+  font: inherit;
+}
+
+.kl-combobox-input:focus-visible {
+  outline: var(--kl-focus-ring-width) solid transparent;
+  outline-offset: var(--kl-focus-ring-offset);
+  box-shadow: var(--kl-focus-ring);
+}
+
+.kl-combobox-input:disabled {
+  border-color: var(--kl-slate-6);
+  color: var(--kl-slate-9);
+  cursor: not-allowed;
+}
+
+.kl-combobox-trigger {
+  all: unset;
+  box-sizing: border-box;
+  display: grid;
+  place-items: center;
+  inline-size: 2.25rem;
+  block-size: 2.25rem;
+  margin-inline-start: -2.25rem;
+  color: var(--kl-slate-11);
+  cursor: default;
+}
+
+/* A plain chevron, drawn with borders so forced colours keep it. Not mirrored: it points down. */
+.kl-combobox-trigger::before {
+  content: '';
+  inline-size: 0.375rem;
+  block-size: 0.375rem;
+  border: solid currentColor;
+  border-width: 0 1.5px 1.5px 0;
+  transform: translateY(-2px) rotate(45deg);
+}
+
+.kl-combobox-trigger:disabled {
+  color: var(--kl-slate-9);
+}
+
+.kl-combobox-content {
+  box-sizing: border-box;
+  max-block-size: 18rem;
+  margin: var(--kl-space-1) 0;
+  padding: var(--kl-space-1);
+  overflow: auto;
+  border: 1px solid var(--kl-slate-6);
+  border-radius: var(--kl-radius-md);
+  background-color: var(--kl-slate-2);
+  box-shadow: var(--kl-shadow-floating);
+  color: var(--kl-slate-12);
+  font-family: var(--kl-font-family);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  opacity: 0;
+  transition:
+    opacity var(--kl-duration-fast) var(--kl-ease),
+    overlay var(--kl-duration-fast) allow-discrete,
+    display var(--kl-duration-fast) allow-discrete;
+}
+
+.kl-combobox-content:popover-open {
+  opacity: 1;
+}
+
+@starting-style {
+  .kl-combobox-content:popover-open {
+    opacity: 0;
+  }
+}
+
+.kl-combobox-option {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: var(--kl-space-2);
+  min-block-size: 2rem;
+  padding: var(--kl-space-1) var(--kl-space-2);
+  border-radius: var(--kl-radius-sm);
+  cursor: default;
+  user-select: none;
+}
+
+.kl-combobox-option-label {
+  flex: 1;
+}
+
+.kl-combobox-option[data-active] {
+  background-color: var(--kl-slate-4);
+  color: var(--kl-slate-12);
+}
+
+/*
+ * The fill is too faint to be the only sign of the keyboard's place (about
+ * 1.2:1 on the surface in dark mode), so an option reached with the arrow
+ * keys also gets an inset blue-9 keyline ring on all four sides, 5:1 or more
+ * on the surface and the fill. Pointer hover keeps the fill alone.
+ */
+.kl-combobox-option[data-active='keyboard'] {
+  outline: 2px solid var(--kl-blue-9);
+  outline-offset: -2px;
+}
+
+.kl-combobox-option[aria-disabled='true'] {
+  color: var(--kl-slate-9);
+}
+
+/* The chosen option: weight 500 and a tick at the inline end, never colour alone. */
+.kl-combobox-option[aria-selected='true'] {
+  font-weight: 500;
+}
+
+.kl-combobox-option[aria-selected='true']::after {
+  content: '';
+  flex: none;
+  inline-size: 0.3125rem;
+  block-size: 0.625rem;
+  margin-inline: auto var(--kl-space-1);
+  border: solid currentColor;
+  border-width: 0 2px 2px 0;
+  transform: translateY(-1px) rotate(45deg);
+}
+
+/* The print motif's keyline under the matching characters: not bold, not a highlighter fill. */
+.kl-combobox-match {
+  background-color: transparent;
+  color: inherit;
+  text-decoration: underline 2px var(--kl-blue-9);
+  text-underline-offset: 3px;
+}
+
+.kl-combobox-group-label {
+  padding: var(--kl-space-2) var(--kl-space-2) var(--kl-space-1);
+  color: var(--kl-slate-11);
+  font-family: var(--kl-font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  line-height: 1rem;
+  text-transform: uppercase;
+}
+
+/* A group with every option filtered out disappears, label and all. */
+.kl-combobox-group:not(:has([role='option'])) {
+  display: none;
+}
+
+.kl-combobox-empty {
+  padding: var(--kl-space-2);
+  color: var(--kl-slate-11);
+}
+
+@media (forced-colors: active) {
+  .kl-combobox-content {
+    border-color: CanvasText;
+  }
+
+  .kl-combobox-option[data-active] {
+    forced-color-adjust: none;
+    background-color: Highlight;
+    color: HighlightText;
+  }
+
+  .kl-combobox-option[data-active='keyboard'] {
+    outline-color: HighlightText;
+  }
+
+  .kl-combobox-option[aria-disabled='true']:not([data-active]) {
+    color: GrayText;
+  }
+
+  .kl-combobox-option[data-active] .kl-combobox-match {
+    text-decoration-color: currentColor;
+  }
+}

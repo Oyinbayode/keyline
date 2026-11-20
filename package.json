@@ -10,6 +10,7 @@
     "components",
     "switch",
     "tabs",
+    "combobox",
     "dialog",
     "menu",
     "toast"
@@ -38,6 +39,16 @@
       "require": {
         "types": "./dist/index.d.cts",
         "default": "./dist/index.cjs"
+      }
+    },
+    "./combobox": {
+      "import": {
+        "types": "./dist/combobox.d.mts",
+        "default": "./dist/combobox.js"
+      },
+      "require": {
+        "types": "./dist/combobox.d.cts",
+        "default": "./dist/combobox.cjs"
       }
     },
     "./dialog": {

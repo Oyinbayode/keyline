@@ -21,15 +21,16 @@ Keyline is a small React 19 + TypeScript library where each component:
 - **uses native elements first**, so the browser provides focus, key handling, and form behaviour;
 - **is styled by design tokens**: light and dark themes, reduced motion, forced colours, and right-to-left handled in CSS custom properties you can override.
 
-Available now: **Switch**, **Tabs**, **Dialog**, **Menu**, **Toast**. Next: Combobox, Date picker.
+Available now: **Switch**, **Tabs**, **Dialog**, **Menu**, **Combobox**, **Toast**. Next: Date picker.
 
-| Component | APG pattern                                                              | Import                       | Docs                                                                               |
-| --------- | ------------------------------------------------------------------------ | ---------------------------- | ---------------------------------------------------------------------------------- |
-| Switch    | [Switch](https://www.w3.org/WAI/ARIA/apg/patterns/switch/)               | `@oyinbayode/keyline/switch` | [Switch](https://oyinbayode.github.io/keyline/?path=/docs/components-switch--docs) |
-| Tabs      | [Tabs](https://www.w3.org/WAI/ARIA/apg/patterns/tabs/)                   | `@oyinbayode/keyline/tabs`   | [Tabs](https://oyinbayode.github.io/keyline/?path=/docs/components-tabs--docs)     |
-| Dialog    | [Dialog (Modal)](https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/) | `@oyinbayode/keyline/dialog` | [Dialog](https://oyinbayode.github.io/keyline/?path=/docs/components-dialog--docs) |
-| Menu      | [Menu Button](https://www.w3.org/WAI/ARIA/apg/patterns/menu-button/)     | `@oyinbayode/keyline/menu`   | [Menu](https://oyinbayode.github.io/keyline/?path=/docs/components-menu--docs)     |
-| Toast     | [Alert](https://www.w3.org/WAI/ARIA/apg/patterns/alert/) + WCAG 4.1.3    | `@oyinbayode/keyline/toast`  | [Toast](https://oyinbayode.github.io/keyline/?path=/docs/components-toast--docs)   |
+| Component | APG pattern                                                              | Import                         | Docs                                                                                   |
+| --------- | ------------------------------------------------------------------------ | ------------------------------ | -------------------------------------------------------------------------------------- |
+| Switch    | [Switch](https://www.w3.org/WAI/ARIA/apg/patterns/switch/)               | `@oyinbayode/keyline/switch`   | [Switch](https://oyinbayode.github.io/keyline/?path=/docs/components-switch--docs)     |
+| Tabs      | [Tabs](https://www.w3.org/WAI/ARIA/apg/patterns/tabs/)                   | `@oyinbayode/keyline/tabs`     | [Tabs](https://oyinbayode.github.io/keyline/?path=/docs/components-tabs--docs)         |
+| Dialog    | [Dialog (Modal)](https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/) | `@oyinbayode/keyline/dialog`   | [Dialog](https://oyinbayode.github.io/keyline/?path=/docs/components-dialog--docs)     |
+| Menu      | [Menu Button](https://www.w3.org/WAI/ARIA/apg/patterns/menu-button/)     | `@oyinbayode/keyline/menu`     | [Menu](https://oyinbayode.github.io/keyline/?path=/docs/components-menu--docs)         |
+| Combobox  | [Combobox](https://www.w3.org/WAI/ARIA/apg/patterns/combobox/)           | `@oyinbayode/keyline/combobox` | [Combobox](https://oyinbayode.github.io/keyline/?path=/docs/components-combobox--docs) |
+| Toast     | [Alert](https://www.w3.org/WAI/ARIA/apg/patterns/alert/) + WCAG 4.1.3    | `@oyinbayode/keyline/toast`    | [Toast](https://oyinbayode.github.io/keyline/?path=/docs/components-toast--docs)       |
 
 ## Install
 
@@ -63,7 +64,7 @@ const [isOn, setIsOn] = useState(false);
 <Switch aria-label="Wi-Fi" checked={isOn} onCheckedChange={setIsOn} />;
 ```
 
-Every component accepts `className`, `style`, and `ref`, passes other props to its root element, and exposes its state as `data-state` for custom styling. Per-component entry points (`@oyinbayode/keyline/switch`, `@oyinbayode/keyline/tabs`, `@oyinbayode/keyline/dialog`, `@oyinbayode/keyline/menu`, `@oyinbayode/keyline/toast`, `@oyinbayode/keyline/primitives`) and ESM tree-shaking keep imports small.
+Every component accepts `className`, `style`, and `ref`, passes other props to its root element, and exposes its state as `data-state` for custom styling. Per-component entry points (`@oyinbayode/keyline/switch`, `@oyinbayode/keyline/tabs`, `@oyinbayode/keyline/dialog`, `@oyinbayode/keyline/menu`, `@oyinbayode/keyline/combobox`, `@oyinbayode/keyline/toast`, `@oyinbayode/keyline/primitives`) and ESM tree-shaking keep imports small.
 
 If you lint with `eslint-plugin-jsx-a11y`, tell `label-has-associated-control` that `Switch` is a control:
 
@@ -99,16 +100,16 @@ Keyline never ships or sets a font: `--kl-font-family` is `inherit`, so componen
 
 Keyline targets WCAG 2.2 AA and the [WAI-ARIA Authoring Practices](https://www.w3.org/WAI/ARIA/apg/). This is what is actually tested for each component, as of the version in `package.json`:
 
-| Check                                                      | Tooling                                           | Switch  | Tabs    | Dialog  | Menu    | Toast   |
-| ---------------------------------------------------------- | ------------------------------------------------- | ------- | ------- | ------- | ------- | ------- |
-| Behaviour (controlled, uncontrolled, state, refs)          | Vitest + Testing Library, jsdom                   | Pass    | Pass    | Pass    | Pass    | Pass    |
-| axe-core, 0 violations in every state                      | vitest-axe                                        | Pass    | Pass    | Pass    | Pass    | Pass    |
-| axe-core on every Storybook story, light and dark          | Playwright + @axe-core/playwright                 | Pass    | Pass    | Pass    | Pass    | Pass    |
-| Keyboard contract from the APG pattern                     | Playwright, Chromium and Firefox                  | Pass    | Pass    | Pass    | Pass    | Pass    |
-| Focus ring, reduced motion, RTL, forced colours (emulated) | Playwright, Chromium (Firefox: no forced colours) | Pass    | Pass    | Pass    | Pass    | Pass    |
-| Announced role, name, and state                            | Guidepup virtual screen reader                    | Pass    | Pass    | Pass    | Pass    | Pass    |
-| Orca + Firefox (Linux)                                     | Manual                                            | Pending | Pending | Pending | Pending | Pending |
-| TalkBack + Chrome (Android)                                | Manual                                            | Pending | Pending | Pending | Pending | Pending |
+| Check                                                      | Tooling                                           | Switch  | Tabs    | Dialog  | Menu    | Combobox | Toast   |
+| ---------------------------------------------------------- | ------------------------------------------------- | ------- | ------- | ------- | ------- | -------- | ------- |
+| Behaviour (controlled, uncontrolled, state, refs)          | Vitest + Testing Library, jsdom                   | Pass    | Pass    | Pass    | Pass    | Pass     | Pass    |
+| axe-core, 0 violations in every state                      | vitest-axe                                        | Pass    | Pass    | Pass    | Pass    | Pass     | Pass    |
+| axe-core on every Storybook story, light and dark          | Playwright + @axe-core/playwright                 | Pass    | Pass    | Pass    | Pass    | Pass     | Pass    |
+| Keyboard contract from the APG pattern                     | Playwright, Chromium and Firefox                  | Pass    | Pass    | Pass    | Pass    | Pass     | Pass    |
+| Focus ring, reduced motion, RTL, forced colours (emulated) | Playwright, Chromium (Firefox: no forced colours) | Pass    | Pass    | Pass    | Pass    | Pass     | Pass    |
+| Announced role, name, and state                            | Guidepup virtual screen reader                    | Pass    | Pass    | Pass    | Pass    | Pass     | Pass    |
+| Orca + Firefox (Linux)                                     | Manual                                            | Pending | Pending | Pending | Pending | Pending  | Pending |
+| TalkBack + Chrome (Android)                                | Manual                                            | Pending | Pending | Pending | Pending | Pending  | Pending |
 
 Not tested: NVDA, JAWS, Narrator, VoiceOver (macOS, iOS), real Windows High Contrast. Manual results are recorded in [docs/manual-testing.md](docs/manual-testing.md). Found a barrier? [Open an issue](https://github.com/Oyinbayode/keyline/issues) with the component, browser, assistive technology, and what you heard or expected.
 
@@ -124,13 +125,15 @@ Minified + brotli, React excluded, enforced in CI by `size-limit` (see `.size-li
 | `import { Tabs } from '@oyinbayode/keyline/tabs'`                     | 1.6 kB  | 1.6 kB |
 | `import { Dialog } from '@oyinbayode/keyline'`                        | 1.58 kB | 1.6 kB |
 | `import { Dialog } from '@oyinbayode/keyline/dialog'`                 | 1.58 kB | 1.6 kB |
-| `import { Menu } from '@oyinbayode/keyline'`                          | 2.58 kB | 2.6 kB |
+| `import { Menu } from '@oyinbayode/keyline'`                          | 2.57 kB | 2.6 kB |
 | `import { Menu } from '@oyinbayode/keyline/menu'`                     | 2.57 kB | 2.6 kB |
+| `import { Combobox } from '@oyinbayode/keyline'`                      | 3.23 kB | 3.4 kB |
+| `import { Combobox } from '@oyinbayode/keyline/combobox'`             | 3.23 kB | 3.4 kB |
 | `import { ToastProvider, useToast } from '@oyinbayode/keyline'`       | 2.36 kB | 2.4 kB |
 | `import { ToastProvider, useToast } from '@oyinbayode/keyline/toast'` | 2.35 kB | 2.4 kB |
 | `@oyinbayode/keyline/primitives` (all)                                | 2.69 kB | 3 kB   |
-| `@oyinbayode/keyline` (everything)                                    | 7.55 kB | 8.4 kB |
-| `@oyinbayode/keyline/styles.css`                                      | 3.38 kB | 3.7 kB |
+| `@oyinbayode/keyline` (everything)                                    | 9.29 kB | 10 kB  |
+| `@oyinbayode/keyline/styles.css`                                      | 3.77 kB | 4.1 kB |
 
 ## Contributing
 
