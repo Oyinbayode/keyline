@@ -16,7 +16,7 @@ import * as ComboboxStories from './combobox.stories';
   entries={[
     { label: 'Pattern', value: 'APG Combobox (list autocomplete)' },
     { label: 'Element', value: <code>{'<input role="combobox">'}</code> },
-    { label: 'Size', value: '3.1 kB' },
+    { label: 'Size', value: '3.23 kB' },
     { label: 'Automated tests', value: '7/7 automated' },
     { label: 'Screen readers', value: 'Orca and TalkBack pending' },
   ]}
@@ -58,6 +58,7 @@ An autocomplete is an input with a list under it, and it is one of the easiest c
 
 - **Roles and relationships from the APG.** The input has `aria-autocomplete="list"`, `aria-expanded` and `aria-controls` pointing at the listbox. Options are `role="option"`, the chosen one has `aria-selected="true"`, and disabled ones `aria-disabled="true"`. Groups are `role="group"` named by their `Combobox.GroupLabel`.
 - **Focus never leaves the input.** The active option is virtual: the input's `aria-activedescendant` points at it, so screen readers read it while the caret stays put and typing keeps working. The active option is scrolled into view.
+- **A ring where the keyboard is.** The active option is a full-width slate-4 fill whether the pointer or the arrow keys put it there. The fill alone is faint against the list (about 1.2:1 in dark mode), so an option reached with the arrow keys also gets a 2px blue-9 keyline ring inset on all four sides, 5:1 or more against the list and the fill in both themes. A hovered option keeps the fill alone.
 - **Nothing chosen for the user.** Typing opens and filters the list, but no option is highlighted until the user moves to one, so <kbd>Enter</kbd> with no active option chooses nothing. <kbd>Enter</kbd> on an active option fills the input with its text and closes the list.
 - **A result count, said once.** A polite, visually hidden live region says "3 results" or "No results" half a second after typing settles. It is emptied on every keystroke and filled once, so it is not read for each letter, and a count still pending when an option is chosen is dropped. Pass `resultsMessage` to translate it, with your language's plural rules.
 - **Editing keys stay editing keys.** <kbd>Home</kbd>, <kbd>End</kbd>, <kbd>←</kbd> and <kbd>→</kbd> move the caret, as the APG specifies for editable comboboxes, and clear the active option, since visual focus is back in the text.
@@ -66,6 +67,7 @@ An autocomplete is an input with a list under it, and it is one of the easiest c
 - **Leaving tidies up.** On blur the list closes. Text that names an option exactly (ignoring case and accents) chooses it; empty text clears the choice; anything else goes back to the chosen option's text, or to empty.
 - **Filtering that forgives accents.** The default filter matches anywhere in the option's text, ignoring case and diacritics, so "cafe" finds "Café" and "cote" finds "Côte d’Ivoire". The matching characters get the print motif's keyline, a 2px underline in blue-9, on a real `<mark>`. Pass `filter` to match differently, or `filter={false}` when the options come already filtered from a server.
 - **In the top layer, beside the input.** The list is a manual native popover, because focus must stay in the input, anchored with CSS anchor positioning: under the input, at least as wide as it, lined up with its inline start edge (the right under `dir="rtl"`), and flipped above when there is no room. It works inside a Keyline Dialog, where <kbd>Esc</kbd> closes the list, then clears the text, and only then closes the dialog.
+- **A value set from outside shows its text.** When a parent changes `value` (a reset button, saved data loaded later), the input shows the new option's text, or nothing when the value is cleared, and the list is not filtered by the old text. If that option has not rendered yet, the input updates when it does.
 - **Forms.** With `name`, a hidden input submits the chosen option's value, not the typed text.
 
 ## Examples
@@ -134,7 +136,7 @@ With the result count translated through `resultsMessage`.
 
 `Combobox.Root` renders a `<div>` around the parts, the live region and the hidden form input. `Combobox.Label` renders a `<label>`, `Combobox.Input` an `<input>`, `Combobox.Trigger` a `<button>`, `Combobox.Content` a `<div role="listbox" popover="manual">`, and options, groups, group labels and the empty message render `<div>`s. Each part passes other props (`className`, `style`, `aria-*`, `data-*`, event handlers, `ref`) to its element. An `onClick` on an option that calls `event.preventDefault()` cancels the choice.
 
-Styling hooks: `data-active` on the active option, `aria-selected` and `aria-disabled` on options, `:popover-open` on the open list, and `.kl-combobox-match` on the `<mark>`.
+Styling hooks: `data-active="keyboard" | "pointer"` on the active option (only `"keyboard"` is ringed), `aria-selected` and `aria-disabled` on options, `:popover-open` on the open list, and `.kl-combobox-match` on the `<mark>`.
 
 <ArgTypes of={ComboboxStories} />
 
@@ -193,18 +195,18 @@ The virtual screen reader reports the active option as "active descendant Apple"
 
 ## What's tested
 
-| Check                                                                                                             | Environment                                                           | Status                     |
-| ----------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- | -------------------------- |
-| ARIA wiring; filtering, marking, every key, blur rules, IME composition, pointer, count timing, forms, controlled | Vitest + Testing Library, jsdom (with a visibility-only popover stub) | <Status value="pass" />    |
-| axe-core, 0 violations: closed, open with active, selected and disabled options, groups, no results, disabled     | vitest-axe (axe-core 4.14), jsdom                                     | <Status value="pass" />    |
-| Keyboard: typing, arrows with wrap, Alt+arrows, Enter, Esc, Home/End caret, Tab, scroll into view, composition    | Playwright, Chromium and Firefox                                      | <Status value="pass" />    |
-| Pointer: press on an option keeps focus, the button, click outside; form submission; live count once              | Playwright, Chromium and Firefox                                      | <Status value="pass" />    |
-| Placement and flipping, on CSS anchor positioning and on the measured fallback; inside a Keyline Dialog           | Playwright, Chromium and Firefox                                      | <Status value="pass" />    |
-| RTL by `dir` alone, the match keyline, reduced motion, forced colours                                             | Playwright, Chromium and Firefox (forced colours: Chromium only)      | <Status value="pass" />    |
-| Announced role, name, value, state, active option and result count                                                | Guidepup virtual screen reader                                        | <Status value="pass" />    |
-| axe-core on every story, light and dark themes                                                                    | Playwright + @axe-core/playwright, Chromium and Firefox               | <Status value="pass" />    |
-| Manual: Orca + Firefox                                                                                            | Linux desktop                                                         | <Status value="pending" /> |
-| Manual: TalkBack + Chrome                                                                                         | Android                                                               | <Status value="pending" /> |
+| Check                                                                                                                                    | Environment                                                           | Status                     |
+| ---------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- | -------------------------- |
+| ARIA wiring; filtering, marking, every key, blur rules, IME composition, pointer, count timing, forms, controlled, outside value changes | Vitest + Testing Library, jsdom (with a visibility-only popover stub) | <Status value="pass" />    |
+| axe-core, 0 violations: closed, open with active, selected and disabled options, groups, no results, disabled                            | vitest-axe (axe-core 4.14), jsdom                                     | <Status value="pass" />    |
+| Keyboard: typing, arrows with wrap, Alt+arrows, Enter, Esc, Home/End caret, Tab, scroll into view, composition                           | Playwright, Chromium and Firefox                                      | <Status value="pass" />    |
+| Pointer: press on an option keeps focus, the button, click outside; form submission; live count once                                     | Playwright, Chromium and Firefox                                      | <Status value="pass" />    |
+| Placement and flipping, on CSS anchor positioning and on the measured fallback; inside a Keyline Dialog                                  | Playwright, Chromium and Firefox                                      | <Status value="pass" />    |
+| RTL by `dir` alone, the match keyline, keyboard-only ring, reduced motion, forced colours                                                | Playwright, Chromium and Firefox (forced colours: Chromium only)      | <Status value="pass" />    |
+| Announced role, name, value, state, active option and result count                                                                       | Guidepup virtual screen reader                                        | <Status value="pass" />    |
+| axe-core on every story, light and dark themes                                                                                           | Playwright + @axe-core/playwright, Chromium and Firefox               | <Status value="pass" />    |
+| Manual: Orca + Firefox                                                                                                                   | Linux desktop                                                         | <Status value="pending" /> |
+| Manual: TalkBack + Chrome                                                                                                                | Android                                                               | <Status value="pending" /> |
 
 Composition is tested with synthetic `keydown` events that carry `isComposing`, not with a real input method. Not tested yet: a real IME, NVDA, JAWS, Narrator, VoiceOver (macOS and iOS), Safari, and real Windows High Contrast.
 
@@ -228,9 +230,9 @@ Measured by `size-limit` (minified + brotli, React excluded):
 
 | Import                                                     | Size    |
 | ---------------------------------------------------------- | ------- |
-| `import { Combobox } from '@oyinbayode/keyline/combobox'`  | 3.1 kB  |
-| `import { Combobox } from '@oyinbayode/keyline'`           | 3.1 kB  |
-| `@oyinbayode/keyline/styles.css` (tokens + all components) | 3.73 kB |
+| `import { Combobox } from '@oyinbayode/keyline/combobox'`  | 3.23 kB |
+| `import { Combobox } from '@oyinbayode/keyline'`           | 3.23 kB |
+| `@oyinbayode/keyline/styles.css` (tokens + all components) | 3.77 kB |
 
 ## Known limitations
 

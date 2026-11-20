@@ -406,6 +406,21 @@ describe('Combobox', () => {
       expect(activeOption()).toBe('Date');
     });
 
+    it('marks how the active option was reached: keyboard or pointer', async () => {
+      render(<Example />);
+      const user = await typeInto('a{ArrowDown}');
+      expect(option('Apple')).toHaveAttribute('data-active', 'keyboard');
+
+      await user.hover(option('Banana'));
+      expect(option('Banana')).toHaveAttribute('data-active', 'pointer');
+      expect(option('Apple')).not.toHaveAttribute('data-active');
+
+      await user.keyboard('{ArrowDown}');
+      expect(option('Date')).toHaveAttribute('data-active', 'keyboard');
+      await user.hover(option('Date'));
+      expect(option('Date')).toHaveAttribute('data-active', 'pointer');
+    });
+
     it('the button opens and closes the list and leaves focus in the input', async () => {
       render(<Example />);
       const user = userEvent.setup();
@@ -528,6 +543,71 @@ describe('Combobox', () => {
       await typeInto('{Backspace>5/}da{ArrowDown}{Enter}');
 
       expect(screen.getByText('date|Date|false')).toBeInTheDocument();
+    });
+
+    it('shows the text of a value set from outside, and clears it when the value is cleared', async () => {
+      function Reset() {
+        const [value, setValue] = useState('banana');
+        return (
+          <>
+            <Example value={value} onValueChange={setValue} />
+            <button
+              type="button"
+              onClick={() => {
+                setValue('cherry');
+              }}
+            >
+              Load saved
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setValue('');
+              }}
+            >
+              Reset
+            </button>
+          </>
+        );
+      }
+      render(<Reset />);
+      const user = userEvent.setup();
+      expect(input()).toHaveValue('Banana');
+
+      await user.click(screen.getByRole('button', { name: 'Load saved' }));
+      expect(input()).toHaveValue('Cherry');
+      await user.click(screen.getByRole('button', { name: 'Show suggestions' }));
+      // Not filtered by stale text: the input shows the choice, so every option is listed.
+      expect(shownOptions()).toHaveLength(fruits.length);
+
+      await user.click(screen.getByRole('button', { name: 'Reset' }));
+      expect(input()).toHaveValue('');
+    });
+
+    it('waits for an option that is not rendered yet before showing its text', () => {
+      function Late({ options, value }: { options: string[]; value: string }) {
+        return (
+          <Combobox.Root value={value}>
+            <Combobox.Label>City</Combobox.Label>
+            <Combobox.Input />
+            <Combobox.Content>
+              {options.map((city) => (
+                <Combobox.Option key={city} value={city.toLowerCase()}>
+                  {city}
+                </Combobox.Option>
+              ))}
+            </Combobox.Content>
+          </Combobox.Root>
+        );
+      }
+      const { rerender } = render(<Late options={['Accra']} value="accra" />);
+      expect(input()).toHaveValue('Accra');
+
+      rerender(<Late options={['Accra']} value="lagos" />);
+      expect(input()).toHaveValue('Accra');
+
+      rerender(<Late options={['Accra', 'Lagos']} value="lagos" />);
+      expect(input()).toHaveValue('Lagos');
     });
 
     it('submits the selected value through a hidden input', () => {

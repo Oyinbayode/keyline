@@ -70,7 +70,7 @@ test.describe('Combobox keyboard', () => {
     expect(await activeOption(page)).toBe('Åland Islands');
 
     await expect(combobox(page)).toBeFocused();
-    await expect(option(page, 'Åland Islands')).toHaveAttribute('data-active', '');
+    await expect(option(page, 'Åland Islands')).toHaveAttribute('data-active', 'keyboard');
   });
 
   test('the active option is scrolled into view', async ({ page }) => {
@@ -224,7 +224,7 @@ test.describe('Combobox pointer', () => {
     if (!box) throw new Error('option not laid out');
 
     await page.mouse.move(box.x + 8, box.y + box.height / 2);
-    await expect(option(page, 'Kenya')).toHaveAttribute('data-active', '');
+    await expect(option(page, 'Kenya')).toHaveAttribute('data-active', 'pointer');
     await page.mouse.down();
     await expect(combobox(page)).toBeFocused();
     expect(await isOpen(list(page))).toBe(true);
@@ -386,6 +386,43 @@ test.describe('Combobox display preferences', () => {
     });
   });
 
+  test('an option reached by keyboard gets an inset blue-9 ring; a hovered one does not', async ({
+    page,
+  }) => {
+    const ring = (name: string) =>
+      option(page, name).evaluate((element) => {
+        const style = getComputedStyle(element);
+        return {
+          style: style.outlineStyle,
+          width: style.outlineWidth,
+          offset: style.outlineOffset,
+          colour: style.outlineColor,
+          fill: style.backgroundColor,
+        };
+      });
+    await page.goto(
+      '/iframe.html?id=components-combobox--basic&viewMode=story&globals=theme:light',
+    );
+    await combobox(page).click();
+    await page.keyboard.type('ap');
+    await page.keyboard.press('ArrowDown');
+
+    // Light theme blue-9 #1f56e0 on the slate-4 #e6ebf3 fill.
+    expect(await ring('Apple')).toEqual({
+      style: 'solid',
+      width: '2px',
+      offset: '-2px',
+      colour: 'rgb(31, 86, 224)',
+      fill: 'rgb(230, 235, 243)',
+    });
+
+    await option(page, 'Apricot').hover();
+    const hovered = await ring('Apricot');
+    expect(hovered.style).toBe('none');
+    expect(hovered.fill).toBe('rgb(230, 235, 243)');
+    expect((await ring('Apple')).style).toBe('none');
+  });
+
   test('forced colours: Highlight on the active option, a border, and the underline kept', async ({
     page,
     browserName,
@@ -407,6 +444,7 @@ test.describe('Combobox display preferences', () => {
       const result = {
         activeMatches:
           active.backgroundColor === system.backgroundColor && active.color === system.color,
+        ring: active.outlineStyle,
         border: getComputedStyle(element).borderTopWidth,
         underline: mark.textDecorationLine,
       };
@@ -414,6 +452,11 @@ test.describe('Combobox display preferences', () => {
       return result;
     });
 
-    expect(styles).toEqual({ activeMatches: true, border: '1px', underline: 'underline' });
+    expect(styles).toEqual({
+      activeMatches: true,
+      ring: 'solid',
+      border: '1px',
+      underline: 'underline',
+    });
   });
 });

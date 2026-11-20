@@ -1,5 +1,14 @@
 import type { ComponentPropsWithRef, ReactNode, RefObject } from 'react';
-import { createContext, use, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import {
+  createContext,
+  use,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { composeRefs } from '../../primitives/compose-refs';
 import { useAnchoredPopover } from '../../primitives/use-anchored-popover';
 import { useControllableState } from '../../primitives/use-controllable-state';
@@ -94,6 +103,8 @@ interface ComboboxContextValue {
   query: string;
   open: boolean;
   activeValue: string | null;
+  /** Whether the keyboard, not the pointer, made the active option active: only then is it ringed. */
+  activeByKeyboard: boolean;
   disabled: boolean;
   count: number;
   filter: ComboboxFilter | false;
@@ -101,9 +112,10 @@ interface ComboboxContextValue {
   listRef: RefObject<HTMLDivElement | null>;
   setOpen: (open: boolean) => void;
   close: () => void;
-  setActiveValue: (value: string | null) => void;
+  setActiveValue: (value: string | null, byKeyboard?: boolean) => void;
   setCount: (count: number) => void;
-  setSelectedText: (text: string) => void;
+  /** The selected option reports its text, so the input can show it. */
+  reportSelected: (value: string, text: string) => void;
   select: (value: string, text: string) => void;
   type: (text: string) => void;
   settle: () => void;
@@ -201,24 +213,37 @@ function Root({
     onChange: onOpenChange,
     name: 'Combobox',
   });
-  const [activeValue, setActiveValue] = useState<string | null>(null);
+  const [active, setActive] = useState<{ value: string; byKeyboard: boolean } | null>(null);
   const [count, setCount] = useState(0);
-  const [optionText, setSelectedText] = useState('');
+  const [reported, setReported] = useState({ value: '', text: '' });
   const [announcement, setAnnouncement] = useState('');
   const [typedAt, setTypedAt] = useState(0);
   const baseId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
-  const filledInitialText = useRef(defaultInputValue !== undefined);
-  // The selected option reports its text; a cleared value has none, whatever was reported last.
-  const selectedText = value ? optionText : '';
+  // The value the input text was last made to show; a defaultInputValue counts as showing the first one.
+  const syncedValue = useRef<string | null>(defaultInputValue === undefined ? null : value);
+  const selectedText = value && reported.value === value ? reported.text : '';
+  // Stable, and a no-op for the same report, because every option's layout effect depends on it.
+  const reportSelected = useCallback((selected: string, text: string) => {
+    setReported((previous) =>
+      previous.value === selected && previous.text === text ? previous : { value: selected, text },
+    );
+  }, []);
+  const setActiveValue = (next: string | null, byKeyboard = false) => {
+    setActive(next === null ? null : { value: next, byKeyboard });
+  };
 
-  // With no defaultInputValue, the input starts with the selected option's text, once the option has reported it.
+  /*
+   * When `value` changes other than by choosing an option (on first render,
+   * or a parent resetting or loading it), the input shows the new option's
+   * text, or nothing for ''. An option that has not rendered yet is waited for.
+   */
   useLayoutEffect(() => {
-    if (filledInitialText.current || !selectedText) return;
-    filledInitialText.current = true;
+    if (syncedValue.current === value || (value && reported.value !== value)) return;
+    syncedValue.current = value;
     setInputValue(selectedText);
-  }, [selectedText, setInputValue]);
+  }, [value, reported, selectedText, setInputValue]);
 
   /*
    * One announcement per pause in typing, not per key: the region is emptied
@@ -241,8 +266,9 @@ function Root({
     setTypedAt(0);
   };
   const select = (next: string, text: string) => {
+    syncedValue.current = next;
     setValue(next);
-    setSelectedText(text);
+    setReported({ value: next, text });
     setInputValue(text);
     close();
   };
@@ -255,7 +281,8 @@ function Root({
     // After a choice the input holds the option's text; filtering by it would hide every other option.
     query: inputValue === selectedText ? '' : inputValue,
     open,
-    activeValue,
+    activeValue: active?.value ?? null,
+    activeByKeyboard: active?.byKeyboard ?? false,
     disabled,
     count,
     filter,
@@ -265,7 +292,7 @@ function Root({
     close,
     setActiveValue,
     setCount,
-    setSelectedText,
+    reportSelected,
     select,
     type: (text) => {
       setInputValue(text);
@@ -360,7 +387,7 @@ function Input({ className, onChange, onKeyDown, onBlur, ref, ...inputProps }: C
           // From no active option, Down goes to the first and Up to the last; both wrap.
           const next =
             key === 'ArrowDown' ? (active + 1) % count : (active < 1 ? count : active) - 1;
-          setActiveValue(items[next]?.dataset.value ?? null);
+          setActiveValue(items[next]?.dataset.value ?? null, true);
         } else if (key === 'Enter' && open && active !== -1) {
           // Nothing is active until the user arrows to it, so Enter never picks an option they did not choose.
           event.preventDefault();
@@ -481,14 +508,14 @@ function Option({
   ...divProps
 }: ComboboxOptionProps) {
   const context = useComboboxContext('Option');
-  const { baseId, query, filter, activeValue, setActiveValue, setSelectedText } = context;
+  const { baseId, query, filter, activeValue, setActiveValue, reportSelected } = context;
   const text = textValue ?? (typeof children === 'string' ? children : '');
   const isSelected = context.value === value;
   const isActive = activeValue === value;
 
   useLayoutEffect(() => {
-    if (isSelected) setSelectedText(text);
-  }, [isSelected, text, setSelectedText]);
+    if (isSelected) reportSelected(value, text);
+  }, [isSelected, value, text, reportSelected]);
 
   if (filter && query && !filter(text, query)) return null;
 
@@ -503,11 +530,11 @@ function Option({
       aria-disabled={disabled || undefined}
       data-value={value}
       data-text={text}
-      data-active={isActive ? '' : undefined}
+      data-active={isActive ? (context.activeByKeyboard ? 'keyboard' : 'pointer') : undefined}
       className={classNames('kl-combobox-option', className)}
       onPointerMove={(event) => {
         onPointerMove?.(event);
-        if (!isActive) setActiveValue(value);
+        if (!isActive || context.activeByKeyboard) setActiveValue(value);
       }}
       onClick={(event) => {
         onClick?.(event);

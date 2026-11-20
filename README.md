@@ -125,15 +125,15 @@ Minified + brotli, React excluded, enforced in CI by `size-limit` (see `.size-li
 | `import { Tabs } from '@oyinbayode/keyline/tabs'`                     | 1.6 kB  | 1.6 kB |
 | `import { Dialog } from '@oyinbayode/keyline'`                        | 1.58 kB | 1.6 kB |
 | `import { Dialog } from '@oyinbayode/keyline/dialog'`                 | 1.58 kB | 1.6 kB |
-| `import { Menu } from '@oyinbayode/keyline'`                          | 2.58 kB | 2.6 kB |
+| `import { Menu } from '@oyinbayode/keyline'`                          | 2.57 kB | 2.6 kB |
 | `import { Menu } from '@oyinbayode/keyline/menu'`                     | 2.57 kB | 2.6 kB |
-| `import { Combobox } from '@oyinbayode/keyline'`                      | 3.1 kB  | 3.4 kB |
-| `import { Combobox } from '@oyinbayode/keyline/combobox'`             | 3.1 kB  | 3.4 kB |
+| `import { Combobox } from '@oyinbayode/keyline'`                      | 3.23 kB | 3.4 kB |
+| `import { Combobox } from '@oyinbayode/keyline/combobox'`             | 3.23 kB | 3.4 kB |
 | `import { ToastProvider, useToast } from '@oyinbayode/keyline'`       | 2.36 kB | 2.4 kB |
 | `import { ToastProvider, useToast } from '@oyinbayode/keyline/toast'` | 2.35 kB | 2.4 kB |
 | `@oyinbayode/keyline/primitives` (all)                                | 2.69 kB | 3 kB   |
-| `@oyinbayode/keyline` (everything)                                    | 9.14 kB | 10 kB  |
-| `@oyinbayode/keyline/styles.css`                                      | 3.73 kB | 4.1 kB |
+| `@oyinbayode/keyline` (everything)                                    | 9.29 kB | 10 kB  |
+| `@oyinbayode/keyline/styles.css`                                      | 3.77 kB | 4.1 kB |
 
 ## Contributing
 

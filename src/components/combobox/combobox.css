@@ -127,6 +127,17 @@
   color: var(--kl-slate-12);
 }
 
+/*
+ * The fill is too faint to be the only sign of the keyboard's place (about
+ * 1.2:1 on the surface in dark mode), so an option reached with the arrow
+ * keys also gets an inset blue-9 keyline ring on all four sides, 5:1 or more
+ * on the surface and the fill. Pointer hover keeps the fill alone.
+ */
+.kl-combobox-option[data-active='keyboard'] {
+  outline: 2px solid var(--kl-blue-9);
+  outline-offset: -2px;
+}
+
 .kl-combobox-option[aria-disabled='true'] {
   color: var(--kl-slate-9);
 }
@@ -184,6 +195,10 @@
     forced-color-adjust: none;
     background-color: Highlight;
     color: HighlightText;
+  }
+
+  .kl-combobox-option[data-active='keyboard'] {
+    outline-color: HighlightText;
   }
 
   .kl-combobox-option[aria-disabled='true']:not([data-active]) {

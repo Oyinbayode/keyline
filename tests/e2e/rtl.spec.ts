@@ -146,7 +146,10 @@ for (const theme of ['dark', 'light'] as const) {
       );
       // The button sits at the inline end of the input, which is its left edge.
       expect(trigger?.x).toBeCloseTo(inputBox?.x ?? 0, 0);
-      await expect(page.getByRole('option', { name: 'Apple' })).toHaveAttribute('data-active', '');
+      await expect(page.getByRole('option', { name: 'Apple' })).toHaveAttribute(
+        'data-active',
+        'keyboard',
+      );
     });
 
     test('Toast stacks on the inline-end side and its fuse burns towards the inline start', async ({
