@@ -11,6 +11,7 @@
     "switch",
     "tabs",
     "dialog",
+    "menu",
     "toast"
   ],
   "homepage": "https://oyinbayode.github.io/keyline/",
@@ -47,6 +48,16 @@
       "require": {
         "types": "./dist/dialog.d.cts",
         "default": "./dist/dialog.cjs"
+      }
+    },
+    "./menu": {
+      "import": {
+        "types": "./dist/menu.d.mts",
+        "default": "./dist/menu.js"
+      },
+      "require": {
+        "types": "./dist/menu.d.cts",
+        "default": "./dist/menu.cjs"
       }
     },
     "./switch": {

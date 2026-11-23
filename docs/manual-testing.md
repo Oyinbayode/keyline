@@ -63,6 +63,27 @@ Steps (from the Dialog docs page), against Components → Dialog → Keyboard te
 
 When a row passes, change the matching "Manual" row in `src/components/dialog/dialog.mdx` from `pending` to `pass`.
 
+## Menu
+
+Steps (from the Menu docs page), against Components → Menu → Keyboard test fixture:
+
+1. Tab from "Before" to "Actions". Expect a button that says it has a popup menu and is collapsed.
+2. Press Enter. Expect "Actions", menu, and "New file" with its shortcut.
+3. Press Down Arrow twice. Expect "Save", announced as unavailable or dimmed. Press Enter: nothing happens.
+4. Type D twice. Expect "Duplicate", then "Delete".
+5. Press Esc. Expect the menu to close and "Actions", collapsed, to be announced.
+6. Open "Format". Press Space on "Wrap lines". Expect "checked" without the menu closing.
+7. Arrow to "Large" and press Enter. Expect it to be announced as checked, in a group named "Text size".
+8. TalkBack: double-tap "Actions", swipe through the items, double-tap "Duplicate". Expect the menu to close and "Last action: Duplicate" below.
+9. Visual: the active item fill, the tick and dot, and the disabled item are clear in both light and dark themes.
+
+| Screen reader  | Browser     | OS             | Date | Keyline version | Result  | What was announced / notes |
+| -------------- | ----------- | -------------- | ---- | --------------- | ------- | -------------------------- |
+| Orca _x.y_     | Firefox _x_ | Linux _distro_ |      | 0.3.0           | Pending |                            |
+| TalkBack _x.y_ | Chrome _x_  | Android _x_    |      | 0.3.0           | Pending |                            |
+
+When a row passes, change the matching "Manual" row in `src/components/menu/menu.mdx` from `pending` to `pass`.
+
 ## Toast
 
 Steps (from the Toast docs page), against Components → Toast → Keyboard test fixture:
