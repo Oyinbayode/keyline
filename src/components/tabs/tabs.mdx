@@ -17,7 +17,7 @@ import * as TabsStories from './tabs.stories';
     { label: 'Element', value: <code>{'<button role="tab">'}</code> },
     { label: 'Size', value: '1.6 kB' },
     { label: 'Automated tests', value: '6/6 automated' },
-    { label: 'Screen readers', value: 'Orca and TalkBack pending' },
+    { label: 'Screen readers', value: 'Orca pass, TalkBack pending' },
   ]}
 />
 
@@ -166,7 +166,7 @@ Real screen readers word this differently. Orca, NVDA and JAWS say "page tab" or
 | Focus ring, keyline position (under the label when vertical), RTL arrows, reduced motion, forced colours | Playwright, Chromium and Firefox (forced colours: Chromium only) | <Status value="pass" />    |
 | Announced role, name, selected state, position; inactive panels skipped                                  | Guidepup virtual screen reader                                   | <Status value="pass" />    |
 | axe-core on every story, light and dark themes                                                           | Playwright + @axe-core/playwright, Chromium and Firefox          | <Status value="pass" />    |
-| Manual: Orca + Firefox                                                                                   | Linux desktop                                                    | <Status value="pending" /> |
+| Manual: Orca + Firefox                                                                                   | Orca 46.1, Firefox 158, Ubuntu 24.04                             | <Status value="pass" />    |
 | Manual: TalkBack + Chrome                                                                                | Android                                                          | <Status value="pending" /> |
 
 Not tested yet: NVDA, JAWS, Narrator, VoiceOver (macOS and iOS), and real Windows High Contrast (forced colours are emulated in Chromium). A virtual screen reader checks the accessibility tree; it is not a substitute for a person using a real one.
