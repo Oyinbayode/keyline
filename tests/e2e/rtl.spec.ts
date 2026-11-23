@@ -126,6 +126,32 @@ for (const theme of ['dark', 'light'] as const) {
       await expect(trigger).toBeFocused();
     });
 
+    test('Combobox list lines up with the input at the inline start (the right)', async ({
+      page,
+    }) => {
+      await openRtl(page, 'components-combobox--basic', theme);
+      const input = page.getByRole('combobox', { name: 'Fruit' });
+      await expectDirOnly(input);
+      await input.click();
+      await page.keyboard.type('ap');
+      await page.keyboard.press('ArrowDown');
+
+      const inputBox = await input.boundingBox();
+      const listBox = await page.locator('.kl-combobox-content').boundingBox();
+      const trigger = await page.getByRole('button', { name: 'Show suggestions' }).boundingBox();
+
+      expect((listBox?.x ?? 0) + (listBox?.width ?? 0)).toBeCloseTo(
+        (inputBox?.x ?? 0) + (inputBox?.width ?? 0),
+        0,
+      );
+      // The button sits at the inline end of the input, which is its left edge.
+      expect(trigger?.x).toBeCloseTo(inputBox?.x ?? 0, 0);
+      await expect(page.getByRole('option', { name: 'Apple' })).toHaveAttribute(
+        'data-active',
+        'keyboard',
+      );
+    });
+
     test('Toast stacks on the inline-end side and its fuse burns towards the inline start', async ({
       page,
     }) => {

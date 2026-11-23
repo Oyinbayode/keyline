@@ -1,3 +1,4 @@
+export * from './components/combobox';
 export * from './components/dialog';
 export * from './components/menu';
 export * from './components/switch';

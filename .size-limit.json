@@ -4,7 +4,7 @@
     "path": "dist/index.js",
     "import": "*",
     "ignore": ["react", "react-dom"],
-    "limit": "8.4 kB"
+    "limit": "10 kB"
   },
   {
     "name": "@oyinbayode/keyline: Switch",
@@ -33,6 +33,20 @@
     "import": "{ Tabs }",
     "ignore": ["react", "react-dom"],
     "limit": "1.6 kB"
+  },
+  {
+    "name": "@oyinbayode/keyline: Combobox",
+    "path": "dist/index.js",
+    "import": "{ Combobox }",
+    "ignore": ["react", "react-dom"],
+    "limit": "3.4 kB"
+  },
+  {
+    "name": "@oyinbayode/keyline/combobox",
+    "path": "dist/combobox.js",
+    "import": "{ Combobox }",
+    "ignore": ["react", "react-dom"],
+    "limit": "3.4 kB"
   },
   {
     "name": "@oyinbayode/keyline: Dialog",
@@ -87,6 +101,6 @@
     "name": "@oyinbayode/keyline/styles.css",
     "path": "dist/styles.css",
     "rolldown": false,
-    "limit": "3.7 kB"
+    "limit": "4.1 kB"
   }
 ]

@@ -4,6 +4,7 @@ import dts from 'vite-plugin-dts';
 
 const entries = {
   index: 'src/index.ts',
+  combobox: 'src/components/combobox/index.ts',
   dialog: 'src/components/dialog/index.ts',
   menu: 'src/components/menu/index.ts',
   switch: 'src/components/switch/index.ts',

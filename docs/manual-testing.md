@@ -43,6 +43,27 @@ Steps (from the Tabs docs page), against Components → Tabs → Keyboard test f
 
 When a row passes, change the matching "Manual" row in `src/components/tabs/tabs.mdx` from `pending` to `pass`.
 
+## Combobox
+
+Steps (from the Combobox docs page), against Components → Combobox → Keyboard test fixture:
+
+1. Tab from "Before" into "Country". Expect "Country", combobox (or "edit, has autocomplete"), collapsed.
+2. Type "cura" and wait. Expect "1 result" once, not a count per letter.
+3. Press Down Arrow. Expect "Curaçao" to be read, with the caret still in the input.
+4. Press Enter. Expect the input to read "Curaçao" and the list to close.
+5. Clear the input, type "egy", press Down Arrow. Expect "Egypt", unavailable or dimmed; Enter does nothing.
+6. Type "zz" and wait. Expect "No results".
+7. Press Esc twice. Expect the list to close, then the text to clear.
+8. TalkBack: type in the input, then swipe to the suggestions and double-tap one. Expect it to fill the input.
+9. Visual: the active fill, the underline under the match, the tick on the chosen option and the disabled option are clear in both light and dark themes.
+
+| Screen reader  | Browser     | OS             | Date | Keyline version | Result  | What was announced / notes |
+| -------------- | ----------- | -------------- | ---- | --------------- | ------- | -------------------------- |
+| Orca _x.y_     | Firefox _x_ | Linux _distro_ |      | 0.3.0           | Pending |                            |
+| TalkBack _x.y_ | Chrome _x_  | Android _x_    |      | 0.3.0           | Pending |                            |
+
+When a row passes, change the matching "Manual" row in `src/components/combobox/combobox.mdx` from `pending` to `pass`.
+
 ## Dialog
 
 Steps (from the Dialog docs page), against Components → Dialog → Keyboard test fixture:
