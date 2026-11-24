@@ -1,5 +1,12 @@
 # @oyinbayode/keyline
 
+## 0.3.0
+
+### Minor Changes
+
+- 9b7c62e: Add `Combobox` (`@oyinbayode/keyline/combobox`), an editable combobox with list autocomplete following the WAI-ARIA APG Combobox pattern: `Combobox.Root`, `Label`, `Input`, `Trigger`, `Content`, `Option`, `Group`, `GroupLabel` and `Empty`. Focus stays in the input with `aria-activedescendant`, nothing is chosen until the user moves to an option, the result count is announced once typing settles (`resultsMessage` localises it), and the default filter ignores case and accents. The list is a manual native popover anchored to the input, and `name` submits the chosen value with a form.
+- 5aa7388: Add `Menu` (`@oyinbayode/keyline/menu`), following the WAI-ARIA APG Menu Button pattern: `Menu.Root`, `Trigger`, `Content`, `Item` (with `onSelect` and `shortcut`), `CheckboxItem`, `RadioGroup`, `RadioItem`, `Group`, `Label` and `Separator`. The menu is a native popover anchored to its trigger with CSS anchor positioning (a measured placement where that is missing), so it needs no portal and works inside a modal `Dialog`. New primitives: `useAnchoredPopover` and `useTypeahead`.
+
 ## 0.2.0
 
 ### Minor Changes
